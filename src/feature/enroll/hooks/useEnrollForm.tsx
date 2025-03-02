@@ -1,0 +1,68 @@
+"use client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { client } from "@/lib/rcp";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import {
+  enrollmentSchema,
+  EnrollmentSchemaT,
+} from "@/zodSchema/enrollmentSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { InferRequestType, InferResponseType } from "hono";
+import { UserRole } from "@/lib/db/schema";
+
+// API setup
+const api = client.api.main.enroll.$post;
+type ResponseType = InferResponseType<typeof api, 201>;
+type RequestType = InferRequestType<typeof api>;
+
+export const useEnrollForm = (
+  defaultValues?: EnrollmentSchemaT,
+  from?: UserRole,
+) => {
+  const { push } = useRouter();
+  const queryClient = useQueryClient();
+  const toastId = "enrollment";
+
+  const form = useForm<EnrollmentSchemaT>({
+    resolver: zodResolver(enrollmentSchema),
+    defaultValues: {
+      patients: defaultValues?.patients?.length
+        ? defaultValues?.patients
+        : [{ patientName: "" }],
+      phone: defaultValues?.phone || "+91",
+    },
+  });
+
+  const { mutate, isPending } = useMutation<ResponseType, Error, RequestType>({
+    mutationFn: async ({ json }) => {
+      const res = await api({ json: { ...json, from } });
+      const data = await res.json();
+      if ("error" in data) {
+        throw data;
+      }
+      return data;
+    },
+    onSuccess: ({ data }) => {
+      toast.success("Enrollment submitted successfully", { id: toastId });
+      queryClient.invalidateQueries({ queryKey: ["userTokens"] });
+      push(`/token/t/${data.phone}`);
+    },
+    onError: (error) => {
+      toast.error("Failed to submit enrollment", { id: toastId });
+      console.error(error);
+    },
+  });
+
+  const onSubmit = (values: EnrollmentSchemaT) => {
+    toast.loading("Submitting Enrollment...", { id: toastId });
+    mutate({ json: values });
+  };
+
+  return {
+    form,
+    onSubmit,
+    isLoading: isPending,
+  };
+};

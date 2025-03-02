@@ -1,0 +1,30 @@
+import { authRoute } from "@/feature/auth/server/route";
+import dashBoardRoute from "@/feature/admin/dashboard/server/route";
+import { enrollmentRoute } from "@/feature/enroll/server/route";
+import { schedulesRoutes } from "@/feature/schedules/server/route";
+import { tokenRoute } from "@/feature/token/server/route";
+import { uploads } from "@/feature/uploads/server/route";
+import { userRoutes } from "@/feature/user/server/route";
+import { Hono } from "hono";
+import { handle } from "hono/vercel";
+import organizationRoutes from "@/feature/organization/server/route";
+
+// export const runtime = "edge";
+
+const app = new Hono().basePath("/api/main");
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const routes = app
+  .route("/enroll", enrollmentRoute)
+  .route("/token", tokenRoute)
+  .route("/auth", authRoute)
+  .route("/admin/dashboard", dashBoardRoute)
+  .route("/uploads", uploads)
+  .route("/schedules", schedulesRoutes)
+  .route("/user", userRoutes)
+  .route("/org", organizationRoutes);
+
+export const GET = handle(app);
+export const POST = handle(app);
+
+export type AppType = typeof routes;

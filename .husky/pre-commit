@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Formate each file
+# pnpm prettier --write .
+
+# Verify the code linting
+pnpm run lint
+
+# Test the build process success or failure
+pnpm run build
+
+# git add .
