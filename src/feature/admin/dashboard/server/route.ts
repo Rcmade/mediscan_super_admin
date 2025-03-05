@@ -1,8 +1,8 @@
 import { db } from "@/lib/db/db";
-import { appointments } from "@/lib/db/schema";
+import { appointments, organizations } from "@/lib/db/schema";
 import { dashboardStatsQuerySchema } from "@/zodSchema/dashboardStatsSchema";
 import { zValidator } from "@hono/zod-validator";
-import { between, sql, desc } from "drizzle-orm";
+import { between, sql, desc, eq, and } from "drizzle-orm";
 import { Hono } from "hono";
 
 // const dashBoardRoute = new Hono().get("/stats", async (c) => {
@@ -41,9 +41,10 @@ import { Hono } from "hono";
 // export default dashBoardRoute;
 
 const dashBoardRoute = new Hono().get(
-  "/stats",
+  "/stats/:webName",
   zValidator("query", dashboardStatsQuerySchema),
   async (c) => {
+    const webName = c.req.param("webName");
     // Validate date range from query parameters
     const parseQuery = dashboardStatsQuerySchema.safeParse(c.req.query());
 
@@ -64,6 +65,16 @@ const dashBoardRoute = new Hono().get(
       const formattedStart = start.toISOString().split("T")[0];
       const formattedEnd = end.toISOString().split("T")[0];
 
+      const [org] = await db
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.doctorWebName, webName))
+        .limit(1);
+
+      if (!org) {
+        return c.json({ error: "Organization not found" }, 404);
+      }
+
       // Get basic appointment statistics
       const statusResults = await db
         .select({
@@ -71,7 +82,12 @@ const dashBoardRoute = new Hono().get(
           count: sql<bigint>`count(*)`,
         })
         .from(appointments)
-        .where(between(appointments.createdAt, start, end))
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            between(appointments.createdAt, start, end),
+          ),
+        )
         .groupBy(appointments.appointmentStatus);
 
       // Get average appointments per day
@@ -82,7 +98,12 @@ const dashBoardRoute = new Hono().get(
           ) as float)`,
         })
         .from(appointments)
-        .where(between(appointments.createdAt, start, end));
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            between(appointments.createdAt, start, end),
+          ),
+        );
 
       // Get most common reasons for visits
       const topReasons = await db
@@ -91,37 +112,15 @@ const dashBoardRoute = new Hono().get(
           count: sql<bigint>`count(*)`,
         })
         .from(appointments)
-        .where(between(appointments.createdAt, start, end))
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            between(appointments.createdAt, start, end),
+          ),
+        )
         .groupBy(appointments.reasonForVisit)
         .orderBy(desc(sql`count(*)`))
         .limit(5);
-
-      // Get busiest hours
-      // const busiestHours = await db
-      //   .select({
-      //     hour: sql<number>`extract(hour from ${appointments.createdAt})`,
-      //     count: sql<bigint>`count(*)`,
-      //   })
-      //   .from(appointments)
-      //   .where(between(appointments.createdAt, start, end))
-      //   .groupBy(sql`extract(hour from ${appointments.createdAt})`)
-      //   .orderBy(desc(sql`count(*)`))
-      //   .limit(5);
-
-      // const busiestHours = await db
-      //   .select({
-      //     timestamp: appointments.createdAt, // Select the full timestamp
-      //     hour: sql<number>`extract(hour from ${appointments.createdAt})`,
-      //     count: sql<bigint>`count(*)`,
-      //   })
-      //   .from(appointments)
-      //   .where(between(appointments.createdAt, start, end))
-      //   .groupBy(
-      //     appointments.createdAt,
-      //     sql`extract(hour from ${appointments.createdAt})`,
-      //   )
-      //   .orderBy(desc(sql`count(*)`))
-      //   .limit(5);
 
       const busiestHours = await db
         .select({
@@ -129,7 +128,12 @@ const dashBoardRoute = new Hono().get(
           count: sql<number>`count(*)`, // Count total appointments per hour
         })
         .from(appointments)
-        .where(between(appointments.createdAt, start, end))
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            between(appointments.createdAt, start, end),
+          ),
+        )
         .groupBy(sql`extract(hour from ${appointments.createdAt})`) // Group by extracted hour
         .orderBy(desc(sql`count(*)`)) // Order by most appointments
         .limit(5);
@@ -159,22 +163,7 @@ const dashBoardRoute = new Hono().get(
             reason: r.reason,
             count: Number(r.count),
           })),
-          // busiestHours: busiestHours.map((h) => ({
-          //   timestamp: h.timestamp.toISOString(), // Include the full UTC timestamp
-          //   hour: Number(h.hour),
-          //   count: Number(h.count),
-          //   timeRange: `${h.hour}:00 - ${h.hour + 1}:00`,
-          // })),
-          // busiestHours: busiestHours.map((h) => {
-          //   const nextHour = (h.hour + 1) % 24;
-          //   return {
-          //     hour: Number(h.hour),
-          //     count: Number(h.count),
-          //     timeRange: `${h.hour.toString().padStart(2, "0")}:00 - ${nextHour
-          //       .toString()
-          //       .padStart(2, "0")}:00`,
-          //   };
-          // }),
+
           busiestHours,
         },
         dateRange: {

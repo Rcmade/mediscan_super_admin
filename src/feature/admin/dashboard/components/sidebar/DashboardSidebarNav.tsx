@@ -21,10 +21,13 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { dashboardContent } from "@/content/dashboardContent";
+import useGetUserOrg from "@/feature/organization/hooks/useGetUserOrg";
+import { userRoleLimitedAccess } from "@/constant";
 
 function DashboardSidebarNav() {
   const user = useCurrentUser();
   const pathname = usePathname();
+  const { data: org } = useGetUserOrg();
 
   return (
     <SidebarGroup>
@@ -47,7 +50,10 @@ function DashboardSidebarNav() {
               >
                 {item.icon && <item.icon className="!size-6" />}
                 <span>{item.title}</span>
-                <Link href={`${item.url}`} className="absolute inset-0"></Link>
+                <Link
+                  href={`${org && user?.role && userRoleLimitedAccess.includes(user.role as (typeof userRoleLimitedAccess)[number]) ? `/admin/dashboard/organization/o/${org.organizations.webName}${item.url}` : item.url}`}
+                  className="absolute inset-0"
+                ></Link>
               </SidebarMenuButton>
             ))}
       </div>

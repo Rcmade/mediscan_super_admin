@@ -1,12 +1,13 @@
 import { signIn } from "@/config/authConfig";
 import { db } from "@/lib/db/db";
-import { organizationUsers, users } from "@/lib/db/schema";
+import { users } from "@/lib/db/schema";
 import { normalizePhoneNumber } from "@/lib/utils/numberUtils";
 import {
   formatError,
   formateVerifyHashString,
   getOtpRedirectUrl,
 } from "@/lib/utils/stringUtils";
+import { getOrgByUserId } from "@/queries/orgQuery";
 import HashService from "@/service/hashService";
 import OTPService from "@/service/otpService";
 import SendService from "@/service/sendService";
@@ -151,22 +152,18 @@ export const authRoute = new Hono()
           });
 
           let redirect = "/";
-
+          // console.log({ user });
           if (user.role === "SUPER_ADMIN") {
             redirect = "/admin/dashboard";
           } else if (user.role !== "USER") {
             // Only query the database if the user is not a regular USER
-            const [userOrg] = await db
-              .select({ orgId: organizationUsers.organizationId })
-              .from(organizationUsers)
-              .where(eq(organizationUsers.userId, user.id));
-
+            const userOrg = await getOrgByUserId(user.id);
             if (!userOrg) {
               redirect = "/";
             } else if (user.role === "ADMIN") {
-              redirect = `/admin/dashboard/organization/o/${userOrg.orgId}`;
+              redirect = `/admin/dashboard/organization/o/${userOrg.webName}`;
             } else {
-              redirect = `/admin/dashboard/organization/o/${userOrg.orgId}/appointments`;
+              redirect = `/admin/dashboard/organization/o/${userOrg.webName}/token/search`;
             }
           }
           // Respond with success when OTP is verified
@@ -181,7 +178,7 @@ export const authRoute = new Hono()
           return c.json({ message: "Invalid stage in login flow" }, 400);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       // Handle unexpected errors
       const err = formatError(error);
       return c.json(

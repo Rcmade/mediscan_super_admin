@@ -15,7 +15,7 @@ export const publicRoutes = [
  * These routes do not require authentication
  * @type {string[]}
  */
-export const publicGroupRoute = ["/p", "/token/t", ""];
+export const publicGroupRoute = ["/p", "/token/t", "/o"];
 
 /**
  * An array of routes that are used for authentication

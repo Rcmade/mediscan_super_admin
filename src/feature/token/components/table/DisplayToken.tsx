@@ -20,12 +20,12 @@ const DisplayToken = () => {
   }
 
   return (
-    <div className="-my-4 mx-auto">
+    <div className="-my-4 mx-auto w-full">
       {data && data.data && data.data.length > 0 ? (
         <>
           <div className="my-4 flex justify-end">
             <span className="text-lg text-muted-foreground">
-              {formateTime(data.lastUpdated)}
+              Last Update: <strong>{formateTime(data.lastUpdated)} </strong>
             </span>
           </div>
           <DataTable columns={columns} data={data.data} />

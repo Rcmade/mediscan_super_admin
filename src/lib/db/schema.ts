@@ -70,6 +70,7 @@ export const organizationUsers = pgTable(
     ...commonFields,
   },
   (table) => ({
+    
     // Ensures a user cannot have multiple roles in the same organization
     uniqueConstraint: unique().on(table.userId, table.organizationId),
   }),

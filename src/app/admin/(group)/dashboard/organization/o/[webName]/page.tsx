@@ -1,9 +1,10 @@
-//
-
 import { currentUser } from "@/action/currentUser";
+import StartEndButton from "@/components/buttons/StartEndButton";
+import AddOrgButton from "@/feature/admin/dashboard/components/button/AddOrgButton";
 import { AppointmentStatsCard } from "@/feature/admin/dashboard/components/cards/AppointmentStatsCard";
 import TrendChart from "@/feature/admin/dashboard/components/chart/TrendChart";
 import { client } from "@/lib/rcp";
+import { PagePropsPromise, SearchParams } from "@/types";
 import {
   Calendar,
   CalendarCheck,
@@ -14,8 +15,6 @@ import {
 } from "lucide-react";
 import { Metadata } from "next";
 import React from "react";
-// import ClientComponents from "./_ClientComponents";
-import AddOrgButton from "@/feature/admin/dashboard/components/button/AddOrgButton";
 
 export const revalidate = 600;
 
@@ -39,9 +38,21 @@ export const metadata: Metadata = {
   },
 };
 
-const getStats = async () => {
+const getStats = async ({
+  searchParams,
+  webName,
+}: {
+  searchParams: SearchParams;
+  webName: string;
+}) => {
   try {
-    const res = await client.api.main.admin.dashboard.stats.$get({ query: {} });
+    const res = await client.api.main.admin.dashboard.stats[":webName"].$get({
+      query: {
+        startDate: searchParams?.startDate,
+        endDate: searchParams?.endDate,
+      },
+      param: { webName },
+    });
 
     if (!res.ok) {
       throw await res.json();
@@ -55,13 +66,23 @@ const getStats = async () => {
     return error as Error;
   }
 };
-const page = async () => {
+const page = async ({ searchParams, params }: PagePropsPromise) => {
   const user = await currentUser();
-  if (!user || (user?.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
+  if (!user || (user?.role !== "SUPER_ADMIN" && user?.role !== "ADMIN")) {
     return <div>Not Authorized</div>;
   }
 
-  const stats = await getStats();
+  const searchParamsAwaited = await searchParams;
+  const webName = (await params).webName;
+  if (!webName) {
+    return <div>Not Authorized</div>;
+  }
+
+  const stats = await getStats({
+    searchParams: searchParamsAwaited,
+    webName,
+  });
+
   if (!stats || "message" in stats) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -77,10 +98,15 @@ const page = async () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4">
-        <div className="my-2 flex items-center justify-between">
-          <h1 className="text-4xl font-semibold">Appointment Dashboard</h1>
-          <AddOrgButton />
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-4 flex flex-col items-center justify-between md:flex-row">
+          <h1 className="text-3xl font-bold text-foreground">
+            Appointment Dashboard
+          </h1>
+          <div>
+            <StartEndButton />
+            <AddOrgButton />
+          </div>
         </div>
         {/* Basic Stats Cards */}
         <div className="mb-8 grid gap-6 md:grid-cols-3">

@@ -11,9 +11,10 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InferRequestType, InferResponseType } from "hono";
 import { UserRole } from "@/lib/db/schema";
+import useWebName from "@/hooks/useWebName";
 
 // API setup
-const api = client.api.main.enroll.$post;
+const api = client.api.main.enroll[":webName"].$post;
 type ResponseType = InferResponseType<typeof api, 201>;
 type RequestType = InferRequestType<typeof api>;
 
@@ -24,6 +25,7 @@ export const useEnrollForm = (
   const { push } = useRouter();
   const queryClient = useQueryClient();
   const toastId = "enrollment";
+  const { webName } = useWebName();
 
   const form = useForm<EnrollmentSchemaT>({
     resolver: zodResolver(enrollmentSchema),
@@ -36,8 +38,11 @@ export const useEnrollForm = (
   });
 
   const { mutate, isPending } = useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ json }) => {
-      const res = await api({ json: { ...json, from } });
+    mutationFn: async ({ json, param }) => {
+      const res = await api({
+        json: { ...json, from },
+        param,
+      });
       const data = await res.json();
       if ("error" in data) {
         throw data;
@@ -57,7 +62,12 @@ export const useEnrollForm = (
 
   const onSubmit = (values: EnrollmentSchemaT) => {
     toast.loading("Submitting Enrollment...", { id: toastId });
-    mutate({ json: values });
+    mutate({
+      json: values,
+      param: {
+        webName,
+      },
+    });
   };
 
   return {

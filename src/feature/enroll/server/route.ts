@@ -11,20 +11,33 @@ import {
   appointments,
   InsertAppointmentsT,
   AppointmentStatusT,
+  organizations,
 } from "@/lib/db/schema"; // Assuming you have an appointments and sessions table
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { normalizePhoneNumber } from "@/lib/utils/numberUtils";
 import { currentUser } from "@/action/currentUser";
 
 export const enrollmentRoute = new Hono().post(
-  "/",
+  "/:webName",
   zValidator("json", enrollmentSchema),
   async (c) => {
     const body = c.req.valid("json");
+    const webName = c.req.param("webName");
     try {
       const validPhone = normalizePhoneNumber(body.phone);
       if (!validPhone) {
         return c.json({ error: "Invalid phone number" }, 400);
+      }
+
+      // Fetch organizationId from webName
+      const [organization] = await db
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.doctorWebName, webName))
+        .limit(1);
+
+      if (!organization) {
+        return c.json({ error: "Organization not found" }, 404);
       }
 
       const [existingUser] = await db
@@ -45,103 +58,15 @@ export const enrollmentRoute = new Hono().post(
         .from(appointments)
         .where(
           and(
+            eq(appointments.organizationId, organization.id),
             gte(appointments.createdAt, todayStart), // Start of today
             lte(appointments.createdAt, todayEnd), // End of today
           ),
         )
         .orderBy(desc(appointments.createdAt), desc(appointments.tokenNumber)) // Sort by createdAt and tokenNumber
         .limit(1); // Get only the latest document with highest tokenNumber
-      // .where(
-      //   eq(appointments.userId, existingUser ? existingUser.id : validPhone),
-      // )
-      // .orderBy(desc(appointments.tokenNumber)) // Sort by token number in descending order
-      // .limit(1);
 
       const latestTokenNumber = getLastToken ? +getLastToken.token : 0; // If no appointments, start at 0
-
-      // if (!existingUser) {
-      //   // User does not exist - create a new user and session
-      //   const [newUser] = await db
-      //     .insert(users)
-      //     .values({
-      //       name: body.patients[0].patientName,
-      //       phone: validPhone,
-      //     })
-      //     .returning();
-
-      //   // Create a session for the new user
-      //   await signIn("credentials", {
-      //     name: newUser.name,
-      //     phone: newUser.phone,
-      //     role: newUser.role,
-      //     redirect: false,
-      //   });
-
-      //   // Create formatted data with correct token numbers
-      //   const formattedData: InsertAppointmentsT[] = formatData(
-      //     body,
-      //     newUser.id,
-      //     latestTokenNumber + 1, // Start token numbers from the next available number
-      //   );
-
-      //   // Insert new appointments
-      //   const result = await db
-      //     .insert(appointments)
-      //     .values(formattedData)
-      //     .returning({
-      //       token: appointments.tokenNumber,
-      //       // createdAt: appointments.createdAt,
-      //       patientName: appointments.patientName,
-      //       id: appointments.id,
-      //     });
-
-      //   return c.json(
-      //     {
-      //       message: "User created and appointment scheduled",
-      //       data: {
-      //         phone: newUser.phone,
-      //         appointments: result,
-      //       },
-      //     },
-      //     201,
-      //   );
-      // } else {
-      //   // User exists - update session and create a new appointment
-      //   await signIn("credentials", {
-      //     name: existingUser.name,
-      //     phone: existingUser.phone,
-      //     role: existingUser.role,
-      //     redirect: false,
-      //   });
-
-      //   const formattedData: InsertAppointmentsT[] = formatData(
-      //     body,
-      //     existingUser.id,
-      //     latestTokenNumber + 1, // Start token numbers from the next available number
-      //   );
-
-      //   // Insert new appointments
-      //   const result = await db
-      //     .insert(appointments)
-      //     .values(formattedData)
-      //     .returning({
-      //       token: appointments.tokenNumber,
-      //       // createdAt: appointments.createdAt,
-      //       patientName: appointments.patientName,
-      //       id: appointments.id,
-      //     });
-      //   return c.json(
-      //     {
-      //       message: "Session updated and new appointment scheduled",
-
-      //       data: {
-      //         phone: existingUser.phone,
-      //         appointments: result,
-      //       },
-      //     },
-      //     201,
-      //   );
-      // }
 
       const user =
         existingUser ||
@@ -182,21 +107,14 @@ export const enrollmentRoute = new Hono().post(
           redirect: false,
         });
       }
-      // // Ensure user session
-      // await signIn("credentials", {
-      //   name: user.name,
-      //   phone: user.phone,
-      //   role: user.role,
-      //   redirect: false,
-      // });
 
-      // Create formatted data with correct token numbers
-      const formattedData: InsertAppointmentsT[] = formatData(
+      // Format data for appointments with organizationId
+      const formattedData: InsertAppointmentsT[] = formatData({
         body,
-        user.id,
-        latestTokenNumber + 1, // Start token numbers from the next available number
-      );
-
+        userId: user.id,
+        latestTokenNumber: latestTokenNumber + 1, // Start token numbers from the next available number
+        organizationId: organization.id,
+      });
       // Insert new appointments
       const result = await db
         .insert(appointments)
@@ -226,11 +144,17 @@ export const enrollmentRoute = new Hono().post(
   },
 );
 
-export const formatData = (
-  body: EnrollmentSchemaT,
-  userId: string,
-  latestTokenNumber: number,
-) => {
+export const formatData = ({
+  body,
+  userId,
+  latestTokenNumber,
+  organizationId,
+}: {
+  body: EnrollmentSchemaT;
+  userId: string;
+  organizationId: string;
+  latestTokenNumber: number;
+}) => {
   return body.patients.map((p, i) => ({
     patientName: p.patientName,
     reasonForVisit: p.reasonForVisit,
@@ -238,5 +162,6 @@ export const formatData = (
     tokenNumber: String(latestTokenNumber + i), // Increment tokenNumber sequentially
     userId,
     createdAt: new Date(),
+    organizationId: organizationId,
   }));
 };

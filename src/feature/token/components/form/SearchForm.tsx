@@ -14,6 +14,7 @@ import {
 import { formatDate } from "@/lib/utils/dateUtils";
 import Tooltip from "@/components/tooltip/Tooltip";
 import Link from "next/link";
+import useWebName from "@/hooks/useWebName";
 
 interface SearchFormProps {
   placeholder?: string;
@@ -26,6 +27,7 @@ export function SearchForm({
   showAdd = true,
 }: SearchFormProps) {
   const searchParams = useSearchParams();
+  const { webName } = useWebName();
 
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [startTime, setStartTime] = useState(
@@ -81,7 +83,7 @@ export function SearchForm({
           <div>
             <Tooltip content="Add new appointment">
               <Button>
-                <Link href="/admin/enroll">Add</Link>
+                <Link href={`/o/${webName}/admin/enroll`}>Add</Link>
               </Button>
             </Tooltip>
           </div>

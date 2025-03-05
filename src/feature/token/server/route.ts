@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { db } from "@/lib/db/db";
-import { appointments, users } from "@/lib/db/schema";
+import { appointments, organizations, users } from "@/lib/db/schema";
 import {
   and,
   desc,
@@ -84,46 +84,59 @@ export const tokenRoute = new Hono()
       );
     }
   })
-  .get("/display", zValidator("query", paginationSchema), async (c) => {
-    try {
-      const query = c.req.query();
-      const { limit = 20 } = paginationSchema.parse(query);
+  .get(
+    "/display/:webName",
+    zValidator("query", paginationSchema),
+    async (c) => {
+      try {
+        const query = c.req.query();
+        const { limit = 20 } = paginationSchema.parse(query);
+        const webName = c.req.param("webName");
+        // Get today's start and end timestamps
+        const todayStart = startOfDay(new Date());
+        const todayEnd = endOfDay(new Date());
 
-      // Get today's start and end timestamps
-      const todayStart = startOfDay(new Date());
-      const todayEnd = endOfDay(new Date());
+        // Fetch top scheduled appointments filtered by webName
+        const scheduledTokens = await db
+          .select({
+            tokenNumber: appointments.tokenNumber,
+            patientName: appointments.patientName,
+            appointmentStatus: appointments.appointmentStatus,
+          })
+          .from(appointments)
+          .innerJoin(
+            organizations,
+            eq(appointments.organizationId, organizations.id),
+          ) // Join with organizations
+          .where(
+            and(
+              eq(appointments.appointmentStatus, "Scheduled"),
+              eq(organizations.doctorWebName, webName), // Filter by webName
+              gte(appointments.createdAt, todayStart),
+              lte(appointments.createdAt, todayEnd),
+            ),
+          )
+          .orderBy(asc(appointments.tokenNumber)) // Sort by token number
+          .limit(limit); // Limit the results
 
-      // Fetch top scheduled appointments sorted by tokenNumber and within today
-      const scheduledTokens = await db
-        .select({
-          tokenNumber: appointments.tokenNumber,
-          patientName: appointments.patientName,
-          appointmentStatus: appointments.appointmentStatus,
-        })
-        .from(appointments)
-        .where(
-          and(
-            eq(appointments.appointmentStatus, "Scheduled"),
-            gte(appointments.createdAt, todayStart),
-            lte(appointments.createdAt, todayEnd),
-          ),
-        )
-        .orderBy(asc(appointments.tokenNumber)) // Sort by token number
-        .limit(limit); // Limit the results for efficiency
+        // Return the response
+        return c.json({
+          data: scheduledTokens,
+          lastUpdated: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error("Error fetching scheduled tokens:", error);
+        return c.json({ error: "Failed to fetch scheduled tokens" }, 500);
+      }
+    },
+  )
 
-      // Return the response
-      return c.json({
-        data: scheduledTokens,
-        lastUpdated: new Date().toISOString(),
-      });
-    } catch (error) {
-      console.error("Error fetching scheduled tokens:", error);
-      return c.json({ error: "Failed to fetch scheduled tokens" }, 500);
-    }
-  })
-
-  .get("/search", zValidator("query", paginationSchema), async (c) => {
+  .get("/search/:webName", zValidator("query", paginationSchema), async (c) => {
+    const webName = c.req.param("webName");
     // Validate query parameters
+    if (!webName) {
+      return c.json({ error: "webName is required" }, 400);
+    }
     const query = c.req.query();
     const {
       limit = 15,
@@ -184,7 +197,18 @@ export const tokenRoute = new Hono()
           .select({ total: count() })
           .from(appointments)
           .leftJoin(users, eq(appointments.userId, users.id)) // Join with `users` table for total count
-          .where(and(baseConditions, todayConditions)), // Count total records
+          .leftJoin(
+            organizations,
+            eq(appointments.organizationId, organizations.id),
+          ) // Filter count by `webName`
+          .where(
+            and(
+              eq(organizations.doctorWebName, webName),
+              baseConditions,
+              todayConditions,
+            ),
+          ),
+        // .where(and(baseConditions, todayConditions)), // Count total records
       ]);
       const formatData = {
         query: paginationSchema.parse(query),

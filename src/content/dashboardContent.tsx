@@ -1,5 +1,14 @@
 import { UserRole } from "@/lib/db/schema";
-import { Frame, Home, type LucideIcon, PieChart, Plane } from "lucide-react";
+import {
+  Calendar,
+  Frame,
+  Home,
+  Layout,
+  type LucideIcon,
+  PieChart,
+  Plane,
+  Tv,
+} from "lucide-react";
 
 type SubMenu = {
   title: string;
@@ -35,23 +44,32 @@ export const topNavMenu: TopNavT[] = [
   {
     title: "Dashboard",
     url: "/admin/dashboard",
-    accessBy: ["SUPER_ADMIN", "RECEPTIONIST", "ADMIN"],
+    accessBy: ["SUPER_ADMIN"],
     icon: Home,
   },
+
   {
     title: "Organization",
-    url: "/admin/dashboard/organization",
-    accessBy: ["SUPER_ADMIN"],
-    icon: Frame,
+    url: "/",
+    accessBy: ["ADMIN"],
+    icon: Layout,
   },
 
-  //   {
-  //     title: "Department",
-  //     url: "/dashboard/department",
-  //     icon: Network,
-  //     accessBy: ["Admin", "HR"],
-  //   },
+  {
+    title: "Appointments",
+    url: "/token/search",
+    accessBy: ["ADMIN", "RECEPTIONIST"],
+    icon: Calendar,
+  },
+
+  {
+    title: "Display",
+    url: "/token/display",
+    icon: Tv,
+    accessBy: ["ADMIN", "RECEPTIONIST"],
+  },
 ] as const;
+
 export const dashboardContent = {
   navMenuWithSubmenu,
   topNavMenu,

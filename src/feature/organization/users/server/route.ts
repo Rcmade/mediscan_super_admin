@@ -10,10 +10,8 @@ import { zValidator } from "@hono/zod-validator";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 
-export const orgUsersRoute = new Hono().post(
-  "/:orgId",
-  zValidator("json", createOrgUser),
-  async (c) => {
+export const orgUsersRoute = new Hono()
+  .post("/:orgId", zValidator("json", createOrgUser), async (c) => {
     try {
       const user = await currentUser();
       if (!user || !user.id) {
@@ -112,5 +110,50 @@ export const orgUsersRoute = new Hono().post(
       console.error("Error in orgUsersRoute:", error);
       return c.json({ error: err.message }, err.statusCode);
     }
-  },
-);
+  })
+  .get("/user-org", async (c) => {
+    const user = await currentUser();
+    if (!user || !user.id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    if (user.role === "USER") {
+      return c.json(
+        { error: "Forbidden. You don't have access to this resource!" },
+        403,
+      );
+    }
+
+    try {
+      // Get organization information for the user
+      const [userOrgs] = await db
+        .select({
+          orgId: organizations.id,
+          webName: organizations.doctorWebName,
+          serviceStartDate: organizations.serviceStartDate,
+          serviceEndDate: organizations.serviceEndDate,
+          userLimit: organizations.userLimit,
+          createdAt: organizations.createdAt,
+          updatedAt: organizations.updatedAt,
+        })
+        .from(organizationUsers)
+        .innerJoin(
+          organizations,
+          eq(organizationUsers.organizationId, organizations.id),
+        )
+        .where(eq(organizationUsers.userId, user.id))
+        .limit(1);
+      if (!userOrgs) {
+        return c.json(
+          { error: "User is not associated with any organization" },
+          404,
+        );
+      }
+
+      return c.json({ organizations: userOrgs });
+    } catch (error) {
+      console.error("Error fetching user organizations:", error);
+      const err = formatError(error);
+      return c.json({ error: err.message }, err.statusCode);
+    }
+  });

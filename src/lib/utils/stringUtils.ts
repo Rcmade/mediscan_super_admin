@@ -66,7 +66,33 @@ export function searchParamsToObject(
 export function formatError(
   error: unknown,
   isFallback = false,
-): { message: string; statusCode: ContentfulStatusCode } {
+): {
+  message: string;
+  statusCode: Exclude<
+    ContentfulStatusCode,
+    | 100
+    | 102
+    | 103
+    | 200
+    | 201
+    | 202
+    | 203
+    | 204
+    | 205
+    | 206
+    | 207
+    | 208
+    | 226
+    | 300
+    | 301
+    | 302
+    | 303
+    | 305
+    | 306
+    | 307
+    | 308
+  >;
+} {
   if (error instanceof Error) {
     // Type assertion to access Postgres-specific fields
     const dbError = error as Error & { detail?: string };
@@ -209,3 +235,7 @@ export async function getReadableErrorMessage(error: unknown): Promise<string> {
 
   return "An unknown error occurred. Please try again.";
 }
+
+export const getOrgPath = (webName?: string) => {
+  return `/admin/dashboard/organization/o/${webName || ""}`;
+};

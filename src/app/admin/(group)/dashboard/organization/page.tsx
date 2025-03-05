@@ -1,8 +1,16 @@
+import { currentUser } from "@/action/currentUser";
 import AddOrgButton from "@/feature/admin/dashboard/components/button/AddOrgButton";
 import SearchAndViewOrg from "@/feature/organization/components/sections/SearchAndViewOrg";
 import React from "react";
 
-const page = () => {
+const page = async () => {
+  const user = await currentUser();
+  // if (user?.role === "RECEPTIONIST" || user?.role === "ADMIN") {
+  // }
+
+  if (user?.role !== "SUPER_ADMIN") {
+    return <div>Unauthorized</div>;
+  }
   return (
     <div>
       <div className="my-4 flex w-full justify-end">
