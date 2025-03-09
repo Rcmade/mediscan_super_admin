@@ -18,5 +18,5 @@ export const CLOUDINARY_REGEX =
 
 export const revisitScheduleHeaderName = "x-revisit-schedule";
 
-export const userRoleLimitedAccess = ["RECEPTIONIST", "USER", "ADMIN"] as const;
-export const userRoleArr = [...userRoleLimitedAccess, "SUPER_ADMIN"] as const;
+export const userRoleLimitedAccess = ["RECEPTIONIST", "ADMIN"] as const;
+export const userRoleArr = [...userRoleLimitedAccess, "SUPER_ADMIN", "USER"] as const;

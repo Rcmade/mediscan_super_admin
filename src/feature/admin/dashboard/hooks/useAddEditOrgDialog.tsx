@@ -1,7 +1,7 @@
 import { UseGetOrgByWebNameResponseT } from "@/feature/organization/hooks/useGetOrgByWebName";
 import { create } from "zustand";
 
-export type AddEditDepartmentDialogT =
+export type AddEdiOrgDialogT =
   | {
       type: "create";
     }
@@ -12,9 +12,9 @@ export type AddEditDepartmentDialogT =
     };
 
 type UseAddEditOrgDialogT = {
-  onOpen: (orgInfo: AddEditDepartmentDialogT) => void;
+  onOpen: (orgInfo: AddEdiOrgDialogT) => void;
   onClose: () => void;
-  orgInfo?: AddEditDepartmentDialogT;
+  orgInfo?: AddEdiOrgDialogT;
   isOpen: boolean;
 };
 

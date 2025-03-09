@@ -10,7 +10,7 @@ type RequestType = InferRequestType<typeof api>;
 export const useViewOrg = (query: RequestType["query"] = {}) => {
   return useQuery({
     queryKey: [
-      "organization",
+      "organizations",
       {
         page: query.page || undefined,
         limit: query.limit || undefined,

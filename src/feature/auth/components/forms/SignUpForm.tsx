@@ -52,6 +52,7 @@ export default function SignUpForm() {
                 <FormControl>
                   <Input
                     disabled={isLoading}
+                    type="tel"
                     placeholder="+1234567890"
                     {...field}
                   />

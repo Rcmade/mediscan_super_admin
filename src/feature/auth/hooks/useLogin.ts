@@ -59,7 +59,6 @@ const useLogin = () => {
       replace(data.data.redirect);
     },
     onError: (error) => {
-      console.log(error);
       toast.error(error.message || "Failed to login", {
         id,
       });

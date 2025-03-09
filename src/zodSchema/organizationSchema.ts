@@ -1,7 +1,5 @@
 import { z } from "zod";
 import { phoneSchema } from ".";
-import { signUpSchema } from "./authSchema";
-import { userRoleLimitedAccess } from "@/constant";
 
 export const createOrgSchema = z.object({
   doctorName: z.string().nonempty(""),
@@ -18,12 +16,6 @@ export const createOrgSchemaWithRefine = createOrgSchema.refine(
     message: "End date must be after or equal to start date.",
     path: ["serviceEndDate"],
   },
-);
-
-export const createOrgUser = signUpSchema.merge(
-  z.object({
-    role: z.enum(userRoleLimitedAccess),
-  }),
 );
 
 export type OrgFormValues = z.infer<typeof createOrgSchema>;

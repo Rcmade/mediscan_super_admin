@@ -1,11 +1,15 @@
 import { InferResponseType } from "hono";
 import { client } from "@/lib/rcp";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+// import { toast } from "sonner";
+// import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 
 const api = client.api.main.org.users["user-org"]["$get"];
 type GetUserOrgResponse = InferResponseType<typeof api, 200>;
+
 const useGetUserOrg = () => {
+  const user = useCurrentUser();
   return useQuery<GetUserOrgResponse>({
     queryKey: ["userOrg"],
     queryFn: async () => {
@@ -14,10 +18,13 @@ const useGetUserOrg = () => {
       if ("organizations" in data) {
         return data;
       } else {
-        toast.error(data?.error);
+        // toast.error(getReadableErrorMessage(data));
         throw new Error(data.error);
       }
     },
+
+    enabled:
+      !!user?.id && user?.role !== "SUPER_ADMIN" && user?.role !== "USER",
   });
 };
 

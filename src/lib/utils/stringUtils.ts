@@ -126,16 +126,14 @@ export function formatError(
         statusCode: 422, // Unprocessable Entity
       };
     }
-
     // General fallback for other errors
     return isFallback
       ? {
           message: "An unexpected error occurred. Please try again.",
           statusCode: 500,
         } // Internal Server Error
-      : { message: "", statusCode: 500 };
+      : { message: error.message, statusCode: 500 };
   }
-
   // If the error is not an instance of `Error`, return a generic message
   return isFallback
     ? {

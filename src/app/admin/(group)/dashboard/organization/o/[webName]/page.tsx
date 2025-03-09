@@ -10,11 +10,14 @@ import {
   CalendarCheck,
   CalendarX,
   Clock,
+  Loader,
   Percent,
   Users,
 } from "lucide-react";
 import { Metadata } from "next";
-import React from "react";
+import React, { Suspense } from "react";
+import SuperAdminOnlyOption from "./_SuperAdminOnlyOption";
+import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 
 export const revalidate = 600;
 
@@ -62,8 +65,8 @@ const getStats = async ({
 
     return data;
   } catch (error) {
-    console.error({ error });
-    return error as Error;
+    const err = await getReadableErrorMessage(error);
+    return { message: err };
   }
 };
 const page = async ({ searchParams, params }: PagePropsPromise) => {
@@ -98,12 +101,18 @@ const page = async ({ searchParams, params }: PagePropsPromise) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
+        {user?.role === "SUPER_ADMIN" && (
+          <Suspense fallback={<Loader className="animate-spin" />}>
+            <SuperAdminOnlyOption />
+          </Suspense>
+        )}
+
         <div className="mb-4 flex flex-col items-center justify-between md:flex-row">
           <h1 className="text-3xl font-bold text-foreground">
             Appointment Dashboard
           </h1>
-          <div>
+          <div className="flex gap-4">
             <StartEndButton />
             <AddOrgButton />
           </div>
@@ -129,7 +138,6 @@ const page = async ({ searchParams, params }: PagePropsPromise) => {
             description="Cancelled appointments"
           />
         </div>
-
         {/* Operational Metrics */}
         <div className="mb-8 grid gap-6 md:grid-cols-3">
           <AppointmentStatsCard
@@ -151,7 +159,6 @@ const page = async ({ searchParams, params }: PagePropsPromise) => {
             description="Percentage of cancelled appointments"
           />
         </div>
-
         {/* Trends Charts */}
         <div className="grid gap-6 md:grid-cols-2">
           <TrendChart

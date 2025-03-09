@@ -1,7 +1,8 @@
+import "server-only";
+
 import { db } from "@/lib/db/db";
 import { organizations, organizationUsers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import "server-only";
 export const getOrgByUserId = async (userId: string) => {
   const [userOrgs] = await db
     .select({
@@ -10,7 +11,6 @@ export const getOrgByUserId = async (userId: string) => {
       serviceStartDate: organizations.serviceStartDate,
       serviceEndDate: organizations.serviceEndDate,
       userLimit: organizations.userLimit,
-      // Add any other fields you need from organizations table
       createdAt: organizations.createdAt,
       updatedAt: organizations.updatedAt,
     })

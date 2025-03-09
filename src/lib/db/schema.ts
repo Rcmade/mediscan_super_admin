@@ -17,8 +17,6 @@ import {
 } from "@/constant";
 import { eq, sql } from "drizzle-orm";
 
-export const userRole = pgEnum("UserRole", userRoleArr);
-
 export const appointmentStatus = pgEnum(
   "AppointmentStatus",
   appointmentStatusArr,
@@ -36,6 +34,8 @@ const commonFields = {
     .$onUpdate(() => new Date())
     .defaultNow(),
 };
+
+export const userRole = pgEnum("UserRole", userRoleArr);
 
 export const users = pgTable("user", {
   role: userRole("role").notNull().default("USER"),
@@ -70,7 +70,6 @@ export const organizationUsers = pgTable(
     ...commonFields,
   },
   (table) => ({
-    
     // Ensures a user cannot have multiple roles in the same organization
     uniqueConstraint: unique().on(table.userId, table.organizationId),
   }),

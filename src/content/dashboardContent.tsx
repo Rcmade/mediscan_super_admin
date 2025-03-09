@@ -8,6 +8,7 @@ import {
   PieChart,
   Plane,
   Tv,
+  Users,
 } from "lucide-react";
 
 type SubMenu = {
@@ -50,6 +51,13 @@ export const topNavMenu: TopNavT[] = [
 
   {
     title: "Organization",
+    url: "/admin/dashboard/organization",
+    accessBy: ["SUPER_ADMIN"],
+    icon: Home,
+  },
+
+  {
+    title: "Organization",
     url: "/",
     accessBy: ["ADMIN"],
     icon: Layout,
@@ -67,6 +75,13 @@ export const topNavMenu: TopNavT[] = [
     url: "/token/display",
     icon: Tv,
     accessBy: ["ADMIN", "RECEPTIONIST"],
+  },
+
+  {
+    title: "Users",
+    url: "/users",
+    accessBy: ["ADMIN", "RECEPTIONIST"],
+    icon: Users,
   },
 ] as const;
 

@@ -239,7 +239,6 @@ const organizationRoutes = new Hono()
       // Extract total count from the first row
       const totalRecords = orgsData.length > 0 ? orgsData[0].total : 0;
 
-      console.dir(orgsData, { depth: Infinity });
       return c.json({
         query: paginationSchema.parse(query),
         data: orgsData,
@@ -285,7 +284,54 @@ const organizationRoutes = new Hono()
       return c.json(org);
     } catch (error) {
       console.error("Database error:", error);
-      return c.json({ error: "Internal server error" }, 500);
+      const err = formatError(error);
+      return c.json({ error: err.message }, err.statusCode);
+    }
+  })
+  .delete("/o/:orgName", async (c) => {
+    try {
+      const orgName = c.req.param("orgName");
+
+      if (!orgName) {
+        return c.json({ error: "Organization web name is required" }, 400);
+      }
+
+      const user = await currentUser();
+      if (!user || !user.id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (user.role !== "SUPER_ADMIN") {
+        return c.json(
+          { error: "Forbidden. You don't have access to these resources!" },
+          403,
+        );
+      }
+
+      const [userInDb] = await db
+        .select({ role: users.role })
+        .from(users)
+        .where(eq(users.id, user.id));
+      if (userInDb?.role !== "SUPER_ADMIN") {
+        return c.json(
+          { error: "Forbidden. You don't have access to these resources!" },
+          403,
+        );
+      }
+
+      const deletedOrg = await db
+        .delete(organizations)
+        .where(eq(organizations.doctorWebName, orgName))
+        .returning();
+
+      if (deletedOrg.length === 0) {
+        return c.json({ error: "Organization not found" }, 404);
+      }
+
+      return c.json({ message: "Organization deleted successfully" });
+    } catch (error) {
+      const err = formatError(error);
+      return c.json({ error: err.message }, err.statusCode);
     }
   });
 
