@@ -7,7 +7,7 @@ import { validateDateRange } from "@/zodSchema";
 import SendService from "@/service/sendService";
 import { createOrgSchema } from "@/zodSchema/organizationSchema";
 import { zValidator } from "@hono/zod-validator";
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { desc, eq, ilike, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { paginationSchema } from "@/zodSchema/paginationSchema";
 import { formatError } from "@/lib/utils/stringUtils";
@@ -21,7 +21,7 @@ const organizationRoutes = new Hono()
       }
 
       const [existingUser] = await db
-        .select({ role: users.role })
+        .select({ role: users.role, phone: users.phone })
         .from(users)
         .where(eq(users.id, user.id));
 
@@ -45,6 +45,14 @@ const organizationRoutes = new Hono()
         return c.json({ errors: ["Invalid phone number"] }, 400);
       }
 
+      if (phone === existingUser.phone) {
+        return c.json(
+          {
+            error: `You can't create an organization with ${phone} phone number`,
+          },
+          400,
+        );
+      }
       const { error } = validateDateRange({
         endDate: serviceEndDate,
         startDate: serviceStartDate,
@@ -129,6 +137,13 @@ const organizationRoutes = new Hono()
           .from(users)
           .where(eq(users.id, user.id));
 
+        if (existingUser?.role !== "SUPER_ADMIN") {
+          return c.json(
+            { error: "Forbidden. You don't have access to these resources!" },
+            403,
+          );
+        }
+
         // Fetch the organization
         const [org] = await db
           .select({ id: organizations.id })
@@ -140,22 +155,17 @@ const organizationRoutes = new Hono()
         }
 
         // Check if the user is an ADMIN of the organization or a SUPER_ADMIN
-        const [orgUser] = await db
-          .select({ userId: organizationUsers.userId })
-          .from(organizationUsers)
-          .where(
-            and(
-              eq(organizationUsers.organizationId, org.id),
-              eq(organizationUsers.userId, user.id),
-            ),
-          );
+        // const [orgUser] = await db
+        //   .select({ userId: organizationUsers.userId })
+        //   .from(organizationUsers)
+        //   .where(and(eq(organizationUsers.organizationId, org.id)));
 
-        if (existingUser?.role !== "SUPER_ADMIN" && !orgUser) {
-          return c.json(
-            { error: "Forbidden. You don't have access to these resources!" },
-            403,
-          );
-        }
+        // if (!orgUser) {
+        //   return c.json(
+        //     { error: "Forbidden. You don't have access to these resources!" },
+        //     403,
+        //   );
+        // }
 
         // Remove undefined values from body
         const filteredBody = Object.fromEntries(
@@ -181,13 +191,35 @@ const organizationRoutes = new Hono()
             ? normalizePhoneNumber(phone)
             : undefined;
 
-          await db
-            .update(users)
-            .set({
-              ...(doctorName ? { name: doctorName } : {}),
-              ...(normalizedPhone ? { phone: normalizedPhone } : {}),
-            })
-            .where(eq(users.id, user.id));
+          if (normalizedPhone) {
+            // Check if phone exists for another user
+            const [existingPhoneUser] = await db
+              .select({ id: users.id, phone: users.phone, name: users.name })
+              .from(users)
+              .where(eq(users.phone, normalizedPhone));
+
+            if (existingPhoneUser.name !== doctorName) {
+              await db
+                .update(users)
+                .set({
+                  ...(doctorName ? { name: doctorName } : {}),
+                  // ...(normalizedPhone ? { phone: normalizedPhone } : {}),
+                })
+                .where(eq(users.id, user.id));
+            }
+
+            // if (existingPhoneUser && existingPhoneUser.id !== user.id) {
+            //   return c.json(
+            //     {
+            //       error:
+            //         "The value for phone must be unique. Please use a different value.",
+            //     },
+            //     400,
+            //   );
+            // }
+          }
+
+          // Update user only if needed
         }
 
         return c.json({ message: "Organization updated" }, 200);

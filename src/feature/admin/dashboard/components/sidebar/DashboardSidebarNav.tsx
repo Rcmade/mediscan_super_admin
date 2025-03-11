@@ -1,119 +1,79 @@
 "use client";
 
-// import { ChevronRight } from "lucide-react";
-
-// import {
-//   Collapsible,
-//   CollapsibleContent,
-//   CollapsibleTrigger,
-// } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
-  //   SidebarMenu,
   SidebarMenuButton,
-  //   SidebarMenuItem,
-  //   SidebarMenuSub,
-  //   SidebarMenuSubItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
-// import useCurrentUser from "@/features/auth/hooks/useCurrentUser";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { dashboardContent } from "@/content/dashboardContent";
 import useGetUserOrg from "@/feature/organization/hooks/useGetUserOrg";
-import { userRoleLimitedAccess } from "@/constant";
+import useWebName from "@/hooks/useWebName";
+import { useMemo } from "react";
 
 function DashboardSidebarNav() {
   const user = useCurrentUser();
   const pathname = usePathname();
   const { data: org } = useGetUserOrg();
+  const { webName } = useWebName();
+
+  // Memoize the filtered top navigation menu
+  const filteredTopNavMenu = useMemo(() => {
+    if (!user) return [];
+    return dashboardContent.topNavMenu.filter(
+      (item) =>
+        item.accessBy.includes(user.role) ||
+        (webName && user.role === "SUPER_ADMIN"),
+    );
+  }, [user, webName]);
+
+  // Reusable function to render a menu button
+  const renderMenuButton = (
+    item: (typeof dashboardContent.topNavMenu)[number],
+    href?: string, // Optional href to override the default item.url
+  ) => (
+    <SidebarMenuButton
+      key={item.title}
+      tooltip={item.title}
+      className={cn(
+        "relative !py-5 font-normal hover:!bg-primary/20 hover:!text-primary",
+        pathname === (href || item.url) &&
+          "!bg-primary/20 !font-bold !text-primary",
+      )}
+    >
+      {item.icon && <item.icon className="!size-6" />}
+      <span>{item.title}</span>
+      <Link
+        href={href || item.url} // Use the provided href or fallback to item.url
+        className="absolute inset-0"
+        aria-label={item.title}
+      />
+    </SidebarMenuButton>
+  );
 
   return (
     <SidebarGroup>
       <div
         className="flex flex-col gap-1"
-        key={`top-nav${user?.id}-${user?.role}`}
+        key={`top-nav-${user?.id}-${user?.role}`}
       >
+        {/* Render super admin only menu */}
+        {user && dashboardContent.superAdminOnlyMenu.map((item) => renderMenuButton(item))}
+
+        <SidebarSeparator />
+
+        {/* Render filtered top navigation menu */}
         {user &&
-          dashboardContent.topNavMenu
-            .filter((i) => i.accessBy.includes(user?.role))
-            .map((item) => (
-              <SidebarMenuButton
-                key={item.title}
-                tooltip={item.title}
-                className={cn(
-                  "relative !py-5 font-normal hover:!bg-primary/20 hover:!text-primary",
-                  pathname === item.url &&
-                    "!bg-primary/20 !font-bold !text-primary",
-                )}
-              >
-                {item.icon && <item.icon className="!size-6" />}
-                <span>{item.title}</span>
-                <Link
-                  href={`${org && user?.role && userRoleLimitedAccess.includes(user.role as (typeof userRoleLimitedAccess)[number]) ? `/admin/dashboard/organization/o/${org.organizations.webName}${item.url}` : item.url}`}
-                  className="absolute inset-0"
-                ></Link>
-              </SidebarMenuButton>
-            ))}
+          filteredTopNavMenu.map((item) =>
+            renderMenuButton(
+              item,
+              `/admin/dashboard/organization/o/${org?.organizations?.webName || webName}${item.url}`,
+            ),
+          )}
       </div>
-      {/* <SidebarMenu className="my-1" key={`top-subnav${user?.id}-${user?.role}`}>
-        {dashboardContent.navMenuWithSubmenu.map((item) => {
-          return (
-            <Collapsible
-              key={item.title}
-              asChild
-              // defaultOpen={item?.isActive}
-              className="group/collapsible"
-            >
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton
-                    key={item.title}
-                    tooltip={item.title}
-                    className={cn(
-                      "relative !py-5 font-normal hover:!bg-primary/20 hover:!text-primary",
-                      pathname === item.url &&
-                        "!bg-primary/20 !font-bold !text-primary",
-                    )}
-                  >
-                    {item.icon && <item.icon className="!size-6" />}
-                    <span>{item.title}</span>
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  {user?.role && (
-                    <SidebarMenuSub>
-                      {item.items
-                        ?.filter((i) => i.accessBy.includes(user?.role))
-                        .map((subItem) => (
-                          <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuButton
-                              key={subItem.title}
-                              tooltip={subItem.title}
-                              className={cn(
-                                "relative font-normal hover:!text-primary",
-                                pathname === subItem.url &&
-                                  "!font-bold !text-primary",
-                              )}
-                            >
-                              <span>{subItem.title}</span>
-                              <Link
-                                href={`${subItem.url}`}
-                                className="absolute inset-0"
-                              ></Link>
-                            </SidebarMenuButton>
-                          </SidebarMenuSubItem>
-                        ))}
-                    </SidebarMenuSub>
-                  )}
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
-          );
-        })}
-      </SidebarMenu> */}
     </SidebarGroup>
   );
 }

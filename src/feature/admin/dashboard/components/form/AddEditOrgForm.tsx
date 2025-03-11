@@ -194,13 +194,19 @@ export default function AddEditOrgForm() {
         <FormField
           control={form.control}
           name="phone"
-          render={({ field }) => (
+          render={({ field: { onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
                   placeholder="+1 (555) 123-4567"
+                  type="tel"
+                  readOnly={orgInfo?.type === "edit"}
+                  onChange={(e) => {
+                    if (orgInfo?.type === "edit") return;
+                    onChange(e.target.value);
+                  }}
                   {...field}
                 />
               </FormControl>

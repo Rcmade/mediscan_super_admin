@@ -109,7 +109,6 @@ export function formatError(
 
     // Handle UNIQUE constraint violation
     if (error.message.includes("unique constraint") && dbError.detail) {
-      console.log({ error }, "-----------------", error.message);
       const match = dbError.detail.match(/\((.*?)\)=\((.*?)\)/);
       const field = match ? match[1] : "a unique field";
       return {

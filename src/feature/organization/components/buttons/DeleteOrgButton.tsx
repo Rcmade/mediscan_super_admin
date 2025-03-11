@@ -8,12 +8,11 @@ import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
 import { Trash } from "lucide-react";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // This button can be only used to delete the current org because it depends on the url path
 
-import React from "react";
-import { toast } from "sonner";
 
 // API setup
 const api = client.api.main.org.o[":orgName"]["$delete"];
@@ -24,7 +23,7 @@ type RequestType = InferRequestType<typeof api>;
 const DeleteOrgButton = () => {
   const { webName } = useWebName();
   const queryClient = useQueryClient();
-  //   const { back } = useRouter();
+  const { replace } = useRouter();
 
   const { showAlertDialog, setAlertDialogLoading, closeAlertDialog } =
     useAlertDialog();
@@ -42,10 +41,10 @@ const DeleteOrgButton = () => {
         return data;
       },
       onSuccess: (data) => {
-        queryClient.invalidateQueries({ queryKey: ["organization"] });
+        queryClient.invalidateQueries({ queryKey: ["organizations"] });
         toast.success(data?.message || "Organization deleted successfully");
         setAlertDialogLoading(false);
-        //   back();
+        replace("/admin/dashboard/organization");
         closeAlertDialog();
       },
       onError: (error) => {
@@ -61,7 +60,9 @@ const DeleteOrgButton = () => {
       description: (
         <span>
           This action cannot be undone. This will permanently delete the org
-          <strong className="text-2xl font-bold capitalize"> {webName} </strong>
+          <strong className="mx-2 text-2xl font-bold capitalize">
+            {webName && decodeURIComponent(webName)}
+          </strong>
           .
         </span>
       ),

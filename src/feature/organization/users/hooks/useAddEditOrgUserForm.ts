@@ -8,10 +8,13 @@ import { toast } from "sonner";
 import { useAddEditOrgUserDialog } from "./useAddEditOrgUserDialog";
 import { createOrgUser, OrgUserValues } from "@/zodSchema/orgUser";
 
-const api = client.api.main.org.users[":doctorWebName"]["$post"];
+const createApi = client.api.main.org.users[":doctorWebName"]["$post"];
+type CreateRequestType = InferRequestType<typeof createApi>;
+type CreateResponseType = InferResponseType<typeof createApi, 201>;
 
-type RequestType = InferRequestType<typeof api>;
-type ResponseType = InferResponseType<typeof api, 201>;
+const editApi = client.api.main.org.users[":doctorWebName"][":userId"]["$put"];
+type EditRequestType = InferRequestType<typeof editApi>;
+type EditResponseType = InferResponseType<typeof editApi, 200>;
 
 const useAddEditOrgUserForm = () => {
   const { onClose, orgUserInfo } = useAddEditOrgUserDialog();
@@ -23,14 +26,14 @@ const useAddEditOrgUserForm = () => {
         role: orgUserInfo.orgUserInfo.role || "RECEPTIONIST",
         name: orgUserInfo.orgUserInfo.name || "",
         phoneNumber: orgUserInfo.orgUserInfo.phoneNumber || "+91",
-        userOrgId: orgUserInfo.orgUserInfo.userOrgId || "",
+        // userOrgId: orgUserInfo.orgUserInfo.userOrgId || "",
       };
     }
     return {
       role: "RECEPTIONIST",
       name: "",
       phoneNumber: "+91",
-      userOrgId: "",
+      // userOrgId: "",
     };
   };
 
@@ -40,9 +43,27 @@ const useAddEditOrgUserForm = () => {
     defaultValues: getDefaultValues(),
   });
 
-  const { mutate, isPending } = useMutation<ResponseType, Error, RequestType>({
+  const { mutate, isPending } = useMutation<
+    CreateResponseType | EditResponseType,
+    Error,
+    CreateRequestType | EditRequestType
+  >({
     mutationFn: async ({ json, param }) => {
-      const res = await api({
+      if (orgUserInfo?.type === "edit") {
+        const res = await editApi({
+          json,
+          param: {
+            doctorWebName: orgUserInfo?.orgUserInfo.webName,
+            userId: orgUserInfo?.orgUserInfo.userId,
+          },
+        });
+        if (!res.ok) throw res;
+
+        const data = await res.json();
+
+        return data;
+      }
+      const res = await createApi({
         json,
         param,
       });
@@ -73,24 +94,39 @@ const useAddEditOrgUserForm = () => {
     if (!orgUserInfo?.orgUserInfo.webName)
       return toast.error("Something went wrong. Please try again later");
 
-    mutate({
-      json: {
-        role: data.role,
-        name: data.name,
-        phoneNumber: data.phoneNumber,
-        userOrgId: data.userOrgId,
-      },
-      param: {
-        doctorWebName: orgUserInfo?.orgUserInfo.webName,
-      },
-    });
+    if (orgUserInfo.type === "create") {
+      mutate({
+        json: {
+          role: data.role,
+          name: data.name,
+          phoneNumber: data.phoneNumber,
+          // userOrgId: data.userOrgId,
+        },
+        param: {
+          doctorWebName: orgUserInfo?.orgUserInfo.webName,
+        },
+      });
+    } else {
+      mutate({
+        json: {
+          role: data.role,
+          name: data.name,
+          phoneNumber: data.phoneNumber,
+          // userOrgId: data.userOrgId,
+        },
+        param: {
+          doctorWebName: orgUserInfo?.orgUserInfo.webName,
+          userId: orgUserInfo?.orgUserInfo.userId,
+        },
+      });
+    }
+
     if (orgUserInfo?.type === "create") {
     }
   }
 
   const isLoading = form.formState.isSubmitting || isPending;
 
-  console.log(form.formState.errors);
   return {
     form,
     handleSubmit,

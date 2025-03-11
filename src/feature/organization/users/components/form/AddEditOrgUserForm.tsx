@@ -91,7 +91,7 @@ const AddEditOrgUserForm = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className="w-full">
           {orgUserInfoDialog?.type === "create" ? "Create" : "Update"}
         </Button>
       </form>

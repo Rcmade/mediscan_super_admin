@@ -1,6 +1,9 @@
+import { SUPER_ADMIN } from "@/constant";
 import { UserRole } from "@/lib/db/schema";
 import {
+  BuildingIcon,
   Calendar,
+  Eclipse,
   Frame,
   Home,
   Layout,
@@ -41,7 +44,9 @@ const navMenuWithSubmenu: NavMenuWithSubmenu[] = [
 
 type TopNavT = SubMenu & { icon: LucideIcon };
 
-export const topNavMenu: TopNavT[] = [
+export const superAdminOnlyMenu: (TopNavT & {
+  accessBy: [typeof SUPER_ADMIN];
+})[] = [
   {
     title: "Dashboard",
     url: "/admin/dashboard",
@@ -50,12 +55,14 @@ export const topNavMenu: TopNavT[] = [
   },
 
   {
-    title: "Organization",
+    title: "Organizations",
     url: "/admin/dashboard/organization",
     accessBy: ["SUPER_ADMIN"],
-    icon: Home,
+    icon: BuildingIcon,
   },
+] as const;
 
+export const topNavMenu: TopNavT[] = [
   {
     title: "Organization",
     url: "/",
@@ -83,10 +90,25 @@ export const topNavMenu: TopNavT[] = [
     accessBy: ["ADMIN", "RECEPTIONIST"],
     icon: Users,
   },
+
+  {
+    title: "Overview",
+    url: "/overview",
+    accessBy: ["ADMIN", "RECEPTIONIST"],
+    icon: Eclipse,
+  },
+
+  // {
+  //   title: "Transactions",
+  //   url: "/transactions",
+  //   accessBy: ["ADMIN", "RECEPTIONIST"],
+  //   icon: Coins,
+  // },
 ] as const;
 
 export const dashboardContent = {
   navMenuWithSubmenu,
+  superAdminOnlyMenu,
   topNavMenu,
   projects: [
     {

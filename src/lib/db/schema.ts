@@ -102,6 +102,33 @@ export const appointments = pgTable("appointments", {
   ...commonFields,
 });
 
+export const orgTransaction = pgTable("org_transaction", {
+  ...commonFields,
+  total: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  paid: numeric("paid", { precision: 10, scale: 2 }).notNull(),
+  due: numeric("due", { precision: 10, scale: 2 }).notNull(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+});
+
+export const orgPaymentMethods = pgTable("org_payment_methods", {
+  ...commonFields,
+  name: text("name").notNull().unique(),
+});
+
+export const orgPayments = pgTable("org_payments", {
+  ...commonFields,
+  transactionId: text("transaction_id")
+    .notNull()
+    .references(() => orgTransaction.id, { onDelete: "cascade" }),
+  paymentMethodId: text("payment_method_id")
+    .notNull()
+    .references(() => orgPaymentMethods.id, { onDelete: "cascade" }),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  paidAt: timestamp("paid_at").defaultNow(), // Time of payment
+});
+
 // Create a SQL view for organizations with user information
 // export const organizationsWithUsersView = pgView(
 //   "organizations_with_users_view",

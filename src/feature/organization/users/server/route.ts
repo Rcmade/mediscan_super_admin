@@ -129,10 +129,19 @@ export const orgUsersRoute = new Hono()
           .where(eq(users.phone, phone))
           .limit(1);
 
-        if (isNewOrgUserIsSuperAdmin.role === "SUPER_ADMIN") {
-          throw new Error(
-            "User is restricted to be a part of any organization.",
-          );
+        if (isNewOrgUserIsSuperAdmin) {
+          if (isNewOrgUserIsSuperAdmin.role === "SUPER_ADMIN") {
+            throw new Error(
+              "User is restricted to be a part of any organization.",
+            );
+          }
+
+          if (isNewOrgUserIsSuperAdmin.role === "ADMIN" && role !== "ADMIN") {
+            return c.json(
+              { error: "You can't change your role in this organization" },
+              400,
+            );
+          }
         }
 
         // Create or update user
@@ -174,13 +183,148 @@ export const orgUsersRoute = new Hono()
         }
       }
 
-      return c.json({ message: "User successfully created or updated" }, 201);
+      return c.json({ message: "User successfully created" }, 201);
     } catch (error) {
       const err = formatError(error);
       // console.error("Error in orgUsersRoute:", error);
       return c.json({ error: err.message }, err.statusCode || 500);
     }
   })
+  .put(
+    "/:doctorWebName/:userId",
+    zValidator("json", createOrgUser),
+    async (c) => {
+      try {
+        // Extract parameters
+        const doctorWebName = c.req.param("doctorWebName");
+        const userId = c.req.param("userId");
+
+        if (!doctorWebName) {
+          return c.json({ error: "Organization Name is required" }, 400);
+        }
+
+        if (!userId) {
+          return c.json({ error: "User ID is required" }, 400);
+        }
+
+        // Retrieve authenticated user
+        const user = await currentUserSession();
+        if (!user?.id) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        // Extract request body and validate inputs
+        const { name, phoneNumber, role } = c.req.valid("json");
+
+        // Prevent assigning SUPER_ADMIN role
+        if (role === ("SUPER_ADMIN" as UserRole)) {
+          return c.json(
+            { error: "Forbidden. You can't assign or modify a SUPER_ADMIN" },
+            403,
+          );
+        }
+
+        // Validate phone number
+        const phone = normalizePhoneNumber(phoneNumber);
+        if (!phone) {
+          return c.json({ error: "Invalid phone number format" }, 400);
+        }
+
+        // Fetch organization details
+        const [organization] = await db
+          .select({
+            id: organizations.id,
+          })
+          .from(organizations)
+          .where(eq(organizations.doctorWebName, doctorWebName))
+          .limit(1);
+
+        if (!organization) {
+          return c.json({ error: "Organization not found" }, 404);
+        }
+
+        // Fetch authenticated user's role and organization access
+        const [currentUser] = await db
+          .select({
+            role: users.role,
+            id: users.id,
+            hasOrgAccess: organizationUsers.userId,
+          })
+          .from(users)
+          .leftJoin(
+            organizationUsers,
+            and(
+              eq(users.id, organizationUsers.userId),
+              eq(organizationUsers.organizationId, organization.id),
+            ),
+          )
+          .where(eq(users.id, user.id))
+          .limit(1);
+
+        if (!currentUser) {
+          return c.json({ error: "User not found" }, 404);
+        }
+
+        // Check if user has permission to edit
+        const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
+        const isAdmin = currentUser.role === "ADMIN";
+
+        if (!isSuperAdmin && !isAdmin) {
+          return c.json(
+            { error: "Forbidden. You don't have access to this resource!" },
+            403,
+          );
+        }
+
+        // Ensure the user being edited exists and belongs to the same organization
+        const [existingUser] = await db
+          .select({
+            id: users.id,
+            role: users.role,
+          })
+          .from(users)
+          .leftJoin(
+            organizationUsers,
+            and(
+              eq(users.id, organizationUsers.userId),
+              eq(organizationUsers.organizationId, organization.id),
+            ),
+          )
+          .where(eq(users.id, userId))
+          .limit(1);
+
+        if (!existingUser) {
+          return c.json(
+            {
+              error:
+                "Target user not found or doesn't belong to the organization",
+            },
+            404,
+          );
+        }
+
+        // Prevent modifying a SUPER_ADMIN user
+        if (existingUser.role === "SUPER_ADMIN") {
+          return c.json({ error: "You cannot modify a SUPER_ADMIN user" }, 403);
+        }
+
+        // Update user
+        await db
+          .update(users)
+          .set({
+            name,
+            phone: phone,
+            role,
+          })
+          .where(eq(users.id, userId));
+
+        return c.json({ message: "User successfully updated" }, 200);
+      } catch (error) {
+        const err = formatError(error);
+        return c.json({ error: err.message }, err.statusCode || 500);
+      }
+    },
+  )
   .get("/user-org", async (c) => {
     const user = await currentUserSession();
     if (!user || !user.id) {

@@ -85,7 +85,7 @@ const useAddEditOrgForm = () => {
       if ("message" in data) {
       } else {
       }
-      queryClient.invalidateQueries({ queryKey: ["organization"] });
+      queryClient.invalidateQueries({ queryKey: ["organizations"] });
       setTimeout(() => {
         onClose();
       }, 0);
