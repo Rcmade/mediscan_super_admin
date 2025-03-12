@@ -1,4 +1,5 @@
 import { currentUser } from "@/action/currentUser";
+import SubscriptionPopupAlert from "@/components/alerts/SubscriptionPopupAlert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { enrollmentMetadata } from "@/content/metadataContent";
 import { PatientEnrollmentForm } from "@/feature/enroll/components/PatientEnrollmentForm";
@@ -14,6 +15,7 @@ const page = async () => {
           <CardTitle>Enter patient information.</CardTitle>
         </CardHeader>
         <CardContent>
+          <SubscriptionPopupAlert />
           <PatientEnrollmentForm
             defaultValue={{
               // patientName: user?.name || "",

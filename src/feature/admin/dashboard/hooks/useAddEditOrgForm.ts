@@ -10,6 +10,8 @@ import { InferRequestType, InferResponseType } from "hono";
 import { client } from "@/lib/rcp";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 import { toast } from "sonner";
+import useViewLatestTransaction from "@/feature/transaction/hooks/useViewLatestTransaction";
+import { useEffect } from "react";
 
 const createApi = client.api.main.org.$post;
 const editApi = client.api.main.org["o"][":orgName"]["$put"];
@@ -30,9 +32,9 @@ type ResponseType =
 
 const useAddEditOrgForm = () => {
   const { orgInfo, onClose } = useAddEditOrgDialog();
-
   const queryClient = useQueryClient();
-  const getDefaultValues = () => {
+  const transaction = useViewLatestTransaction();
+  const getDefaultValues = (): Partial<OrgFormValues> => {
     if (orgInfo?.type === "edit") {
       return {
         doctorName: orgInfo.orgInfo.name || "",
@@ -45,6 +47,14 @@ const useAddEditOrgForm = () => {
         serviceEndDate: orgInfo.orgInfo.serviceEndDate
           ? new Date(orgInfo.orgInfo.serviceEndDate)
           : undefined,
+        transaction: {
+          // total: orgInfo.orgInfo.transaction.total,
+          // paid: orgInfo.orgInfo.transaction.paid,
+          // due: orgInfo.orgInfo.transaction.due,
+          total: 0,
+          paid: 0,
+          due: 0,
+        },
       };
     }
     return {
@@ -52,6 +62,11 @@ const useAddEditOrgForm = () => {
       doctorWebName: "",
       phone: "+91",
       userLimit: 1,
+      transaction: {
+        total: 0,
+        paid: 0,
+        due: 0,
+      },
     };
   };
 
@@ -60,6 +75,35 @@ const useAddEditOrgForm = () => {
     resolver: zodResolver(createOrgSchemaWithRefine),
     defaultValues: getDefaultValues(),
   });
+
+  useEffect(() => {
+    const a = async () => {
+      if (orgInfo?.type === "edit") {
+        try {
+          const transactionData = await transaction.mutateAsync({
+            param: { orgWebName: orgInfo.orgInfo.doctorWebName },
+          });
+
+          if (transactionData) {
+            form.reset({
+              ...getDefaultValues(),
+              transaction: {
+                total: +transactionData.total,
+                paid: +transactionData.paid,
+                due: +transactionData.due,
+                transactionId: transactionData.id,
+              },
+            });
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    };
+    a();
+    return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgInfo]);
 
   const { mutate, isPending } = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (info) => {

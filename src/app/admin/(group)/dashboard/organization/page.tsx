@@ -1,4 +1,5 @@
 import { currentUser } from "@/action/currentUser";
+import SubscriptionPopupAlert from "@/components/alerts/SubscriptionPopupAlert";
 import AddOrgButton from "@/feature/admin/dashboard/components/button/AddOrgButton";
 import SearchAndViewOrg from "@/feature/organization/components/sections/SearchAndViewOrg";
 import React from "react";
@@ -13,6 +14,7 @@ const page = async () => {
   }
   return (
     <div>
+      <SubscriptionPopupAlert />
       <div className="my-4 flex w-full justify-end">
         <AddOrgButton />
       </div>

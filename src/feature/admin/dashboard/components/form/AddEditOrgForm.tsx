@@ -180,7 +180,6 @@ export default function AddEditOrgForm() {
                   disabled={isLoading}
                   type="number"
                   min="1"
-                  placeholder="10"
                   {...field}
                   onChange={(e) => field.onChange(e.target.valueAsNumber)}
                 />
@@ -215,12 +214,75 @@ export default function AddEditOrgForm() {
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="transaction.total"
+          render={({ field: { value, ...rest } }) => (
+            <FormItem>
+              <FormLabel>Total Amount</FormLabel>
+              <FormControl>
+                <Input
+                  disabled={isLoading}
+                  type="number"
+                  min="1"
+                  {...rest}
+                  value={value || ""}
+                  onChange={(e) => rest.onChange(e.target.valueAsNumber)}
+                />
+              </FormControl>
+              <FormDescription>
+                The total amount of the transaction
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="transaction.paid"
+          render={({ field: { value, ...rest } }) => (
+            <FormItem>
+              <FormLabel>Paid Amount</FormLabel>
+              <FormControl>
+                <Input
+                  disabled={isLoading}
+                  type="number"
+                  min="1"
+                  {...rest}
+                  value={value || ""}
+                  onChange={(e) => rest.onChange(e.target.valueAsNumber)}
+                />
+              </FormControl>
+              <FormDescription>The amount that has been paid</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="transaction.due"
+          render={({ field: { value, ...rest } }) => (
+            <FormItem>
+              <FormLabel>Due Amount</FormLabel>
+              <FormControl>
+                <Input
+                  disabled={isLoading}
+                  type="number"
+                  min="1"
+                  {...rest}
+                  value={value || ""}
+                  onChange={(e) => rest.onChange(e.target.valueAsNumber)}
+                />
+              </FormControl>
+              <FormDescription>The amount that is due</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" spinner disabled={isLoading}>
-          {/* {isLoading
-            ? "Submitting..."
-            : initialData
-              ? "Update Organization"
-              : "Create Organization"} */}
           {orgInfo?.type === "create"
             ? "Create Organization"
             : "Update Organization"}

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { phoneSchema } from ".";
+import { orgTransactionSchema } from "./transactionSchema";
 
 export const createOrgSchema = z.object({
   doctorName: z.string().nonempty(""),
@@ -8,7 +9,9 @@ export const createOrgSchema = z.object({
   serviceEndDate: z.coerce.date(),
   userLimit: z.coerce.number().min(1).int(),
   phone: phoneSchema,
+  transaction: orgTransactionSchema,
 });
+// .merge();
 
 export const createOrgSchemaWithRefine = createOrgSchema.refine(
   (data) => data.serviceEndDate >= data.serviceStartDate,

@@ -1,213 +1,243 @@
 import { Hono } from "hono";
-import { eq } from "drizzle-orm";
-import { z } from "zod";
-import { zValidator } from "@hono/zod-validator";
+import { desc, eq } from "drizzle-orm";
+// import { z } from "zod";
+// import { zValidator } from "@hono/zod-validator";
 import { db } from "@/lib/db/db";
 import {
-  orgPaymentMethods,
-  orgPayments,
+  organizations,
+  // orgPaymentMethods,
+  // orgPayments,
   orgTransaction,
 } from "@/lib/db/schema";
 
 // Create Hono app
-const transactionRoutes = new Hono();
-
-// Get all transactions
-transactionRoutes
-  .get("/", async (c) => {
+export const transactionRoutes = new Hono().get(
+  "/last-transaction/:orgWebName",
+  async (c) => {
     try {
-      const transactions = await db.query.orgTransaction.findMany({
-        orderBy: (transaction, { desc }) => [desc(transaction.createdAt)],
-      });
+      const orgWebName = c.req.param("orgWebName");
 
-      return c.json(transactions);
+      const transaction = await db
+        .select({
+          total: orgTransaction.total,
+          paid: orgTransaction.paid,
+          due: orgTransaction.due,
+          createdAt: orgTransaction.createdAt,
+          organizationId: orgTransaction.organizationId,
+          id: orgTransaction.id,
+        })
+        .from(orgTransaction)
+        .innerJoin(
+          organizations,
+          eq(orgTransaction.organizationId, organizations.id),
+        )
+        .where(eq(organizations.doctorWebName, orgWebName))
+        .orderBy(desc(orgTransaction.createdAt))
+        .limit(1);
+
+      if (!transaction.length) {
+        return c.json({ error: "Transaction not found" }, 404);
+      }
+
+      return c.json(transaction[0]); // Returning the first (latest) transaction
     } catch (error) {
       console.error("Error fetching transactions:", error);
       return c.json({ error: "Failed to fetch transactions" }, 500);
     }
-  })
-  // Create a new transaction
-  .post(
-    "/",
-    zValidator(
-      "json",
-      z.object({
-        total: z.number().positive(),
-        organizationId: z.string().min(1),
-      }),
-    ),
-    async (c) => {
-      try {
-        const { total, organizationId } = c.req.valid("json");
+  },
+);
+// .get("/", async (c) => {
+//   try {
+//     const transactions = await db.query.orgTransaction.findMany({
+//       orderBy: (transaction, { desc }) => [desc(transaction.createdAt)],
+//     });
 
-        const newTransaction = await db
-          .insert(orgTransaction)
-          .values({
-            total: total.toString(),
-            paid: String(0),
-            due: total.toString(),
-            organizationId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
+//     return c.json(transactions);
+//   } catch (error) {
+//     console.error("Error fetching transactions:", error);
+//     return c.json({ error: "Failed to fetch transactions" }, 500);
+//   }
+// })
+// // Create a new transaction
+// .post(
+//   "/",
+//   zValidator(
+//     "json",
+//     z.object({
+//       total: z.number().positive(),
+//       organizationId: z.string().min(1),
+//     }),
+//   ),
+//   async (c) => {
+//     try {
+//       const { total, organizationId } = c.req.valid("json");
 
-        return c.json(newTransaction[0]);
-      } catch (error) {
-        console.error("Error creating transaction:", error);
-        return c.json({ error: "Failed to create transaction" }, 500);
-      }
-    },
-  )
+//       const newTransaction = await db
+//         .insert(orgTransaction)
+//         .values({
+//           total: total.toString(),
+//           paid: String(0),
+//           due: total.toString(),
+//           organizationId,
+//           createdAt: new Date(),
+//           updatedAt: new Date(),
+//         })
+//         .returning();
 
-  // Get transaction by ID
-  .get("/api/transactions/:id", async (c) => {
-    try {
-      const id = c.req.param("id");
+//       return c.json(newTransaction[0]);
+//     } catch (error) {
+//       console.error("Error creating transaction:", error);
+//       return c.json({ error: "Failed to create transaction" }, 500);
+//     }
+//   },
+// )
 
-      const transaction = await db.query.orgTransaction.findFirst({
-        where: eq(orgTransaction.id, id),
-      });
+// // Get transaction by ID
+// .get("/api/transactions/:id", async (c) => {
+//   try {
+//     const id = c.req.param("id");
 
-      if (!transaction) {
-        return c.json({ error: "Transaction not found" }, 404);
-      }
+//     const transaction = await db.query.orgTransaction.findFirst({
+//       where: eq(orgTransaction.id, id),
+//     });
 
-      return c.json(transaction);
-    } catch (error) {
-      console.error("Error fetching transaction:", error);
-      return c.json({ error: "Failed to fetch transaction" }, 500);
-    }
-  })
-  // Get payments for a transaction
-  .get("/api/transactions/:id/payments", async (c) => {
-    try {
-      const id = c.req.param("id");
+//     if (!transaction) {
+//       return c.json({ error: "Transaction not found" }, 404);
+//     }
 
-      const payments = await db.query.orgPayments.findMany({
-        where: eq(orgPayments.transactionId, id),
-        with: {
-          paymentMethod: true,
-        },
-        orderBy: (payment, { desc }) => [desc(payment.paidAt)],
-      });
+//     return c.json(transaction);
+//   } catch (error) {
+//     console.error("Error fetching transaction:", error);
+//     return c.json({ error: "Failed to fetch transaction" }, 500);
+//   }
+// })
+// // Get payments for a transaction
+// .get("/api/transactions/:id/payments", async (c) => {
+//   try {
+//     const id = c.req.param("id");
 
-      return c.json(payments);
-    } catch (error) {
-      console.error("Error fetching payments:", error);
-      return c.json({ error: "Failed to fetch payments" }, 500);
-    }
-  })
-  // Add a payment to a transaction
-  .post(
-    "/api/transactions/:id/payments",
-    zValidator(
-      "json",
-      z.object({
-        paymentMethodId: z.string().min(1),
-        amount: z.number().positive(),
-      }),
-    ),
-    async (c) => {
-      try {
-        const id = c.req.param("id");
-        const { paymentMethodId, amount } = c.req.valid("json");
+//     const payments = await db.query.orgPayments.findMany({
+//       where: eq(orgPayments.transactionId, id),
+//       with: {
+//         paymentMethod: true,
+//       },
+//       orderBy: (payment, { desc }) => [desc(payment.paidAt)],
+//     });
 
-        // Get the transaction
-        const transaction = await db.query.orgTransaction.findFirst({
-          where: eq(orgTransaction.id, id),
-        });
+//     return c.json(payments);
+//   } catch (error) {
+//     console.error("Error fetching payments:", error);
+//     return c.json({ error: "Failed to fetch payments" }, 500);
+//   }
+// })
+// // Add a payment to a transaction
+// .post(
+//   "/api/transactions/:id/payments",
+//   zValidator(
+//     "json",
+//     z.object({
+//       paymentMethodId: z.string().min(1),
+//       amount: z.number().positive(),
+//     }),
+//   ),
+//   async (c) => {
+//     try {
+//       const id = c.req.param("id");
+//       const { paymentMethodId, amount } = c.req.valid("json");
 
-        if (!transaction) {
-          return c.json({ error: "Transaction not found" }, 404);
-        }
+//       // Get the transaction
+//       const transaction = await db.query.orgTransaction.findFirst({
+//         where: eq(orgTransaction.id, id),
+//       });
 
-        // Check if payment amount is valid
-        if (amount > +transaction.due) {
-          return c.json({ error: "Payment amount exceeds due amount" }, 400);
-        }
+//       if (!transaction) {
+//         return c.json({ error: "Transaction not found" }, 404);
+//       }
 
-        // Create the payment
-        const newPayment = await db
-          .insert(orgPayments)
-          .values({
-            //   id: crypto.randomUUID(),
-            transactionId: id,
-            paymentMethodId,
-            amount: amount.toString(),
-            paidAt: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
+//       // Check if payment amount is valid
+//       if (amount > +transaction.due) {
+//         return c.json({ error: "Payment amount exceeds due amount" }, 400);
+//       }
 
-        // Update the transaction
-        const updatedPaid = transaction.paid + amount;
-        const updatedDue = +transaction.total - +updatedPaid;
+//       // Create the payment
+//       const newPayment = await db
+//         .insert(orgPayments)
+//         .values({
+//           //   id: crypto.randomUUID(),
+//           transactionId: id,
+//           paymentMethodId,
+//           amount: amount.toString(),
+//           paidAt: new Date(),
+//           createdAt: new Date(),
+//           updatedAt: new Date(),
+//         })
+//         .returning();
 
-        await db
-          .update(orgTransaction)
-          .set({
-            paid: updatedPaid,
-            due: updatedDue.toString(),
-            updatedAt: new Date(),
-          })
-          .where(eq(orgTransaction.id, id));
+//       // Update the transaction
+//       const updatedPaid = transaction.paid + amount;
+//       const updatedDue = +transaction.total - +updatedPaid;
 
-        // Get the payment method for the response
-        const paymentMethod = await db.query.orgPaymentMethods.findFirst({
-          where: eq(orgPaymentMethods.id, paymentMethodId),
-        });
+//       await db
+//         .update(orgTransaction)
+//         .set({
+//           paid: updatedPaid,
+//           due: updatedDue.toString(),
+//           updatedAt: new Date(),
+//         })
+//         .where(eq(orgTransaction.id, id));
 
-        return c.json({
-          ...newPayment[0],
-          paymentMethod,
-        });
-      } catch (error) {
-        console.error("Error adding payment:", error);
-        return c.json({ error: "Failed to add payment" }, 500);
-      }
-    },
-  )
-  // Get all payment methods
-  .get("/api/payment-methods", async (c) => {
-    try {
-      const paymentMethods = await db.query.orgPaymentMethods.findMany();
-      return c.json(paymentMethods);
-    } catch (error) {
-      console.error("Error fetching payment methods:", error);
-      return c.json({ error: "Failed to fetch payment methods" }, 500);
-    }
-  })
-  // Create a new payment method
-  .post(
-    "/api/payment-methods",
-    zValidator(
-      "json",
-      z.object({
-        name: z.string().min(1),
-      }),
-    ),
-    async (c) => {
-      try {
-        const { name } = c.req.valid("json");
+//       // Get the payment method for the response
+//       const paymentMethod = await db.query.orgPaymentMethods.findFirst({
+//         where: eq(orgPaymentMethods.id, paymentMethodId),
+//       });
 
-        const newPaymentMethod = await db
-          .insert(orgPaymentMethods)
-          .values({
-            id: crypto.randomUUID(),
-            name,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
+//       return c.json({
+//         ...newPayment[0],
+//         paymentMethod,
+//       });
+//     } catch (error) {
+//       console.error("Error adding payment:", error);
+//       return c.json({ error: "Failed to add payment" }, 500);
+//     }
+//   },
+// )
+// // Get all payment methods
+// .get("/api/payment-methods", async (c) => {
+//   try {
+//     const paymentMethods = await db.query.orgPaymentMethods.findMany();
+//     return c.json(paymentMethods);
+//   } catch (error) {
+//     console.error("Error fetching payment methods:", error);
+//     return c.json({ error: "Failed to fetch payment methods" }, 500);
+//   }
+// })
+// // Create a new payment method
+// .post(
+//   "/api/payment-methods",
+//   zValidator(
+//     "json",
+//     z.object({
+//       name: z.string().min(1),
+//     }),
+//   ),
+//   async (c) => {
+//     try {
+//       const { name } = c.req.valid("json");
 
-        return c.json(newPaymentMethod[0]);
-      } catch (error) {
-        console.error("Error creating payment method:", error);
-        return c.json({ error: "Failed to create payment method" }, 500);
-      }
-    },
-  );
+//       const newPaymentMethod = await db
+//         .insert(orgPaymentMethods)
+//         .values({
+//           id: crypto.randomUUID(),
+//           name,
+//           createdAt: new Date(),
+//           updatedAt: new Date(),
+//         })
+//         .returning();
 
-export default transactionRoutes;
+//       return c.json(newPaymentMethod[0]);
+//     } catch (error) {
+//       console.error("Error creating payment method:", error);
+//       return c.json({ error: "Failed to create payment method" }, 500);
+//     }
+//   },
+// );

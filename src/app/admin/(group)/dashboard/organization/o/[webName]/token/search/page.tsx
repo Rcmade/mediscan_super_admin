@@ -1,4 +1,5 @@
 import { currentUser } from "@/action/currentUser";
+import SubscriptionPopupAlert from "@/components/alerts/SubscriptionPopupAlert";
 import SearchAndCards from "@/feature/token/components/search/SearchAndCards";
 import React, { Suspense } from "react";
 
@@ -14,6 +15,8 @@ const page = async () => {
   }
   return (
     <Suspense>
+      <SubscriptionPopupAlert />
+
       <SearchAndCards />
     </Suspense>
   );

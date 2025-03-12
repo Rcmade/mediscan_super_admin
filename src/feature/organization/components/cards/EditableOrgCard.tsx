@@ -15,9 +15,9 @@ const EditableOrgCard = ({
   <Card className="min-w-fit shadow-md transition-shadow duration-300 hover:shadow-lg">
     <CardContent className="flex justify-between gap-2 p-2 sm:p-4">
       <div className="flex flex-col gap-2">
-        <h1 className="text-lg font-semibold text-primary">
+        {/* <h1 className="text-lg font-semibold text-primary">
           Org: <span className="text-3xl capitalize">{org.name ?? "N/A"}</span>
-        </h1>
+        </h1> */}
         <Link
           href={`/admin/dashboard/organization/o/${org.doctorWebName}`}
           // target="_blank"
@@ -44,7 +44,7 @@ const EditableOrgCard = ({
           Service: {new Date(org.serviceStartDate).toLocaleDateString()} -
           {new Date(org.serviceEndDate).toLocaleDateString()}
         </p>
-        <h3 className="text-lg font-medium">{org.phone ?? "No Phone"}</h3>
+        {/* <h3 className="text-lg font-medium">{org.phone ?? "No Phone"}</h3> */}
       </div>
     </CardContent>
   </Card>

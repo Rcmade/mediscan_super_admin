@@ -7,7 +7,6 @@ import {
   numeric,
   integer,
   unique,
-  pgView,
 } from "drizzle-orm/pg-core";
 import { nId } from "@/lib/utils/dbUtils";
 import {
@@ -15,7 +14,6 @@ import {
   appointmentStatusArr,
   userRoleArr,
 } from "@/constant";
-import { eq, sql } from "drizzle-orm";
 
 export const appointmentStatus = pgEnum(
   "AppointmentStatus",
@@ -126,79 +124,7 @@ export const orgPayments = pgTable("org_payments", {
     .notNull()
     .references(() => orgPaymentMethods.id, { onDelete: "cascade" }),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  paidAt: timestamp("paid_at").defaultNow(), // Time of payment
 });
-
-// Create a SQL view for organizations with user information
-// export const organizationsWithUsersView = pgView(
-//   "organizations_with_users_view",
-// ).as((qb) => {
-//   return qb
-//     .select({
-//       id: organizations.id,
-//       doctorWebName: organizations.doctorWebName,
-//       serviceStartDate: organizations.serviceStartDate,
-//       serviceEndDate: organizations.serviceEndDate,
-//       userLimit: organizations.userLimit,
-//       name: users.name,
-//       phone: users.phone,
-//       total: sql<number>`count(${organizationUsers.userId})`.as("total"),
-//       role: users.role,
-//       userId: organizationUsers.userId,
-//     })
-//     .from(organizations)
-//     .leftJoin(
-//       organizationUsers,
-//       sql`${organizations.id} = ${organizationUsers.organizationId}`,
-//     )
-//     .leftJoin(users, sql`${organizationUsers.userId} = ${users.id}`)
-//     .groupBy(
-//       organizations.id,
-//       organizations.doctorWebName,
-//       organizations.serviceStartDate,
-//       organizations.serviceEndDate,
-//       organizations.userLimit,
-//       users.name,
-//       users.phone,
-//     );
-// });
-
-export const organizationsWithUsersView = pgView(
-  "organizations_with_users_view",
-).as((qb) => {
-  return qb
-    .select({
-      id: organizations.id,
-      doctorWebName: organizations.doctorWebName,
-      serviceStartDate: organizations.serviceStartDate,
-      serviceEndDate: organizations.serviceEndDate,
-      userLimit: organizations.userLimit,
-      name: users.name,
-      phone: users.phone,
-      total: sql<number>`count(${organizationUsers.userId})`.as("total"),
-      userId: organizationUsers.userId,
-    })
-    .from(organizations)
-    .leftJoin(
-      organizationUsers,
-      eq(organizations.id, organizationUsers.organizationId),
-    )
-    .leftJoin(users, eq(organizationUsers.userId, users.id))
-    .groupBy(
-      organizations.id,
-      organizations.doctorWebName,
-      organizations.serviceStartDate,
-      organizations.serviceEndDate,
-      organizations.userLimit,
-      users.name,
-      users.phone,
-      organizationUsers.userId, // Ensure this is present
-    );
-});
-
-// Type for the view results
-export type OrganizationWithUserView =
-  typeof organizationsWithUsersView.$inferSelect;
 
 export type InsertUserT = typeof users.$inferInsert;
 export type SelectUserT = typeof users.$inferSelect;

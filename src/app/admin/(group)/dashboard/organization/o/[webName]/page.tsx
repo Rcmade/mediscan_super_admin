@@ -18,6 +18,7 @@ import { Metadata } from "next";
 import React, { Suspense } from "react";
 import SuperAdminOnlyOption from "./_SuperAdminOnlyOption";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
+import SubscriptionPopupAlert from "@/components/alerts/SubscriptionPopupAlert";
 
 export const revalidate = 600;
 
@@ -101,6 +102,8 @@ const page = async ({ searchParams, params }: PagePropsPromise) => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SubscriptionPopupAlert />
+
       <div className="container mx-auto px-4">
         {user?.role === "SUPER_ADMIN" && (
           <Suspense fallback={<Loader className="animate-spin" />}>

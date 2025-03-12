@@ -47,7 +47,7 @@ const SearchAndViewOrg = () => {
   return (
     <div className="space-y-4">
       <SearchForm
-        placeholder={"Search for an organization by name, email, or phone"}
+        placeholder={"Search for an organization by name..."}
         isGlobalSearch={true}
         showAdd={false}
       />

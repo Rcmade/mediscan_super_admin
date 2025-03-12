@@ -1,4 +1,9 @@
-import { organizations, organizationUsers } from "@/lib/db/schema";
+import {
+  organizations,
+  // organizationsWithUsersView,
+  organizationUsers,
+  orgTransaction,
+} from "@/lib/db/schema";
 import { currentUser } from "@/action/currentUser";
 import { db } from "@/lib/db/db";
 import { users } from "@/lib/db/schema";
@@ -94,6 +99,15 @@ const organizationRoutes = new Hono()
         userId: createOrgUser.id,
         organizationId: org.id,
       });
+      const { transaction } = rest;
+
+      await db.insert(orgTransaction).values({
+        ...transaction,
+        organizationId: org.id,
+        total: transaction.total.toString(),
+        paid: transaction.paid.toString(),
+        due: transaction.due.toString(),
+      });
 
       // Send OTP confirmation if the service is enabled
       if (process.env.OTP_SERVICE_AVAILABLE === "true") {
@@ -180,6 +194,17 @@ const organizationRoutes = new Hono()
           .where(eq(organizations.id, org.id))
           .returning({ doctorWebName: organizations.doctorWebName });
 
+        if (body.transaction?.transactionId) {
+          await db
+            .update(orgTransaction)
+            .set({
+              ...body.transaction,
+              total: body.transaction.total.toString(),
+              paid: body.transaction.paid.toString(),
+              due: body.transaction.due.toString(),
+            })
+            .where(eq(orgTransaction.id, body.transaction.transactionId));
+        }
         if (!updatedOrg) {
           return c.json({ error: "Failed to update organization" }, 500);
         }
@@ -240,8 +265,8 @@ const organizationRoutes = new Hono()
       const searchCondition = search
         ? or(
             ilike(organizations.doctorWebName, `%${search}%`),
-            ilike(users.phone, `%${search}%`),
-            ilike(users.name, `%${search}%`),
+            // ilike(users.phone, `%${search}%`),
+            // ilike(users.name, `%${search}%`),
           )
         : undefined;
 
@@ -253,22 +278,21 @@ const organizationRoutes = new Hono()
           serviceStartDate: organizations.serviceStartDate,
           serviceEndDate: organizations.serviceEndDate,
           userLimit: organizations.userLimit,
-          name: users.name,
-          phone: users.phone,
-          total: sql<number>`COUNT(*) OVER()`.as("total"), // Single query for pagination
+          // name: users.name,
+          // phone: users.phone,
+          total: sql<number>`COUNT(*) OVER()`.as("total"),
         })
         .from(organizations)
-        .leftJoin(
-          organizationUsers,
-          eq(organizations.id, organizationUsers.organizationId),
-        )
-        .leftJoin(users, eq(organizationUsers.userId, users.id)) // Join with users through organizationUsers
+        // .leftJoin(
+        //   organizationUsers,
+        //   eq(organizations.id, organizationUsers.organizationId),
+        // )
+        // .leftJoin(users, eq(organizationUsers.userId, users.id)) // Join with users through organizationUsers
         .where(searchCondition)
         .orderBy(desc(organizations.serviceStartDate))
         .offset(offset)
         .limit(limit);
 
-      // Extract total count from the first row
       const totalRecords = orgsData.length > 0 ? orgsData[0].total : 0;
 
       return c.json({

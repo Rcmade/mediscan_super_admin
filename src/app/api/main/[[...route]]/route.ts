@@ -9,7 +9,8 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import organizationRoutes from "@/feature/organization/server/route";
 import { orgUsersRoute } from "@/feature/organization/users/server/route";
-import transactionRoutes from "@/feature/transaction/server/route";
+import { transactionRoutes } from "@/feature/transaction/server/route";
+import { subscriptionRoute } from "@/feature/subscription/server/route";
 
 // export const runtime = "edge"
 
@@ -25,8 +26,9 @@ const routes = app
   .route("/schedules", schedulesRoutes)
   .route("/user", userRoutes)
   .route("/org", organizationRoutes)
+  .route("/org/transactions", transactionRoutes)
   .route("/org/users", orgUsersRoute)
-  .route("/org/transactions", transactionRoutes);
+  .route("/org/subscription", subscriptionRoute);
 
 export const GET = handle(app);
 export const POST = handle(app);
