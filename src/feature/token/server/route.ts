@@ -179,13 +179,18 @@ export const tokenRoute = new Hono()
             reasonForVisit: appointments.reasonForVisit,
             createdAt: appointments.createdAt,
             appointmentStatus: appointments.appointmentStatus,
-            phone: users.phone, // Include phone in the select query,
+            phone: users.phone,
           })
           .from(appointments)
-          .leftJoin(users, eq(appointments.userId, users.id)) // Join with the `users` table
+          .leftJoin(users, eq(appointments.userId, users.id))
+          .leftJoin(
+            organizations,
+            eq(appointments.organizationId, organizations.id),
+          )
           .where(
             and(
               eq(appointments.appointmentStatus, "Scheduled"),
+              eq(organizations.doctorWebName, webName),
               baseConditions,
               todayConditions,
             ),

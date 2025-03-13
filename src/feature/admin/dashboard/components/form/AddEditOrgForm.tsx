@@ -181,7 +181,7 @@ export default function AddEditOrgForm() {
                   type="number"
                   min="1"
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
                 />
               </FormControl>
               <FormDescription>Maximum number of users allowed</FormDescription>
@@ -217,17 +217,17 @@ export default function AddEditOrgForm() {
         <FormField
           control={form.control}
           name="transaction.total"
-          render={({ field: { value, ...rest } }) => (
+          render={({ field: { ...rest } }) => (
             <FormItem>
               <FormLabel>Total Amount</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
                   type="number"
-                  min="1"
+                  // min="1"
                   {...rest}
-                  value={value}
-                  onChange={(e) => rest.onChange(e.target.valueAsNumber)}
+                  onChange={(e) => rest.onChange(e.target.valueAsNumber || 0)}
+                  // value={value}
                 />
               </FormControl>
               <FormDescription>
@@ -241,17 +241,17 @@ export default function AddEditOrgForm() {
         <FormField
           control={form.control}
           name="transaction.paid"
-          render={({ field: { value, ...rest } }) => (
+          render={({ field: { ...rest } }) => (
             <FormItem>
               <FormLabel>Paid Amount</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
                   type="number"
-                  min="1"
+                  // min="1"
+                  // value={value}
                   {...rest}
-                  value={value}
-                  onChange={(e) => rest.onChange(e.target.valueAsNumber)}
+                  onChange={(e) => rest.onChange(e.target.valueAsNumber || 0)}
                 />
               </FormControl>
               <FormDescription>The amount that has been paid</FormDescription>
@@ -263,17 +263,17 @@ export default function AddEditOrgForm() {
         <FormField
           control={form.control}
           name="transaction.due"
-          render={({ field: { value, ...rest } }) => (
+          render={({ field: { ...rest } }) => (
             <FormItem>
               <FormLabel>Due Amount</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
                   type="number"
-                  min="1"
+                  // min="1"
                   {...rest}
-                  value={value}
-                  onChange={(e) => rest.onChange(e.target.valueAsNumber)}
+                  onChange={(e) => rest.onChange(e.target.valueAsNumber || 0)}
+                  // value={value}
                 />
               </FormControl>
               <FormDescription>The amount that is due</FormDescription>
