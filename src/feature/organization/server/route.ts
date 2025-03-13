@@ -289,7 +289,7 @@ const organizationRoutes = new Hono()
         // )
         // .leftJoin(users, eq(organizationUsers.userId, users.id)) // Join with users through organizationUsers
         .where(searchCondition)
-        .orderBy(desc(organizations.serviceStartDate))
+        .orderBy(desc(organizations.updatedAt))
         .offset(offset)
         .limit(limit);
 
