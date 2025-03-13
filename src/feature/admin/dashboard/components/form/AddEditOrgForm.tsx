@@ -178,6 +178,7 @@ export default function AddEditOrgForm() {
               <FormControl>
                 <Input
                   disabled={isLoading}
+                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
                   type="number"
                   min="1"
                   {...field}
@@ -224,6 +225,7 @@ export default function AddEditOrgForm() {
                 <Input
                   disabled={isLoading}
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
                   // min="1"
                   {...rest}
                   onChange={(e) => rest.onChange(e.target.valueAsNumber || 0)}
@@ -248,6 +250,7 @@ export default function AddEditOrgForm() {
                 <Input
                   disabled={isLoading}
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
                   // min="1"
                   // value={value}
                   {...rest}
@@ -270,6 +273,7 @@ export default function AddEditOrgForm() {
                 <Input
                   disabled={isLoading}
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
                   // min="1"
                   {...rest}
                   onChange={(e) => rest.onChange(e.target.valueAsNumber || 0)}
