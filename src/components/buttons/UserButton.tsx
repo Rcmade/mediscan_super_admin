@@ -9,7 +9,6 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, Clock, Coins, Layout, LogOut, Tv, User } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-// import LoginButton from "@/components/buttons/LoginButton";
 import Link from "next/link";
 import LoginButton from "./LoginButton";
 import { useRouter } from "next/navigation";
@@ -17,8 +16,6 @@ import { signOut } from "next-auth/react";
 import { Button } from "../ui/button";
 import useGetUserOrg from "@/feature/organization/hooks/useGetUserOrg";
 import { getOrgPath } from "@/lib/utils/stringUtils";
-// import { useRouter } from "next/navigation";
-// import { signOut } from "next-auth/react";
 
 export const UserButton = () => {
   const user = useCurrentUser();
@@ -59,9 +56,7 @@ export const UserButton = () => {
               </Link>
             </DropdownMenuItem>
 
-            {(user.role === "RECEPTIONIST" ||
-              user.role === "ADMIN" ||
-              user.role === "SUPER_ADMIN") &&
+            {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") &&
               data?.organizations?.webName && (
                 <>
                   <DropdownMenuItem
@@ -85,17 +80,17 @@ export const UserButton = () => {
                 </>
               )}
 
-            {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
+            {user.role === "SUPER_ADMIN" && (
               <DropdownMenuItem className="flex cursor-pointer gap-4" asChild>
                 <Link
                   href={
                     user.role === "SUPER_ADMIN"
-                      ? `/admin/dashboard`
+                      ? `/admin/dashboard/organization`
                       : `${orgPath}`
                   }
                 >
                   <Layout className="mr-2 h-4 w-4" />
-                  <span>Dashboard</span>
+                  <span>Organizations</span>
                 </Link>
               </DropdownMenuItem>
             )}

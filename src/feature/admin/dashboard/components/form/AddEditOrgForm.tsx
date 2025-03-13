@@ -226,7 +226,7 @@ export default function AddEditOrgForm() {
                   type="number"
                   min="1"
                   {...rest}
-                  value={value || ""}
+                  value={value}
                   onChange={(e) => rest.onChange(e.target.valueAsNumber)}
                 />
               </FormControl>
@@ -250,7 +250,7 @@ export default function AddEditOrgForm() {
                   type="number"
                   min="1"
                   {...rest}
-                  value={value || ""}
+                  value={value}
                   onChange={(e) => rest.onChange(e.target.valueAsNumber)}
                 />
               </FormControl>
@@ -272,7 +272,7 @@ export default function AddEditOrgForm() {
                   type="number"
                   min="1"
                   {...rest}
-                  value={value || ""}
+                  value={value}
                   onChange={(e) => rest.onChange(e.target.valueAsNumber)}
                 />
               </FormControl>

@@ -9,8 +9,6 @@ import {
   Smartphone,
 } from "lucide-react";
 
-// import { Button } from "@/components/ui/button";
-
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -42,7 +40,7 @@ export default function Home() {
               <div className="flex items-center justify-center">
                 <div className="relative w-full max-w-sm">
                   <Image
-                    src="/placeholder.svg?height=600&width=320"
+                    src="/doctor.webp"
                     width={320}
                     height={600}
                     alt="MediScan App Interface"
