@@ -24,7 +24,6 @@ export function AlertDialog() {
     closeDialog,
   } = useAlertDialogStore();
 
-
   const handleCancel = () => {
     onCancel();
     closeDialog();

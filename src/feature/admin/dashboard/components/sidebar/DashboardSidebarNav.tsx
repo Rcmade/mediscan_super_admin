@@ -61,7 +61,10 @@ function DashboardSidebarNav() {
         key={`top-nav-${user?.id}-${user?.role}`}
       >
         {/* Render super admin only menu */}
-        {user && dashboardContent.superAdminOnlyMenu.map((item) => renderMenuButton(item))}
+        {user &&
+          dashboardContent.superAdminOnlyMenu.map((item) =>
+            renderMenuButton(item),
+          )}
 
         <SidebarSeparator />
 

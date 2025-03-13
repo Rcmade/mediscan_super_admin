@@ -24,7 +24,7 @@ export default function LoginForm() {
     LoginVerificationStage.OTPVerify;
 
   return (
-    <div className="space-y-6">
+    <div className="h-full max-h-fit space-y-6">
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold">Log In</h1>
         <p className="text-muted-foreground">

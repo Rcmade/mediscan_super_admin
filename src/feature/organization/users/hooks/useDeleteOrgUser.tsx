@@ -27,9 +27,9 @@ const useDeleteOrgUser = () => {
       queryClient.invalidateQueries({
         queryKey: ["users", data.webName],
       });
-    //   setTimeout(() => {
-    //     onClose();
-    //   }, 0);
+      //   setTimeout(() => {
+      //     onClose();
+      //   }, 0);
     },
   });
 

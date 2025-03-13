@@ -13,7 +13,6 @@ import { toast } from "sonner";
 
 // This button can be only used to delete the current org because it depends on the url path
 
-
 // API setup
 const api = client.api.main.org.o[":orgName"]["$delete"];
 

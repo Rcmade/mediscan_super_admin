@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Coins, Layout, LogOut, Tv, User } from "lucide-react";
+import { Calendar, Clock, Coins, Layout, LogOut, Tv, User } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 // import LoginButton from "@/components/buttons/LoginButton";
 import Link from "next/link";
@@ -51,6 +51,14 @@ export const UserButton = () => {
                 <span>Recent Token</span>
               </Link>
             </DropdownMenuItem>
+
+            <DropdownMenuItem className="flex cursor-pointer gap-4" asChild>
+              <Link href={`/history`}>
+                <Clock className="mr-2 h-4 w-4" />
+                <span>History</span>
+              </Link>
+            </DropdownMenuItem>
+
             {(user.role === "RECEPTIONIST" ||
               user.role === "ADMIN" ||
               user.role === "SUPER_ADMIN") &&

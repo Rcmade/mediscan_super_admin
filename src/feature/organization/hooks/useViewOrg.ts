@@ -35,5 +35,4 @@ export const useViewOrg = (query: RequestType["query"] = {}) => {
   });
 };
 
-
 // type a = UseViewOrgResponseT['data']

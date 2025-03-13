@@ -17,7 +17,7 @@ export default function SignUpForm() {
   const { form, isLoading, onSubmit } = useSignUp();
 
   return (
-    <div className="space-y-6">
+    <div className="max-h-fit space-y-6">
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold">Sign Up</h1>
         <p className="text-muted-foreground">

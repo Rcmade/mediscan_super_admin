@@ -20,7 +20,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 3600000// 1 hour,
+        staleTime: 3600000, // 1 hour,
       },
     },
   });

@@ -6,7 +6,7 @@ const DisplayTokenPage = () => {
   return (
     <>
       <SubscriptionPopupAlert />
-      <DisplayToken />;
+      <DisplayToken />
     </>
   );
 };

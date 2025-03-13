@@ -47,5 +47,3 @@ const EditableAppointmentCard = ({
 );
 
 export default EditableAppointmentCard;
-
-

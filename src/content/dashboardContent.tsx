@@ -5,7 +5,7 @@ import {
   Calendar,
   Eclipse,
   Frame,
-  Home,
+  // Home,
   Layout,
   type LucideIcon,
   PieChart,
@@ -47,12 +47,12 @@ type TopNavT = SubMenu & { icon: LucideIcon };
 export const superAdminOnlyMenu: (TopNavT & {
   accessBy: [typeof SUPER_ADMIN];
 })[] = [
-  {
-    title: "Dashboard",
-    url: "/admin/dashboard",
-    accessBy: ["SUPER_ADMIN"],
-    icon: Home,
-  },
+  // {
+  //   title: "Dashboard",
+  //   url: "/admin/dashboard",
+  //   accessBy: ["SUPER_ADMIN"],
+  //   icon: Home,
+  // },
 
   {
     title: "Organizations",

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
-import { PanelLeft } from "lucide-react";
+import { Menu } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -40,10 +40,33 @@ const SidebarContext = React.createContext<SidebarContext | null>(null);
 
 function useSidebar() {
   const context = React.useContext(SidebarContext);
-  if (!context) {
-    throw new Error("useSidebar must be used within a SidebarProvider.");
-  }
+  // if (!context) {
+  //   throw new Error("useSidebar must be used within a SidebarProvider.");
+  // }
+  // if (!context) {
+  //   return {
+  //     isOpen: false, // Default closed state
+  //     isMobile: false, // Default to non-mobile
+  //     toggleSidebar: () => {
+  //       const event = new Event("globalToggleSidebar");
+  //       window.dispatchEvent(event);
+  //     },
+  //   };
+  // }
 
+  if (!context) {
+    return {
+      state: {}, // Provide a default empty state
+      isOpen: false, // Default: sidebar is closed
+      isMobile: false, // Default: not mobile
+      toggleSidebar: () => {
+        const event = new Event("globalToggleSidebar");
+        window.dispatchEvent(event);
+      },
+      openMobile: false, // Default value
+      setOpenMobile: () => {}, // No-op function to avoid errors
+    };
+  }
   return context;
 }
 
@@ -95,6 +118,16 @@ const SidebarProvider = React.forwardRef<
         ? setOpenMobile((open) => !open)
         : setOpen((open) => !open);
     }, [isMobile, setOpen, setOpenMobile]);
+
+    React.useEffect(() => {
+      const handleToggleSidebar = () => {
+        toggleSidebar();
+      };
+
+      window.addEventListener("globalToggleSidebar", handleToggleSidebar);
+      return () =>
+        window.removeEventListener("globalToggleSidebar", handleToggleSidebar);
+    }, [toggleSidebar]);
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
@@ -286,7 +319,7 @@ const SidebarTrigger = React.forwardRef<
       }}
       {...props}
     >
-      <PanelLeft />
+      <Menu />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
