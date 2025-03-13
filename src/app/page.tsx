@@ -9,7 +9,7 @@ import {
   Smartphone,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -344,7 +344,7 @@ export default function Home() {
                 ease.
               </p>
             </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row lg:justify-end">
+            {/* <div className="flex flex-col gap-2 min-[400px]:flex-row lg:justify-end">
               <Button size="lg" className="gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -385,7 +385,7 @@ export default function Home() {
                 </svg>
                 Google Play
               </Button>
-            </div>
+            </div> */}
           </div>
         </section>
       </main>
