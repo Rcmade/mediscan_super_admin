@@ -6,10 +6,12 @@ import { useSidebar } from "../ui/sidebar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Button } from "../ui/button";
 import { Menu } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
   const { toggleSidebar } = useSidebar();
   const user = useCurrentUser();
+  const pathName = usePathname()
 
   return (
     <nav className="flex items-center justify-between border-b px-2 py-4 md:px-4 lg:px-6">
@@ -17,7 +19,7 @@ const Navbar = () => {
         <LogoButton />
       </Suspense>
       <div className="flex items-center gap-2">
-        {user?.role !== "USER" && (
+        {user?.role !== "USER" && pathName?.includes("admin") && (
           <Button onClick={toggleSidebar} size="sm" variant={"ghost"}>
             <Menu />
           </Button>

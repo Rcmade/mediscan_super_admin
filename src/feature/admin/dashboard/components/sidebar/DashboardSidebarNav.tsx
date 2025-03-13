@@ -61,12 +61,14 @@ function DashboardSidebarNav() {
         key={`top-nav-${user?.id}-${user?.role}`}
       >
         {/* Render super admin only menu */}
-        {user &&
-          dashboardContent.superAdminOnlyMenu.map((item) =>
-            renderMenuButton(item),
-          )}
-
-        <SidebarSeparator />
+        {user && user?.role === "SUPER_ADMIN" && (
+          <>
+            {dashboardContent.superAdminOnlyMenu.map((item) =>
+              renderMenuButton(item),
+            )}
+            <SidebarSeparator />
+          </>
+        )}
 
         {/* Render filtered top navigation menu */}
         {user &&

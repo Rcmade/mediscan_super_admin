@@ -32,7 +32,7 @@ const SubscriptionPopupAlert = () => {
   if (isLoading || !data) return null;
 
   // Don't show anything if days remaining is more than 15
-  // if (daysRemaining > 15) return null;
+  if (daysRemaining > 15) return null;
 
   // Show warning alert when subscription is about to end (within 15 days)
   if (daysRemaining > 0) {
