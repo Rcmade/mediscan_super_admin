@@ -20,11 +20,13 @@ interface SearchFormProps {
   placeholder?: string;
   isGlobalSearch?: boolean;
   showAdd?: boolean;
+  showStartEnd?: boolean;
 }
 export function SearchForm({
   placeholder,
   isGlobalSearch = false,
   showAdd = true,
+  showStartEnd = true,
 }: SearchFormProps) {
   const searchParams = useSearchParams();
   const { webName } = useWebName();
@@ -89,63 +91,65 @@ export function SearchForm({
           </div>
         )}
       </div>
-      <div className="flex w-full items-center justify-between gap-2 md:w-auto">
-        <div className="flex flex-1 items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost">
-                {startTime ? formatDate(startTime) : <CalendarIcon />}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={startTime ? new Date(startTime) : undefined}
-                onSelect={(e) => {
-                  setStartTime(e?.toISOString() || "");
-                  setTimeout(() => {
-                    handleSearch();
-                  }, 0);
-                }}
-                className=""
-              />
-            </PopoverContent>
-          </Popover>
+      {showStartEnd && (
+        <div className="flex w-full items-center justify-between gap-2 md:w-auto">
+          <div className="flex flex-1 items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost">
+                  {startTime ? formatDate(startTime) : <CalendarIcon />}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={startTime ? new Date(startTime) : undefined}
+                  onSelect={(e) => {
+                    setStartTime(e?.toISOString() || "");
+                    setTimeout(() => {
+                      handleSearch();
+                    }, 0);
+                  }}
+                  className=""
+                />
+              </PopoverContent>
+            </Popover>
 
-          <ArrowRightLeft />
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost">
-                {endOfDay ? formatDate(endOfDay) : <CalendarIcon />}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={endOfDay ? new Date(endOfDay) : undefined}
-                onSelect={(e) => {
-                  setEndOfDay(e?.toISOString() || "");
-                  setTimeout(() => {
-                    handleSearch();
-                  }, 0);
-                }}
-                className=""
-              />
-            </PopoverContent>
-          </Popover>
+            <ArrowRightLeft />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost">
+                  {endOfDay ? formatDate(endOfDay) : <CalendarIcon />}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={endOfDay ? new Date(endOfDay) : undefined}
+                  onSelect={(e) => {
+                    setEndOfDay(e?.toISOString() || "");
+                    setTimeout(() => {
+                      handleSearch();
+                    }, 0);
+                  }}
+                  className=""
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <Button
+            variant="ghost"
+            size={"icon"}
+            onClick={() => {
+              setStartTime("");
+              setEndOfDay("");
+              handleSearch();
+            }}
+          >
+            <X />
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size={"icon"}
-          onClick={() => {
-            setStartTime("");
-            setEndOfDay("");
-            handleSearch();
-          }}
-        >
-          <X />
-        </Button>
-      </div>
+      )}
     </form>
   );
 }

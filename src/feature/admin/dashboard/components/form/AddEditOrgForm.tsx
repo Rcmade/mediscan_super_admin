@@ -21,10 +21,26 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import useAddEditOrgForm from "../../hooks/useAddEditOrgForm";
+import { useEffect, useState } from "react";
+import { NumberInput } from "@/components/ui/number-input";
 
 export default function AddEditOrgForm() {
   const { form, handleSubmit, isLoading, orgInfo, startDate } =
     useAddEditOrgForm();
+  const [openPopovers, setOpenPopovers] = useState({
+    startDate: false,
+    endDate: false,
+  });
+
+  const paidAmount = form.watch("transaction.paid");
+  const totalAmount = form.watch("transaction.total");
+  useEffect(() => {
+    if (paidAmount === undefined || totalAmount === undefined) return;
+    if (paidAmount >= totalAmount) return;
+    form.setValue("transaction.due", totalAmount - paidAmount);
+    return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paidAmount, totalAmount]);
 
   return (
     <Form {...form}>
@@ -72,13 +88,18 @@ export default function AddEditOrgForm() {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Service Start Date</FormLabel>
-              <Popover>
+              <Popover
+                open={openPopovers.startDate}
+                onOpenChange={(o) =>
+                  setOpenPopovers((pre) => ({ ...pre, startDate: o }))
+                }
+              >
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-full pl-3 text-left font-normal",
+                        "w-full border-input pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground",
                       )}
                       disabled={isLoading}
@@ -97,7 +118,11 @@ export default function AddEditOrgForm() {
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    // onSelect={field.onChange}
+                    onSelect={(date) => {
+                      field.onChange(date);
+                      setOpenPopovers((pre) => ({ ...pre, startDate: false }));
+                    }}
                     disabled={(date) => {
                       const today = new Date();
                       today.setHours(0, 0, 0, 0); // Reset time to start of day
@@ -121,12 +146,17 @@ export default function AddEditOrgForm() {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Service End Date</FormLabel>
-              <Popover>
+              <Popover
+                open={openPopovers.endDate}
+                onOpenChange={(o) =>
+                  setOpenPopovers((pre) => ({ ...pre, endDate: o }))
+                }
+              >
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "w-full pl-3 text-left font-normal",
+                      "w-full border-input pl-3 text-left font-normal",
                       !field.value && "text-muted-foreground",
                     )}
                     // Disable the end date button if start date isn't selected
@@ -146,7 +176,10 @@ export default function AddEditOrgForm() {
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={(date) => {
+                      field.onChange(date);
+                      setOpenPopovers((pre) => ({ ...pre, endDate: false }));
+                    }}
                     disabled={(date) => {
                       const today = new Date();
                       today.setHours(0, 0, 0, 0); // Reset time to start of day
@@ -218,18 +251,14 @@ export default function AddEditOrgForm() {
         <FormField
           control={form.control}
           name="transaction.total"
-          render={({ field: { ...rest } }) => (
+          render={({ field: { value, onChange, ...rest } }) => (
             <FormItem>
               <FormLabel>Total Amount</FormLabel>
               <FormControl>
-                <Input
-                  disabled={isLoading}
-                  type="number"
-                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
-                  // min="1"
+                <NumberInput
+                  value={value}
+                  onValueChange={(e) => onChange(e)}
                   {...rest}
-                  onChange={(e) => rest.onChange(e.target.valueAsNumber || 0)}
-                  // value={value}
                 />
               </FormControl>
               <FormDescription>
@@ -243,18 +272,14 @@ export default function AddEditOrgForm() {
         <FormField
           control={form.control}
           name="transaction.paid"
-          render={({ field: { ...rest } }) => (
+          render={({ field: { value, onChange, ...rest } }) => (
             <FormItem>
               <FormLabel>Paid Amount</FormLabel>
               <FormControl>
-                <Input
-                  disabled={isLoading}
-                  type="number"
-                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
-                  // min="1"
-                  // value={value}
+                <NumberInput
+                  value={value}
+                  onValueChange={(e) => onChange(e)}
                   {...rest}
-                  onChange={(e) => rest.onChange(e.target.valueAsNumber || 0)}
                 />
               </FormControl>
               <FormDescription>The amount that has been paid</FormDescription>
@@ -266,18 +291,14 @@ export default function AddEditOrgForm() {
         <FormField
           control={form.control}
           name="transaction.due"
-          render={({ field: { ...rest } }) => (
+          render={({ field: { value, onChange, ...rest } }) => (
             <FormItem>
               <FormLabel>Due Amount</FormLabel>
               <FormControl>
-                <Input
-                  disabled={isLoading}
-                  type="number"
-                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
-                  // min="1"
+                <NumberInput
+                  value={value}
+                  onValueChange={(e) => onChange(e)}
                   {...rest}
-                  onChange={(e) => rest.onChange(e.target.valueAsNumber || 0)}
-                  // value={value}
                 />
               </FormControl>
               <FormDescription>The amount that is due</FormDescription>

@@ -50,6 +50,7 @@ const SearchAndViewOrg = () => {
         placeholder={"Search for an organization by name..."}
         isGlobalSearch={true}
         showAdd={false}
+        showStartEnd={false}
       />
       <AddEditOrgDialog />
       {error && (

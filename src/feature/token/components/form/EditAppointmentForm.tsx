@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   Form,
   FormControl,
@@ -56,7 +56,9 @@ const EditAppointmentForm = ({
   setEditAppointmentId,
 }: Props) => {
   const fileInpRef = useRef<HTMLInputElement>(null);
-
+  const [openPopovers, setOpenPopovers] = useState({
+    revisit: false,
+  });
   // const form = useForm<AppointmentSchemaT>({
   //   resolver: zodResolver(appointmentSchema),
   //   defaultValues: {
@@ -272,7 +274,12 @@ const EditAppointmentForm = ({
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Patient Revisit</FormLabel>
-              <Popover>
+              <Popover
+                onOpenChange={(o) =>
+                  setOpenPopovers((pre) => ({ ...pre, revisit: o }))
+                }
+                open={openPopovers.revisit}
+              >
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
@@ -295,7 +302,11 @@ const EditAppointmentForm = ({
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    // onSelect={field.onChange}
+                    onSelect={(date) => {
+                      field.onChange(date);
+                      setOpenPopovers((pre) => ({ ...pre, revisit: false }));
+                    }}
                     disabled={(date) => {
                       const today = new Date();
                       today.setHours(0, 0, 0, 0); // Reset time to start of day

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
 import { ArrowRightLeft, CalendarIcon } from "lucide-react";
@@ -12,12 +12,22 @@ const StartEndButton = () => {
   const searchParams = useSearchParams();
   const { updateSearchParams } = useUpdateSearchParams();
 
+  const [openPopovers, setOpenPopovers] = useState({
+    startDate: false,
+    endDate: false,
+  });
+
   const endDate = searchParams.get("endDate");
   const startDate = searchParams.get("startDate");
 
   return (
     <div className="flex w-full items-center justify-between gap-2 md:w-auto">
-      <Popover>
+      <Popover
+        onOpenChange={(o) =>
+          setOpenPopovers((pre) => ({ ...pre, startDate: o }))
+        }
+        open={openPopovers.startDate}
+      >
         <PopoverTrigger asChild>
           <Button variant="ghost">
             {startDate ? formatSearchDate(startDate) : <CalendarIcon />}
@@ -30,6 +40,7 @@ const StartEndButton = () => {
             onSelect={(e) => {
               if (e?.toISOString()) {
                 updateSearchParams({ startDate: e?.toISOString() });
+                setOpenPopovers((pre) => ({ ...pre, startDate: false }));
               }
             }}
             className=""
@@ -38,7 +49,10 @@ const StartEndButton = () => {
       </Popover>
 
       <ArrowRightLeft />
-      <Popover>
+      <Popover
+        onOpenChange={(o) => setOpenPopovers((pre) => ({ ...pre, endDate: o }))}
+        open={openPopovers.endDate}
+      >
         <PopoverTrigger asChild>
           <Button variant="ghost">
             {endDate ? formatSearchDate(endDate) : <CalendarIcon />}
@@ -47,39 +61,16 @@ const StartEndButton = () => {
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            // selected={endDate ? new Date(endDate) : undefined}
-            // disabled={(date) => {
-            //   if (startDate && isValid(startDate)) {
-            //     const today = new Date();
-            //     today.setHours(0, 0, 0, 0); // Reset time to start of day
-            //     return (
-            //       date < new Date(startDate) || // Disable dates before start date
-            //       date < today ||
-            //       date < new Date("1900-01-01")
-            //     );
-            //   }
-            //   return false;
-            // }}
             onSelect={(e) => {
               if (e?.toISOString()) {
                 updateSearchParams({ endDate: e?.toISOString() });
+                setOpenPopovers((pre) => ({ ...pre, endDate: false }));
               }
             }}
             className=""
           />
         </PopoverContent>
       </Popover>
-      {/* <Button
-        variant="ghost"
-        size={"icon"}
-        onClick={() => {
-          //   setStartDate("");
-          //   setEndDate("");
-          handleSearch();
-        }}
-      >
-        <X />
-      </Button> */}
     </div>
   );
 };
