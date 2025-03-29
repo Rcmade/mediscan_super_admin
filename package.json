@@ -42,7 +42,7 @@
     "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "drizzle-orm": "^0.38.2",
+    "drizzle-orm": "^0.40.0",
     "hono": "^4.6.14",
     "html2canvas": "^1.4.1",
     "libphonenumber-js": "^1.11.17",
