@@ -3,15 +3,18 @@ const useUpdateSearchParams = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const updateSearchParams = (updates: Record<string, string>) => {
+  const updateSearchParams = (
+    updates: Record<string, string | string[] | number | Date | undefined>,
+  ) => {
     const params = new URLSearchParams(searchParams.toString());
     Object.entries(updates).forEach(([key, value]) => {
       if (value) {
-        params.set(key, value);
+        params.set(key, value as string);
       } else {
         params.delete(key);
       }
     });
+    console.log(params.toString());
     router.push(`?${params.toString()}`);
   };
 

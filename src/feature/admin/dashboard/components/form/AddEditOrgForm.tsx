@@ -23,10 +23,18 @@ import { cn } from "@/lib/utils";
 import useAddEditOrgForm from "../../hooks/useAddEditOrgForm";
 import { useEffect, useState } from "react";
 import { NumberInput } from "@/components/ui/number-input";
+import { formatDate } from "@/lib/utils/dateUtils";
 
 export default function AddEditOrgForm() {
-  const { form, handleSubmit, isLoading, orgInfo, startDate } =
-    useAddEditOrgForm();
+  const {
+    form,
+    handleSubmit,
+    isLoading,
+    orgInfo,
+    startDate,
+    transaction,
+    transactionId,
+  } = useAddEditOrgForm();
   const [openPopovers, setOpenPopovers] = useState({
     startDate: false,
     endDate: false,
@@ -41,6 +49,7 @@ export default function AddEditOrgForm() {
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paidAmount, totalAmount]);
+
 
   return (
     <Form {...form}>
@@ -62,7 +71,6 @@ export default function AddEditOrgForm() {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="doctorWebName"
@@ -81,7 +89,6 @@ export default function AddEditOrgForm() {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="serviceStartDate"
@@ -139,7 +146,6 @@ export default function AddEditOrgForm() {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="serviceEndDate"
@@ -201,7 +207,6 @@ export default function AddEditOrgForm() {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="userLimit"
@@ -223,7 +228,6 @@ export default function AddEditOrgForm() {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="phone"
@@ -247,7 +251,47 @@ export default function AddEditOrgForm() {
             </FormItem>
           )}
         />
+        {orgInfo?.type === "edit" && (
+          <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+            <span>
+              {transaction?.createdAt
+                ? `This transaction was created on ${formatDate(transaction?.createdAt)}`
+                : ""}
+              {transaction?.updatedAt
+                ? ` and updated on ${formatDate(transaction?.updatedAt)}`
+                : ""}
+              To create new transaction, please click on new transaction button
+            </span>
+            <Button
+              variant={transactionId ? "outline" : "default"}
+              onClick={() => {
+                form.setValue(
+                  "transaction.transactionId",
+                  transactionId ? undefined : transaction?.id,
+                );
+              }}
+              size="sm"
+              type="button"
+              disabled={isLoading}
+            >
+              {transactionId ? "New Transaction" : "Update Transaction"}
+            </Button>
 
+            <span>
+              {transactionId ? (
+                <span>
+                  This transaction will be <strong> updated </strong> when you
+                  submit the form
+                </span>
+              ) : (
+                <span>
+                  `This is a new transaction, it will be
+                  <strong> created </strong> when you submit the form`
+                </span>
+              )}
+            </span>
+          </div>
+        )}
         <FormField
           control={form.control}
           name="transaction.total"
@@ -268,7 +312,6 @@ export default function AddEditOrgForm() {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="transaction.paid"
@@ -287,7 +330,6 @@ export default function AddEditOrgForm() {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="transaction.due"

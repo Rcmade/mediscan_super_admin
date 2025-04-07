@@ -60,6 +60,12 @@ export const superAdminOnlyMenu: (TopNavT & {
     accessBy: ["SUPER_ADMIN"],
     icon: BuildingIcon,
   },
+  {
+    title: "Transaction",
+    url: "/admin/dashboard/transaction",
+    accessBy: ["SUPER_ADMIN"],
+    icon: PieChart,
+  },
 ] as const;
 
 export const topNavMenu: TopNavT[] = [
