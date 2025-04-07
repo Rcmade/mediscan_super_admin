@@ -278,7 +278,9 @@ export default function AddEditOrgForm() {
               <FormControl>
                 <NumberInput
                   value={value}
-                  onValueChange={(e) => onChange(e)}
+                  onValueChange={(e) => {
+                    onChange(e);
+                  }}
                   {...rest}
                 />
               </FormControl>

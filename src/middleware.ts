@@ -10,7 +10,7 @@ import {
 import authProvidersConfig from "@/config/authProvidersConfig";
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
-const { auth } = NextAuth(authProvidersConfig);
+const { auth } = NextAuth({ ...authProvidersConfig, trustHost: true });
 
 export default auth((req) => {
   const { nextUrl } = req;

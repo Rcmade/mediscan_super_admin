@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useRef, useCallback } from "react";
 import { NumericFormat, NumericFormatProps } from "react-number-format";
 import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react";
@@ -19,12 +19,9 @@ type NumberInputProps = Omit<NumericFormatProps, "value" | "onValueChange"> & {
   decimalScale?: number;
   showUpDown?: boolean;
 };
-
 export const NumberInput: React.FC<NumberInputProps> = ({
-  stepper,
   thousandSeparator,
   placeholder,
-  defaultValue,
   min = -Infinity,
   max = Infinity,
   onValueChange,
@@ -32,56 +29,38 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   decimalScale = 0,
   suffix,
   prefix,
-  value: controlledValue,
+  value, // use controlled value directly
+  stepper,
   showUpDown = false,
   ...props
 }) => {
   const internalRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState<number | undefined>(
-    controlledValue ?? defaultValue,
-  );
 
   const handleIncrement = useCallback(() => {
-    setValue((prev) =>
-      prev === undefined
+    const newValue =
+      value === undefined
         ? (stepper ?? 1)
-        : Math.min(prev + (stepper ?? 1), max),
-    );
-  }, [stepper, max]);
+        : Math.min(value + (stepper ?? 1), max);
+    if (onValueChange) onValueChange(newValue);
+  }, [value, stepper, max, onValueChange]);
 
   const handleDecrement = useCallback(() => {
-    setValue((prev) =>
-      prev === undefined
+    const newValue =
+      value === undefined
         ? -(stepper ?? 1)
-        : Math.max(prev - (stepper ?? 1), min),
-    );
-  }, [stepper, min]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (document.activeElement === internalRef.current) {
-        if (e.key === "ArrowUp") handleIncrement();
-        else if (e.key === "ArrowDown") handleDecrement();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleIncrement, handleDecrement]);
-
-  useEffect(() => {
-    if (controlledValue !== undefined) setValue(controlledValue);
-  }, [controlledValue]);
+        : Math.max(value - (stepper ?? 1), min);
+    if (onValueChange) onValueChange(newValue);
+  }, [value, stepper, min, onValueChange]);
 
   const handleChange = ({ floatValue }: { floatValue?: number }) => {
     const newValue = floatValue ?? undefined;
-    setValue(newValue);
     if (onValueChange) onValueChange(newValue);
   };
 
   const handleBlur = () => {
     if (value !== undefined) {
-      if (value < min) setValue(min);
-      else if (value > max) setValue(max);
+      if (value < min && onValueChange) onValueChange(min);
+      else if (value > max && onValueChange) onValueChange(max);
     }
   };
 
