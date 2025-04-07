@@ -62,5 +62,7 @@ export const {
     strategy: "jwt",
   },
 
+  trustHost: true,
+
   ...authProvidersConfig,
 });
