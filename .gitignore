@@ -40,9 +40,4 @@ migrations
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 3755c69 (added standalon)
 temp.txt
