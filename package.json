@@ -13,7 +13,7 @@
     "migrate": "bun ./src/lib/db/migrate.ts",
     "db-studio": "bunx drizzle-kit studio  --config=./src/lib/db/drizzle.config.ts",
     "db-update": "bun run codegen && bun run migrate && bun run push",
-    "prepare": "husky",
+    "prepare": "npx husky",
     "format": "pnpm prettier --write ."
   },
   "dependencies": {
@@ -70,6 +70,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/lodash.debounce": "^4.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -77,6 +78,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.1",
     "husky": "^9.1.7",
+    "lodash.debounce": "^4.0.8",
     "postcss": "^8",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",

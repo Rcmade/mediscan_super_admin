@@ -17,7 +17,7 @@ export function formatDate(dateString: string): string {
     }
     return format(date, "MMM d, yyyy"); // Example format: "Aug 30, 2024"
   } catch (error) {
-    console.log(error);
+    console.error(error);
     console.error("Invalid date string:", dateString);
     return "Invalid date";
   }
@@ -48,7 +48,7 @@ export function formatSearchDate(dateString: string): string {
     }
     return format(date, "MMM d, yyyy"); // Example format: "Aug 30, 2024"
   } catch (error) {
-    console.log(error);
+    console.error(error);
     console.error("Invalid date string:", dateString);
     return "Invalid date";
   }

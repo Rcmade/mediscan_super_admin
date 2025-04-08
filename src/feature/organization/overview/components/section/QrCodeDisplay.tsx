@@ -10,9 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Download } from "lucide-react";
+import { Download, ExternalLink } from "lucide-react";
 import html2canvas from "html2canvas";
 import QrCodeView from "@/components/qrcode/QrCodeView";
+import Link from "next/link";
 
 interface QrCodeViewProps
   extends React.DetailedHTMLProps<
@@ -106,7 +107,14 @@ const QrCodeDisplay = ({
           />
         </div>
       </CardContent>
-      <CardFooter className="flex justify-center pb-6">
+      <CardFooter className="flex flex-col justify-center gap-4 pb-6">
+        <Link
+          href={value}
+          target="_blank"
+          className="flex space-x-2 text-blue-500"
+        >
+          <ExternalLink /> View Link
+        </Link>
         <Button
           onClick={handleDownload}
           className="gap-2"

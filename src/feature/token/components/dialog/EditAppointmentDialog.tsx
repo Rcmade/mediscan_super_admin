@@ -31,7 +31,10 @@ export default function EditAppointmentDialog({
       open={!!appointmentId}
       onOpenChange={() => setEditAppointmentId("")}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        onInteractOutside={(e) => e?.preventDefault()}
+        className="sm:max-w-md"
+      >
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div className="text-4xl font-bold">
             <DialogTitle>

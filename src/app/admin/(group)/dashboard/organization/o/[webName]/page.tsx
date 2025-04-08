@@ -124,9 +124,9 @@ const page = async ({ searchParams, params }: PagePropsPromise) => {
         <div className="mb-8 grid gap-6 md:grid-cols-3">
           <AppointmentStatsCard
             title="Booked Appointments"
-            value={stats.appointmentStats.scheduled}
+            value={stats.appointmentStats.total}
             icon={<Calendar className="h-6 w-6" />}
-            description="Currently scheduled appointments"
+            description="Total booked appointments"
           />
           <AppointmentStatsCard
             title="Completed Appointments"

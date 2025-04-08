@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,10 @@ export function SearchForm({
     if (endOfDay) searchParams.set("endOfDay", endOfDay || "");
     router.push(`?${searchParams.toString()}` || "");
   };
+
+  useEffect(() => {
+    return () => {};
+  }, []);
 
   return (
     <form

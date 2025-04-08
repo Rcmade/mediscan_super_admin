@@ -15,12 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-// import { useForm } from "react-hook-form";
-// import {
-// appointmentSchema,
-// AppointmentSchemaT,
-// } from "@/zodSchema/appointmentSchema";
-// import { zodResolver } from "@hookform/resolvers/zod";
 import { UseGetAppointmentResponseT } from "../../hook/useGetAppointment";
 import Image from "next/image";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -59,16 +53,7 @@ const EditAppointmentForm = ({
   const [openPopovers, setOpenPopovers] = useState({
     revisit: false,
   });
-  // const form = useForm<AppointmentSchemaT>({
-  //   resolver: zodResolver(appointmentSchema),
-  //   defaultValues: {
-  //     patientName: patientName || "",
-  //     appointmentStatus: appointmentStatus || "Scheduled",
-  //     reasonForVisit,
-  //     image: image || "",
-  //     phone: phone || "",
-  //   },
-  // });
+
   const { onSubmit, isLoading, form } = useEditAppointment({
     patientName: patientName || "",
     appointmentStatus: appointmentStatus || "Scheduled",
@@ -87,30 +72,6 @@ const EditAppointmentForm = ({
     if (file) {
       form.setValue("image", file);
     }
-
-    // try {
-    //   // Compression options
-    //   const options = {
-    //     maxSizeMB: 1, // Maximum file size (in MB)
-    //     maxWidthOrHeight: 500, // Max width or height
-    //     useWebWorker: true, // Enable web worker for faster processing
-    //   };
-
-    //   // Compress the image
-    //   const compressedFile = await imageCompression(file, options);
-
-    //   console.log("Compressed File:", {
-    //     name: compressedFile.name,
-    //     size: `${(compressedFile.size / 1024).toFixed(2)} KB`,
-    //     type: compressedFile.type,
-    //     url: URL.createObjectURL(compressedFile), // Temporary URL to view the compressed image
-    //   });
-
-    //   // Update form field with the compressed image
-    //   form.setValue("image", compressedFile);
-    // } catch (error) {
-    //   console.error("Image compression error:", error);
-    // }
   };
 
   return (
@@ -302,7 +263,6 @@ const EditAppointmentForm = ({
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    // onSelect={field.onChange}
                     onSelect={(date) => {
                       field.onChange(date);
                       setOpenPopovers((pre) => ({ ...pre, revisit: false }));
@@ -320,6 +280,14 @@ const EditAppointmentForm = ({
             </FormItem>
           )}
         />
+
+        <Button spinner type="button" className="w-full" disabled={isLoading}>
+          Save and Add Payment
+        </Button>
+
+        <div className="relative flex w-full justify-center border-b border-input">
+          <span className="absolute -top-3 bg-background px-4">OR</span>
+        </div>
         <Button spinner type="submit" className="w-full" disabled={isLoading}>
           Confirm
         </Button>

@@ -96,7 +96,7 @@ const useAddEditOrgForm = () => {
             });
           }
         } catch (error) {
-          console.log(error);
+          console.error(error);
         }
       }
     };
@@ -127,7 +127,7 @@ const useAddEditOrgForm = () => {
     onSuccess: ({ data }) => {
       // toast.success(data.data.message);
       if ("message" in data) {
-      } else {
+        toast.success(data.message);
       }
       queryClient.invalidateQueries({ queryKey: ["organizations"] });
       setTimeout(() => {
@@ -150,13 +150,15 @@ const useAddEditOrgForm = () => {
 
   const isLoading = form.formState.isSubmitting || isPending;
   const startDate = form.watch("serviceStartDate");
-
+  const transactionId = form.watch("transaction.transactionId");
   return {
     form,
     handleSubmit,
     isLoading,
     orgInfo,
     startDate,
+    transaction: transaction?.data,
+    transactionId,
   };
 };
 

@@ -28,7 +28,7 @@ const routes = app
   .route("/org", organizationRoutes)
   .route("/org/transactions", transactionRoutes)
   .route("/org/users", orgUsersRoute)
-  .route("/org/subscription", subscriptionRoute);
+  .route("/org/subscription", subscriptionRoute)
 
 export const GET = handle(app);
 export const POST = handle(app);

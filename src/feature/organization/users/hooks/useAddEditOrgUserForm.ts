@@ -90,7 +90,6 @@ const useAddEditOrgUserForm = () => {
 
   // Form submission handler
   function handleSubmit(data: OrgUserValues) {
-    console.log({ data });
     if (!orgUserInfo?.orgUserInfo.webName)
       return toast.error("Something went wrong. Please try again later");
 

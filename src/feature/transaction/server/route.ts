@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, like, lte } from "drizzle-orm";
 // import { z } from "zod";
 // import { zValidator } from "@hono/zod-validator";
 import { db } from "@/lib/db/db";
@@ -9,11 +9,13 @@ import {
   // orgPayments,
   orgTransaction,
 } from "@/lib/db/schema";
+import { zValidator } from "@hono/zod-validator";
+import { transactionPaginationSchema } from "@/zodSchema/paginationSchema";
+import { tableLimitArr } from "@/content";
 
 // Create Hono app
-export const transactionRoutes = new Hono().get(
-  "/last-transaction/:orgWebName",
-  async (c) => {
+export const transactionRoutes = new Hono()
+  .get("/last-transaction/:orgWebName", async (c) => {
     try {
       const orgWebName = c.req.param("orgWebName");
 
@@ -25,6 +27,7 @@ export const transactionRoutes = new Hono().get(
           createdAt: orgTransaction.createdAt,
           organizationId: orgTransaction.organizationId,
           id: orgTransaction.id,
+          updatedAt: orgTransaction.updatedAt,
         })
         .from(orgTransaction)
         .innerJoin(
@@ -44,8 +47,209 @@ export const transactionRoutes = new Hono().get(
       console.error("Error fetching transactions:", error);
       return c.json({ error: "Failed to fetch transactions" }, 500);
     }
-  },
-);
+  })
+  .get("/", zValidator("query", transactionPaginationSchema), async (c) => {
+    // const {
+    //   search,
+    //   dateFrom,
+    //   dateTo,
+    //   sortBy = "createdAt",
+    //   sortOrder = "desc",
+    // } = c.req.query();
+
+    const queryParam = c.req.valid("query");
+
+    const {
+      limit = tableLimitArr[0],
+      page = 1,
+      // search,
+      // startTime: startTimeString,
+      // endOfDay: endOfDayString,
+      search,
+      fromDate,
+      toDate,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = transactionPaginationSchema.parse(queryParam);
+
+    const offset = (page - 1) * limit;
+
+    try {
+      // let query = db
+      //   .select({
+      //     transaction: orgTransaction,
+      //     organization: organizations,
+      //   })
+      //   .from(orgTransaction)
+      //   .innerJoin(
+      //     organizations,
+      //     eq(orgTransaction.organizationId, organizations.id),
+      //   )
+      //   .$dynamic();
+
+      let query = db
+        .select({
+          transaction: {
+            id: orgTransaction.id,
+            total: orgTransaction.total,
+            paid: orgTransaction.paid,
+            due: orgTransaction.due,
+            createdAt: orgTransaction.createdAt,
+            updatedAt: orgTransaction.updatedAt,
+            organizationId: orgTransaction.organizationId,
+          },
+          organization: {
+            id: organizations.id,
+            doctorWebName: organizations.doctorWebName,
+            // serviceStartDate: organizations.serviceStartDate,
+            // serviceEndDate: organizations.serviceEndDate,
+            // userLimit: organizations.userLimit,
+          },
+        })
+        .from(orgTransaction)
+        .innerJoin(
+          organizations,
+          eq(orgTransaction.organizationId, organizations.id),
+        )
+        .$dynamic();
+
+      // Apply filters
+      const filters = [];
+
+      // Search by doctor name
+      if (search) {
+        filters.push(like(organizations.doctorWebName, `%${search}%`));
+      }
+
+      if (fromDate) {
+        filters.push(gte(orgTransaction.createdAt, new Date(fromDate)));
+      }
+
+      if (toDate) {
+        filters.push(lte(orgTransaction.createdAt, new Date(toDate)));
+      }
+
+      if (filters.length > 0) {
+        query = query.where(and(...filters));
+      }
+
+      // if (search) {
+      //   filters.push(like(organizations.doctorWebName, `%${search}%`));
+      // }
+
+      // // Date range for createdAt
+      // if (dateFrom) {
+      //   filters.push(gte(orgTransaction.createdAt, new Date(dateFrom)));
+      // }
+
+      // if (dateTo) {
+      //   filters.push(lte(orgTransaction.createdAt, new Date(dateTo)));
+      // }
+
+      // if (filters.length > 0) {
+      //   query = query.where(and(...filters));
+      // }
+
+      // // Apply sorting
+      // if (sortOrder === "desc") {
+      //   if (sortBy === "createdAt") {
+      //     query = query.orderBy(desc(orgTransaction.createdAt));
+      //   } else if (sortBy === "updatedAt") {
+      //     query = query.orderBy(desc(orgTransaction.updatedAt));
+      //   } else if (sortBy === "total") {
+      //     query = query.orderBy(desc(orgTransaction.total));
+      //   } else if (sortBy === "due") {
+      //     query = query.orderBy(desc(orgTransaction.due));
+      //   }
+      // } else {
+      //   if (sortBy === "createdAt") {
+      //     query = query.orderBy(asc(orgTransaction.createdAt));
+      //   } else if (sortBy === "updatedAt") {
+      //     query = query.orderBy(asc(orgTransaction.updatedAt));
+      //   } else if (sortBy === "total") {
+      //     query = query.orderBy(asc(orgTransaction.total));
+      //   } else if (sortBy === "due") {
+      //     query = query.orderBy(asc(orgTransaction.due));
+      //   }
+      // }
+
+      // Apply sorting
+      query = query.orderBy(
+        sortOrder === "desc"
+          ? desc(orgTransaction[sortBy])
+          : asc(orgTransaction[sortBy]),
+      );
+
+      // const results = await query.execute();
+      // Fetch paginated data
+      const [transactionsData, totalRecords] = await Promise.all([
+        query.offset(offset).limit(limit).execute(),
+        db
+          .select({ total: count() })
+          .from(orgTransaction)
+          .innerJoin(
+            organizations,
+            eq(orgTransaction.organizationId, organizations.id),
+          )
+          .where(and(...filters))
+          .execute(),
+      ]);
+
+      const formattedData = {
+        query: transactionPaginationSchema.parse(queryParam),
+        // data: transactionsData.map(({ transaction, organization }) => ({
+        //   ...transaction,
+        //   organization,
+        // })),
+        data: transactionsData,
+        pagination: {
+          total: totalRecords[0].total,
+          page,
+          limit,
+        },
+      };
+
+      return c.json(formattedData);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      return c.json({ error: "Failed to fetch transactions" }, 500);
+    }
+  })
+
+  // Get a single transaction by ID
+  //
+  .get("/:id", async (c) => {
+    const id = c.req.param("id");
+
+    try {
+      const result = await db
+        .select({
+          transaction: orgTransaction,
+          organization: organizations,
+        })
+        .from(orgTransaction)
+        .innerJoin(
+          organizations,
+          eq(orgTransaction.organizationId, organizations.id),
+        )
+        .where(eq(orgTransaction.id, id))
+        .limit(1);
+
+      if (result.length === 0) {
+        return c.json({ error: "Transaction not found" }, 404);
+      }
+
+      const { transaction, organization } = result[0];
+
+      return c.json({
+        ...transaction,
+        organization,
+      });
+    } catch (error) {
+      console.error("Error fetching transaction:", error);
+      return c.json({ error: "Failed to fetch transaction" }, 500);
+    }
+  });
 // .get("/", async (c) => {
 //   try {
 //     const transactions = await db.query.orgTransaction.findMany({

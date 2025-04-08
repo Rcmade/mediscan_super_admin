@@ -178,7 +178,7 @@ export const authRoute = new Hono()
           return c.json({ message: "Invalid stage in login flow" }, 400);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       // Handle unexpected errors
       const err = formatError(error);
       return c.json(

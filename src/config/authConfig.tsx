@@ -50,7 +50,7 @@ export const {
             token[key] = updatedSession[key];
           });
         } catch (error) {
-          console.log(error);
+          console.error(error);
         }
       }
 

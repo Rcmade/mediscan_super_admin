@@ -86,6 +86,7 @@ const organizationRoutes = new Hono()
         .insert(organizations)
         .values({
           ...rest,
+          doctorWebName:rest.doctorWebName.toLowerCase(),
           serviceEndDate,
           serviceStartDate,
         })
@@ -194,7 +195,10 @@ const organizationRoutes = new Hono()
           .where(eq(organizations.id, org.id))
           .returning({ doctorWebName: organizations.doctorWebName });
 
+        let transactionMessage = "";
+        // if transaction id exists which mean user want to update the transaction if now user want to create new transaction
         if (body.transaction?.transactionId) {
+          transactionMessage = "Transaction updated";
           await db
             .update(orgTransaction)
             .set({
@@ -204,6 +208,15 @@ const organizationRoutes = new Hono()
               due: body.transaction.due.toString(),
             })
             .where(eq(orgTransaction.id, body.transaction.transactionId));
+        } else if (body.transaction) {
+          transactionMessage = "Transaction created";
+          await db.insert(orgTransaction).values({
+            ...body.transaction,
+            organizationId: org.id,
+            total: body.transaction.total.toString(),
+            paid: body.transaction.paid.toString(),
+            due: body.transaction.due.toString(),
+          });
         }
         if (!updatedOrg) {
           return c.json({ error: "Failed to update organization" }, 500);
@@ -232,22 +245,13 @@ const organizationRoutes = new Hono()
                 })
                 .where(eq(users.id, user.id));
             }
-
-            // if (existingPhoneUser && existingPhoneUser.id !== user.id) {
-            //   return c.json(
-            //     {
-            //       error:
-            //         "The value for phone must be unique. Please use a different value.",
-            //     },
-            //     400,
-            //   );
-            // }
           }
-
-          // Update user only if needed
         }
 
-        return c.json({ message: "Organization updated" }, 200);
+        return c.json(
+          { message: `Organization updated and  ${transactionMessage}` },
+          200,
+        );
       } catch (error) {
         const err = formatError(error);
         return c.json({ error: err.message }, err.statusCode);
