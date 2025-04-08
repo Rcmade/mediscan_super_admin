@@ -186,9 +186,9 @@ pipeline {
                             git clone --branch "\$TAG" --depth 1 "\$REPO_URL" "\$TEMP_DIR" || { echo "❌ Error: Failed to clone tag \$TAG"; exit 1; }
 
                             if [ "\$ENV" = "staging" ]; then
-                                APP_SECRET_NAME=":mediscan-app-env"
+                                APP_SECRET_NAME="mediscan-app-env"
                             else
-                                APP_SECRET_NAME=":mediscan-app-env"
+                                APP_SECRET_NAME="mediscan-app-env"
                             fi
 
                             echo "Logging into ECR"
