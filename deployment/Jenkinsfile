@@ -163,7 +163,7 @@ pipeline {
             steps {
                 script {
                     // Execute the remote script and capture its output
-                    def output = sshagent(credentials: [$JENKINS_EC2_APP_SERVER_TWO]) {
+                    def output = sshagent(credentials: [env.JENKINS_EC2_APP_SERVER_TWO]) {
                         sh(script: """
                             ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} '
                             set -e
@@ -306,7 +306,7 @@ pipeline {
 
         stage('Deploy Using Blue-Green Deployment') {
             steps {
-                sshagent(credentials: [$JENKINS_EC2_APP_SERVER_TWO]) {
+                sshagent(credentials: [env.JENKINS_EC2_APP_SERVER_TWO]) {
                     // Use a unique compose project name (e.g., ENVIRONMENT_COLOR) to isolate deployments.
                     sh """
                         ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} '
@@ -329,7 +329,7 @@ pipeline {
 
         stage('Switch Nginx to New Deployment') {
             steps {
-                sshagent(credentials: [$JENKINS_EC2_APP_SERVER_TWO]) {
+                sshagent(credentials: [env.JENKINS_EC2_APP_SERVER_TWO]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} '
                         set -e
@@ -390,7 +390,7 @@ pipeline {
 
         stage('Cleanup Old Containers') {
             steps {
-                sshagent(credentials: [$JENKINS_EC2_APP_SERVER_TWO]) {
+                sshagent(credentials: [env.JENKINS_EC2_APP_SERVER_TWO]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} '
                         set -e
