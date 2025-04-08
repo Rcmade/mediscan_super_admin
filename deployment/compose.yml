@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+
+  app:
+    image: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${APP_TAG}"
+    container_name: "mediscan_${ENVIRONMENT}_${COLOR}"
+    env_file:
+      - ./app/.env
+    ports:
+      - "${HOST_APP_PORT}:3000"
+    stdin_open: true
+    tty: true
+    restart: always
+    networks:
+      - mediscan__network
+
+networks:
+  mediscan__network:
+    driver: bridge

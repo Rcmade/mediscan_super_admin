@@ -1,0 +1,442 @@
+/* groovylint-disable DuplicateListLiteral, DuplicateStringLiteral, LineLength, NestedBlockDepth, VariableTypeRequired */
+pipeline {
+    agent any
+
+    environment {
+        // Credentials
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        AWS_ACCOUNT_ID = credentials('aws-rahul-account-id')
+        EC2_INSTANCE = credentials('aws-app-server-2-user-with-ip')
+        ECR_REPOSITORY = 'mediscan-app'
+        GITHUB_PAT = credentials('hrms-git-token')
+        AWS_REGION = 'ap-south-1'
+        CODEBUILD_PROJECT_NAME = 'mediscan-Build'
+        GIT_REPO = "https://${GITHUB_PAT}@github.com/rahul-chourasiya0204/mediscan_super_admin.git"
+
+        // Production ports
+        APP_PORT = '3000'
+        APP_SECONDARY_PORT = '3001'
+        // Staging ports
+        STAGING_APP_PORT = '4000'
+        STAGING_APP_SECONDARY_PORT = '4001'
+
+        // Workspace and health checks
+        BASE_DIR = '/home/ubuntu/mediscan'
+        HEALTH_APP_PATH = 'api/health'
+        // Nginx conf file
+        NGINX_STAGING_CONF = 'mediscan.qrblack.com.conf'
+        NGINX_PRODUCTION_CONF = 'mediscan.qrblack.com.conf'
+        APP_NAME = 'mediscan'
+    }
+
+    stages {
+        stage('Validate Git Tag') {
+            steps {
+                script {
+                    // Use tag(s) pointing at HEAD to avoid picking an unrelated latest tag
+                    env.TAG_NAME = sh(script: 'git tag --points-at HEAD || echo ""', returnStdout: true).trim()
+
+                    if (!env.TAG_NAME) {
+                        error '❌ No tag detected! Deployment only triggers on tag creation.'
+                    }
+                    echo "📌 Detected Tag: ${env.TAG_NAME}"
+
+                    // Extract branch from which the tag originated.
+                    env.BRANCH = sh(script: "git branch -r --contains ${env.TAG_NAME} | grep -Eo 'origin/(main|staging|hotfix)' | head -n 1 | cut -d '/' -f2 || echo ''", returnStdout: true).trim()
+                    if (!env.BRANCH) {
+                        error "❌ Invalid tag! Tags must be from 'main', 'staging', or 'hotfix' branches."
+                    }
+
+                    if (env.BRANCH == 'main' && env.TAG_NAME ==~ /^v\d+\.\d+\.\d+$/) {
+                        env.ENVIRONMENT = 'production'
+                    } else if (env.BRANCH == 'staging' && env.TAG_NAME ==~ /^v\d+\.\d+\.\d+-staging$/) {
+                        env.ENVIRONMENT = 'staging'
+                    } else if (env.BRANCH == 'hotfix' && env.TAG_NAME ==~ /^hotfix-\d+\.\d+\.\d+$/) {
+                        env.ENVIRONMENT = 'production'
+                    } else {
+                        error "❌ Invalid tag format for branch '${env.BRANCH}'."
+                    }
+                    echo "🌍 Deployment Environment: ${env.ENVIRONMENT}"
+                }
+            }
+        }
+        stage('Create Docker Tags') {
+            steps {
+                script {
+                    env.APP_TAG = "app-${env.ENVIRONMENT}-${env.TAG_NAME}"
+
+                    echo "🛠️ App Tag: ${env.APP_TAG}"
+                }
+            }
+        }
+
+        stage('Check and Trigger AWS CodeBuild') {
+            steps {
+                script {
+                    echo "🚀 Checking if images exist in ECR for tags: ${env.APP_TAG}"
+                    def appExists = sh(script: """
+                        aws ecr describe-images --repository-name ${ECR_REPOSITORY} \
+                        --image-ids imageTag=${env.APP_TAG} \
+                        --region ${AWS_REGION} > /dev/null 2>&1
+                        """, returnStatus: true) == 0
+
+                    if (appExists) {
+                        env.BUILD_ID =  'SKIPPED'
+                        echo '✅ Both images already exist in ECR. Skipping CodeBuild trigger.'
+                    } else {
+                        echo '🚀 Triggering AWS CodeBuild for missing images...'
+                        env.BUILD_ID = sh(script: """
+                            aws codebuild start-build --project-name ${CODEBUILD_PROJECT_NAME} \
+                            --region ${AWS_REGION} \
+                            --source-version ${env.TAG_NAME} \
+                            --environment-variables-override \
+                                name=TAG_NAME,value='${env.TAG_NAME}',type=PLAINTEXT \
+                                name=ENVIRONMENT,value='${env.ENVIRONMENT}',type=PLAINTEXT \
+                                name=APP_TAG,value='${env.APP_TAG}',type=PLAINTEXT \
+                            --query 'build.id' --output text
+                        """, returnStdout: true).trim()
+
+                        // Throw an error if BUILD_ID is still empty
+                        if (!env.BUILD_ID?.trim()) {
+                            error '❌ AWS CodeBuild failed to start. No BUILD_ID received.'
+                        }
+                        echo "Build started with ID: ${env.BUILD_ID}"
+                    }
+                }
+            }
+        }
+
+        stage('Wait for AWS CodeBuild Completion') {
+            when {
+                expression { env.BUILD_ID && env.BUILD_ID != 'SKIPPED' }
+            }
+            steps {
+                script {
+                    echo '⏳ Waiting for AWS CodeBuild to complete...'
+                    def buildStatus = ''
+                    def logStreamName = sh(script: """
+                aws codebuild batch-get-builds --ids ${env.BUILD_ID} --region ${AWS_REGION} \
+                --query 'builds[0].logs.streamName' --output text
+            """, returnStdout: true).trim()
+
+                    if (!logStreamName) {
+                        error '❌ Unable to fetch CloudWatch Log Stream for CodeBuild.'
+                    }
+                    echo "🔗 Streaming logs from CloudWatch Log Group: /aws/codebuild/${env.CODEBUILD_PROJECT_NAME}"
+                    echo "📄 Log Stream Name: ${logStreamName}"
+                    def nextToken = ''
+
+                    while (!['SUCCEEDED', 'FAILED', 'STOPPED', 'FAULT', 'TIMED_OUT'].contains(buildStatus)) {
+                        sleep 10
+                        def logCommand = """
+                                        aws logs get-log-events --log-group-name "/aws/codebuild/${env.CODEBUILD_PROJECT_NAME}" \
+                                        --log-stream-name "${logStreamName}" --region ${AWS_REGION} --output json \
+                                        ${nextToken ? "--next-token '${nextToken}'" : ''}
+                                    """
+                        def logResult = sh(script: logCommand, returnStdout: true).trim()
+                        if (logResult) {
+                            def logJson = readJSON(text: logResult)
+                            logJson.events.each { event ->
+                                echo event.message
+                            }
+                            nextToken = logJson.nextForwardToken ?: nextToken
+                        }
+                        buildStatus = sh(script: """
+                    aws codebuild batch-get-builds --ids ${env.BUILD_ID} --region ${AWS_REGION} \
+                    --query 'builds[0].buildStatus' --output text
+                """, returnStdout: true).trim()
+
+                        echo "Build status: ${buildStatus}"
+                    }
+                    if (buildStatus == 'SUCCEEDED') {
+                        echo '✅ AWS CodeBuild completed successfully.'
+            } else {
+                        error '❌ AWS CodeBuild failed.'
+                    }
+                }
+            }
+        }
+
+        stage('Clone and Configure on Remote Host') {
+            steps {
+                script {
+                    // Execute the remote script and capture its output
+                    def output = sshagent(credentials: ['jenkins-ssh-key']) {
+                        sh(script: """
+                            ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} '
+                            set -e
+
+                            BASE_DIR="${BASE_DIR}"
+                            ENV="${env.ENVIRONMENT}"
+                            TAG="${env.TAG_NAME}"
+                            REPO_URL="$GIT_REPO"
+                            WORKSPACE_DIR="\$BASE_DIR/\$ENV"
+
+                            echo "🚀 Starting clone process for tag: \$TAG"
+                            sudo mkdir -p "\$BASE_DIR"
+                            sudo chown ubuntu:ubuntu "\$BASE_DIR"
+                            mkdir -p "\$WORKSPACE_DIR"
+                            cd "\$WORKSPACE_DIR"
+
+                            echo "🔄 Cloning repository for tag: \$TAG from \$REPO_URL"
+                            TEMP_DIR=\$(mktemp -d)
+                            git clone --branch "\$TAG" --depth 1 "\$REPO_URL" "\$TEMP_DIR" || { echo "❌ Error: Failed to clone tag \$TAG"; exit 1; }
+
+                            if [ "\$ENV" = "staging" ]; then
+                                APP_SECRET_NAME=":mediscan-app-env"
+                            else
+                                APP_SECRET_NAME=":mediscan-app-env"
+                            fi
+
+                            echo "Logging into ECR"
+                            AWS_ACCOUNT_ID=\$(aws sts get-caller-identity --query Account --output text)
+                            ECR_URL="\${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}"
+                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin \${ECR_URL}
+
+                            echo "🔑 Fetching secrets from AWS Secrets Manager..."
+                            APP_ENV_JSON=\$(aws secretsmanager get-secret-value --secret-id "\$APP_SECRET_NAME" --query SecretString --output text)
+
+                            if [ -z "\$APP_ENV_JSON" ]; then
+                                echo "❌ Error: Failed to retrieve secrets from AWS Secrets Manager"
+                                exit 1
+                            fi
+
+                            ##############################################################################
+                            # Toggle logic: Check running container to determine the new color
+                            ##############################################################################
+                            CURRENT_COLOR=\$(docker ps --filter "name=mediscan_\${ENV}" --format "{{.Names}}" | grep -Eo "(blue|green)" | head -n 1)
+                            if [ "\$CURRENT_COLOR" = "blue" ]; then
+                                NEW_COLOR="green"
+                                if [ "\$ENV" = "staging" ]; then
+                                    HOST_APP_PORT=${STAGING_APP_SECONDARY_PORT}
+                                else
+                                    HOST_APP_PORT=${APP_SECONDARY_PORT}
+                                fi
+                            elif [ "\$CURRENT_COLOR" = "green" ]; then
+                                NEW_COLOR="blue"
+                                if [ "\$ENV" = "staging" ]; then
+                                    HOST_APP_PORT=${STAGING_APP_PORT}
+                                else
+                                    HOST_APP_PORT=${APP_PORT}
+                                fi
+                            else
+                                echo "No running container found. Defaulting to blue on primary ports."
+                                NEW_COLOR="blue"
+                                if [ "\$ENV" = "staging" ]; then
+                                    HOST_APP_PORT=${STAGING_APP_PORT}
+                                else
+                                    HOST_APP_PORT=${APP_PORT}
+                                fi
+                            fi
+
+                            TARGET_DIR="\$WORKSPACE_DIR/\$NEW_COLOR"
+                            mkdir -p "\$TARGET_DIR"
+                            cp -f "\$TEMP_DIR/deployment/compose.yml" "\$TARGET_DIR/"
+                            mkdir -p "\$TARGET_DIR/app"
+
+                            echo "🚦 New deployment color: \$NEW_COLOR"
+                            echo "🚦 Host App Port: \$HOST_APP_PORT"
+                            echo "🚦 Target Directory: \$TARGET_DIR"
+                            echo "✅ Converting JSON secrets to .env format"
+                            echo "\$APP_ENV_JSON" | jq -r "to_entries | map(\\\"\\(.key)=\\(.value | @text)\\\") | .[]" > "\$TARGET_DIR/app/.env"
+
+                            # Create the .env file with the required variables
+                            printf "AWS_ACCOUNT_ID=%s\\nAWS_REGION=%s\\nECR_REPOSITORY=%s\\nAPP_TAG=%s\\nHOST_APP_PORT=%s\\nCOLOR=%s\\nENVIRONMENT=%s\\nAPP_SECRET_NAME=%s\\n" \\
+                                "$AWS_ACCOUNT_ID" "$AWS_REGION" "$ECR_REPOSITORY" "${env.APP_TAG}" "\$HOST_APP_PORT" "\$NEW_COLOR" "\$ENV" "\$APP_SECRET_NAME" > "\$TARGET_DIR/.env"
+
+                            cd "\$TARGET_DIR"
+                            docker-compose pull || { echo "❌ Error: Failed to pull Docker images"; exit 1; }
+                            echo "✅ Successfully pulled latest Docker images."
+                            rm -rf "\$TEMP_DIR"
+
+                            # Force flush output before printing markers
+                            sleep 1
+
+                            echo "====VARIABLES_START===="
+                            echo "CURRENT_COLOR=\$CURRENT_COLOR"
+                            echo "WORKSPACE_DIR=\$WORKSPACE_DIR"
+                            echo "NEW_COLOR=\$NEW_COLOR"
+                            echo "HOST_APP_PORT=\$HOST_APP_PORT"
+                            echo "TARGET_DIR=\$TARGET_DIR"
+                            echo "WORKSPACE_DIR=\$WORKSPACE_DIR"
+                            echo "====VARIABLES_END===="
+                            '
+                        """, returnStdout: true).trim()
+                    }
+
+                    // Debug: print the full SSH output
+                    echo "Full SSH output:\n${output}"
+
+                    def startMarker = '====VARIABLES_START===='
+                    def endMarker = '====VARIABLES_END===='
+
+                    // Check if both markers exist
+                    if (output.contains(startMarker) && output.contains(endMarker)) {
+                        def extractedBlock = output.split(startMarker)[1].split(endMarker)[0].trim()
+                        echo "Marker block:\n${extractedBlock}"
+
+                        // Parse the extracted variables into a map
+                        def variables = [:]
+                        extractedBlock.split('\n').each { line ->
+                            if (line.contains('=')) {
+                                def parts = line.split('=')
+                                if (parts.size() >= 2) {
+                                    variables[parts[0].trim()] = parts[1].trim()
+                                }
+                            }
+                        }
+
+                        // Assign values to environment variables
+                        env.APP_SECRET_NAME = variables.get('APP_SECRET_NAME', '')
+                        env.CURRENT_COLOR = variables.get('CURRENT_COLOR', '')
+                        env.NEW_COLOR = variables.get('NEW_COLOR', '')
+                        env.HOST_APP_PORT = variables.get('HOST_APP_PORT', '')
+                        env.TARGET_DIR = variables.get('TARGET_DIR', '')
+                        env.WORKSPACE_DIR = variables.get('WORKSPACE_DIR', '')
+
+                        echo "Captured variables: ${variables}"
+        } else {
+                        error('Could not find variable markers in the SSH output')
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Using Blue-Green Deployment') {
+            steps {
+                sshagent(credentials: ['jenkins-ssh-key']) {
+                    // Use a unique compose project name (e.g., ENVIRONMENT_COLOR) to isolate deployments.
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} '
+                        set -e
+                        PROJECT_NAME="${env.APP_NAME}_${env.ENVIRONMENT}_${env.NEW_COLOR}"
+                        TARGET_DIR="${env.TARGET_DIR}"
+                        echo "🚀 Deploying to ${env.NEW_COLOR} environment with project: \$PROJECT_NAME in \$TARGET_DIR"
+                        cd "\$TARGET_DIR"
+                        echo "📂 Current directory: \$(pwd)"
+                        echo "📄 Listing all files inside \$TARGET_DIR:"
+                        ls -la
+                        echo "🛠️ Starting containers using Docker Compose with project name \$PROJECT_NAME..."
+                        docker-compose -p "\$PROJECT_NAME" --env-file "\$TARGET_DIR/.env" -f "\$TARGET_DIR/compose.yml" up -d
+                        echo "✅ Deployment to \$TARGET_DIR completed!"
+                        '
+                    """
+                }
+            }
+        }
+
+        stage('Switch Nginx to New Deployment') {
+            steps {
+                sshagent(credentials: ['jenkins-ssh-key']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} '
+                        set -e
+                        ENV="${env.ENVIRONMENT}"
+
+                        ##############################################################################
+                        # Update the Nginx config file with the new upstream port values.
+                        ##############################################################################
+                        if [ "\$ENV" = "staging" ]; then
+                            sudo sed -i "s/\\(server 127.0.0.1:\\)\\($STAGING_APP_PORT\\|$STAGING_APP_SECONDARY_PORT\\)/\\1${env.HOST_APP_PORT}/" /etc/nginx/conf.d/$NGINX_STAGING_CONF
+                        else
+                            sudo sed -i "s/\\(server 127.0.0.1:\\)\\($APP_PORT\\|$APP_SECONDARY_PORT\\)/\\1${env.HOST_APP_PORT}/" /etc/nginx/conf.d/$NGINX_PRODUCTION_CONF
+                        fi
+
+                        echo "Using captured deploy info: Color=${env.NEW_COLOR}, App Port=${env.HOST_APP_PORT}"
+                        if [ "\$ENV" = "staging" ]; then
+                            sudo sed -i "s/\\(server 127.0.0.1:\\)\\(${STAGING_APP_PORT}\\|${STAGING_APP_SECONDARY_PORT}\\)/\\1${env.HOST_APP_PORT}/" /etc/nginx/conf.d/$NGINX_STAGING_CONF
+                        else
+                            sudo sed -i "s/\\(server 127.0.0.1:\\)\\(${APP_PORT}\\|${APP_SECONDARY_PORT}\\)/\\1${env.HOST_APP_PORT}/" /etc/nginx/conf.d/$NGINX_PRODUCTION_CONF
+                        fi
+
+                        ##############################################################################
+                        # Perform health checks on the new upstream endpoints.
+                        ##############################################################################
+                        CHECKS=0
+                        MAX_CHECKS=5
+                        while [ \$CHECKS -lt \$MAX_CHECKS ]; do
+                            APP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:${env.HOST_APP_PORT}/$HEALTH_APP_PATH)
+                            echo "Health check attempt \$((CHECKS+1)): App=\$APP_STATUS"
+                            if [ "\$APP_STATUS" -eq 200 ]; then
+                                echo "✅ Health check passed."
+                                break
+                            fi
+                            CHECKS=\$((CHECKS+1))
+                            sleep 1
+                        done
+                        if [ \$CHECKS -eq \$MAX_CHECKS ]; then
+                            echo "❌ Health check failed after \$MAX_CHECKS attempts. Aborting Nginx reload."
+                            exit 1
+                        fi
+
+                        ##############################################################################
+                        # Validate the updated Nginx configuration syntax.
+                        ##############################################################################
+                        sudo nginx -t
+
+                        ##############################################################################
+                        # Reload Nginx with the new configuration.
+                        ##############################################################################
+                        sudo systemctl reload nginx
+
+                        echo "✅ Nginx successfully reloaded with new configuration."
+                        '
+                    """
+                }
+            }
+        }
+
+        stage('Cleanup Old Containers') {
+            steps {
+                sshagent(credentials: ['jenkins-ssh-key']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} '
+                        set -e
+                        if [ "${env.CURRENT_COLOR}" = "blue" ]; then
+                            INACTIVE_COLOR="blue"
+                        elif [ "${env.CURRENT_COLOR}" = "green" ]; then
+                            INACTIVE_COLOR="green"
+                        else
+                            echo "⚠️ No running container found to determine inactive deployment. Skipping cleanup."
+                            exit 0
+                        fi
+                        PROJECT_NAME="${env.APP_NAME}_${env.ENVIRONMENT}_\$INACTIVE_COLOR"
+                        INACTIVE_DIR="${env.WORKSPACE_DIR}/\$INACTIVE_COLOR"
+                        if [ -d "\$INACTIVE_DIR" ]; then
+                            echo "🗑️ Cleaning up old deployment: \$INACTIVE_COLOR with project \$PROJECT_NAME at \$INACTIVE_DIR"
+                            cd "\$INACTIVE_DIR"
+                            docker-compose -p "\$PROJECT_NAME" down || echo "Warning: Failed to bring down containers in \$INACTIVE_DIR"
+                            docker system prune -af || echo "Warning: Failed to prune Docker system"
+                            echo "✅ Old deployment \$INACTIVE_COLOR cleaned up successfully!"
+                        else
+                            echo "⚠️ Directory \$INACTIVE_DIR does not exist. Skipping cleanup."
+                        fi
+                        '
+                    """
+                }
+            }
+        }
+
+        stage('Notify & Finish') {
+            steps {
+                echo "✅ Deployment successful! App is now running with tag: ${TAG_NAME}"
+            }
+        }
+    }
+
+    post {
+        always {
+            echo '🔹 Job Finished'
+        }
+        success {
+            echo '✅ Build and Deployment Successful!'
+        }
+        failure {
+            echo '❌ Build Failed! Check logs.'
+        }
+        unstable {
+            echo '⚠️ Build is unstable! Review the warnings.'
+        }
+    }
+}
