@@ -307,6 +307,7 @@ pipeline {
         stage('Deploy Using Blue-Green Deployment') {
             steps {
                 sshagent(credentials: [env.JENKINS_EC2_APP_SERVER_TWO]) {
+                   
                     // Use a unique compose project name (e.g., ENVIRONMENT_COLOR) to isolate deployments.
                     sh """
                         ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE} '
