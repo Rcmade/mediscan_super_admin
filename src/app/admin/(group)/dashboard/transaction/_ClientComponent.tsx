@@ -61,9 +61,9 @@ export default function ClientComponent() {
       : undefined,
     sortBy: searchParams.get("sortBy") || "createdAt",
     sortOrder: searchParams.get("sortOrder") || "desc",
+    page: searchParams.get("page") || "1",
   });
 
-  console.log({ filters });
 
   const [openPopovers, setOpenPopovers] = useState({
     fromDate: false,
@@ -90,7 +90,7 @@ export default function ClientComponent() {
   useEffect(() => {
     debounceSearch(filters);
     return () => {};
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   return (

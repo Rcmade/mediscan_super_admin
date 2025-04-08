@@ -7,6 +7,7 @@ import {
   TransactionSortOrder,
   transactionSortOrderArr,
 } from "@/content/transactionContent";
+import { tableLimitArr } from "@/content";
 
 export const paginationSchema = z
   .object({
@@ -140,7 +141,7 @@ export type PaginationSchemaT = z.infer<typeof paginationSchema>;
 
 export const transactionPaginationSchema = z
   .object({
-    limit: z.coerce.number().int().positive().default(20),
+    limit: z.coerce.number().int().positive().default(tableLimitArr[0]),
     page: z.coerce.number().int().positive().default(1),
     search: z.string().optional(),
     fromDate: z

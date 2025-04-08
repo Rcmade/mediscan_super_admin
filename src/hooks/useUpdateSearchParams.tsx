@@ -14,7 +14,6 @@ const useUpdateSearchParams = () => {
         params.delete(key);
       }
     });
-    console.log(params.toString());
     router.push(`?${params.toString()}`);
   };
 

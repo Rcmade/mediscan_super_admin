@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/schema";
 import { zValidator } from "@hono/zod-validator";
 import { transactionPaginationSchema } from "@/zodSchema/paginationSchema";
+import { tableLimitArr } from "@/content";
 
 // Create Hono app
 export const transactionRoutes = new Hono()
@@ -56,10 +57,10 @@ export const transactionRoutes = new Hono()
     //   sortOrder = "desc",
     // } = c.req.query();
 
-    const queryParam = c.req.valid('query');
+    const queryParam = c.req.valid("query");
 
     const {
-      limit = 15,
+      limit = tableLimitArr[0],
       page = 1,
       // search,
       // startTime: startTimeString,

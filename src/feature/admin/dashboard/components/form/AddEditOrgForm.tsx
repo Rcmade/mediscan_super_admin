@@ -50,7 +50,6 @@ export default function AddEditOrgForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paidAmount, totalAmount]);
 
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -210,17 +209,14 @@ export default function AddEditOrgForm() {
         <FormField
           control={form.control}
           name="userLimit"
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...rest } }) => (
             <FormItem>
               <FormLabel>User Limit</FormLabel>
               <FormControl>
-                <Input
-                  disabled={isLoading}
-                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
-                  type="number"
-                  min="1"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                <NumberInput
+                  value={value}
+                  onValueChange={(e) => onChange(e)}
+                  {...rest}
                 />
               </FormControl>
               <FormDescription>Maximum number of users allowed</FormDescription>

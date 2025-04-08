@@ -138,7 +138,7 @@ export const enrollmentRoute = new Hono().post(
         201,
       );
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return c.json({ error: "An error occurred" }, 500);
     }
   },
