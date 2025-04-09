@@ -26,8 +26,8 @@ phases:
         echo "Using Secrets ARN: $SECRET_ARN"
 
       - |
+        for VAR in NEXT_PUBLIC_URL NEXT_PUBLIC_APP_VERSION NEXT_PUBLIC_WEB_NAME NEXT_PUBLIC_WEB_MODE NEXT_PUBLIC_DEV_PHONE_NUMBER NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME NEXT_PUBLIC_CLOUDINARY_API_KEY NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET; do
         SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id $SECRET_ARN --query SecretString --output text)
-        for VAR in NEXT_PUBLIC_BASE_URL NEXT_PUBLIC_APP_VERSION NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME NEXT_PUBLIC_CLOUDINARY_API_KEY NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET; do
           export $VAR=$(echo $SECRET_JSON | jq -r .$VAR)
         done
 
@@ -38,10 +38,13 @@ phases:
       - echo "🔹 Building Order easy Docker image..."
       - |
         docker build \
+          --build-arg NEXT_PUBLIC_URL="$NEXT_PUBLIC_URL" \
           --build-arg NEXT_PUBLIC_APP_VERSION="$TAG_NAME" \
-          --build-arg NODE_ENV="$ENVIRONMENT" \
-          --build-arg NEXT_PUBLIC_BASE_URL="$NEXT_PUBLIC_BASE_URL" \
           --build-arg NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME" \
+          --build-arg NODE_ENV="$ENVIRONMENT" \
+          --build-arg NEXT_PUBLIC_WEB_NAME="$NEXT_PUBLIC_WEB_NAME" \
+          --build-arg NEXT_PUBLIC_WEB_MODE="$NEXT_PUBLIC_WEB_MODE" \
+          --build-arg NEXT_PUBLIC_DEV_PHONE_NUMBER="$NEXT_PUBLIC_DEV_PHONE_NUMBER" \
           --build-arg NEXT_PUBLIC_CLOUDINARY_API_KEY="$NEXT_PUBLIC_CLOUDINARY_API_KEY" \
           --build-arg NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="$NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET" \
           -t $APP_TAG -f ./Dockerfile .
