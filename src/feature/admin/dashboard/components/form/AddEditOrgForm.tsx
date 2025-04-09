@@ -44,7 +44,7 @@ export default function AddEditOrgForm() {
   const totalAmount = form.watch("transaction.total");
   useEffect(() => {
     if (paidAmount === undefined || totalAmount === undefined) return;
-    if (paidAmount >= totalAmount) return;
+    if (paidAmount > totalAmount) return;
     form.setValue("transaction.due", totalAmount - paidAmount);
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,10 +80,16 @@ export default function AddEditOrgForm() {
                 <Input
                   disabled={isLoading}
                   placeholder="dr-john-doe"
+                  readOnly={orgInfo?.type === "edit"}
                   {...field}
                 />
               </FormControl>
-              <FormDescription>This will be used in the URL</FormDescription>
+              <FormDescription>
+                {orgInfo?.type === "edit"
+                  ? "You can't change this field"
+                  : "This will be used in the URL"}
+              </FormDescription>
+
               <FormMessage />
             </FormItem>
           )}
@@ -251,11 +257,11 @@ export default function AddEditOrgForm() {
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
             <span>
               {transaction?.createdAt
-                ? `This transaction was created on ${formatDate(transaction?.createdAt)}`
-                : ""}
+                ? `This transaction was created on ${formatDate(transaction?.createdAt)} `
+                : " "}
               {transaction?.updatedAt
-                ? ` and updated on ${formatDate(transaction?.updatedAt)}`
-                : ""}
+                ? ` and updated on ${formatDate(transaction?.updatedAt)} `
+                : " "}
               To create new transaction, please click on new transaction button
             </span>
             <Button
