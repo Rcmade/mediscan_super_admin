@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Clock, Coins, Layout, LogOut, Tv, User } from "lucide-react";
+import { Calendar, Clock, Coins, Layout, LogOut, Tv } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import Link from "next/link";
 import LoginButton from "./LoginButton";
@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Button } from "../ui/button";
 import useGetUserOrg from "@/feature/organization/hooks/useGetUserOrg";
-import { getOrgPath } from "@/lib/utils/stringUtils";
+import { getInitials, getOrgPath } from "@/lib/utils/stringUtils";
 
 export const UserButton = () => {
   const user = useCurrentUser();
@@ -36,8 +36,8 @@ export const UserButton = () => {
           <DropdownMenuTrigger>
             <Avatar key={user?.image}>
               <AvatarImage src={user?.image || ""} />
-              <AvatarFallback className="bg-primary">
-                <User className="text-primary-foreground" />
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {getInitials(user?.name || "Unknown ")}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
