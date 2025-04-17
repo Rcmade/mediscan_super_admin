@@ -15,10 +15,19 @@ const EditableAppointmentCard = ({
   <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
     <CardContent className="flex justify-between gap-2 p-2 sm:p-4">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-primary">
-          Token: <span className="text-3xl">{appointment.tokenNumber}</span>
-        </h1>
-        <h3 className="text-lg font-medium">{appointment.patientName}</h3>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-primary">
+            Token: <span className="text-3xl">{appointment.tokenNumber}</span>
+          </h1>
+          <Badge variant={appointment.isPaid ? "default" : "destructive"}>
+            {appointment.isPaid ? "Paid" : "Not Paid"}
+          </Badge>
+
+          {/* {appointment.isPaid} */}
+        </div>
+        <h3 className="text-sm font-medium md:text-lg">
+          {appointment.patientName}
+        </h3>
         <p className="text-sm text-muted-foreground">ID: {appointment.id}</p>
         <Badge variant="outline" className="max-w-fit">
           {appointment.reasonForVisit}

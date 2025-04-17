@@ -5,3 +5,8 @@ export enum LoginVerificationStage {
   OTPVerified = "OTP_VERIFIED",
   OTPExpired = "OTP_EXPIRED",
 }
+
+// Change it carefully. It is connected to the Razorpay payment gateway
+export enum PaymentFrom {
+  Appointment = "APPOINTMENT",
+}

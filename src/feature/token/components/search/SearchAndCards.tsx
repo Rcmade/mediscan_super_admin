@@ -40,7 +40,6 @@ const SearchAndCards = () => {
         appointmentId={editAppointmentId}
         setEditAppointmentId={setEditAppointmentId}
       />
-
       {error && <p className="text-red-500">Error: {error.message}</p>}
 
       <Card className="mx-auto w-full">
@@ -50,7 +49,7 @@ const SearchAndCards = () => {
             !endOfDay &&
             !endOfDay &&
             !startTime && <p> No Appointments Found today</p>}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
             {isLoading
               ? Array.from({ length: 6 }).map((_, index) => (
                   <AppointmentSkeleton key={index} />

@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { InferRequestType, InferResponseType } from "hono";
 import { UserRole } from "@/lib/db/schema";
 import useWebName from "@/hooks/useWebName";
+import { APPOINTMENT_ID_HASH_NAME } from "@/constant";
 
 // API setup
 const api = client.api.main.enroll[":webName"].$post;
@@ -22,7 +23,7 @@ export const useEnrollForm = (
   defaultValues?: EnrollmentSchemaT,
   from?: UserRole,
 ) => {
-  const { push } = useRouter();
+  const { replace } = useRouter();
   const queryClient = useQueryClient();
   const toastId = "enrollment";
   const { webName } = useWebName();
@@ -52,7 +53,9 @@ export const useEnrollForm = (
     onSuccess: ({ data }) => {
       toast.success("Enrollment submitted successfully", { id: toastId });
       queryClient.invalidateQueries({ queryKey: ["userTokens"] });
-      push(`/token/t/${data.phone}`);
+      const hash = data[APPOINTMENT_ID_HASH_NAME];
+      replace(`/o/${webName}/enroll/pay/${encodeURIComponent(hash)}`);
+      // push(`/token/t/${data.phone}`);
     },
     onError: (error) => {
       toast.error("Failed to submit enrollment", { id: toastId });

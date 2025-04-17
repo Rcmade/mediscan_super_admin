@@ -5,7 +5,10 @@ export const webName = process.env.NEXT_PUBLIC_WEB_NAME || "Mediscan";
 
 export const OTP_HASH_NAME = "PS1";
 
+export const APPOINTMENT_ID_HASH_NAME = "PS2";
+
 export const appointmentStatusArr = [
+  "Pending",
   "Scheduled",
   "Completed",
   "Cancelled",
@@ -25,3 +28,8 @@ export const userRoleArr = [
   SUPER_ADMIN,
   "USER",
 ] as const;
+
+// Do not change the order of this array, and do not change it will also change the database schema
+export const paymentMethodsArr = ["ONLINE", "CASH"] as const;
+
+export const paymentStatusArr = ["PENDING", "COMPLETED", "FAILED"] as const;

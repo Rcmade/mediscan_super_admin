@@ -21,7 +21,7 @@ export default function Home() {
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Skip the Queue, Book Your Medical Scan Online
                   </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  <p className="max-w-[600px]  md:text-xl">
                     MediScan lets you book appointments for medical scans
                     directly from your mobile device. No more waiting in long
                     queues - get your token and arrive just in time.

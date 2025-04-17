@@ -7,11 +7,14 @@ import {
   numeric,
   integer,
   unique,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { nId } from "@/lib/utils/dbUtils";
 import {
   appointmentsReasons,
   appointmentStatusArr,
+  paymentMethodsArr,
+  paymentStatusArr,
   userRoleArr,
 } from "@/constant";
 
@@ -21,6 +24,10 @@ export const appointmentStatus = pgEnum(
 );
 
 export const visitReasons = pgEnum("VisitReasons", appointmentsReasons);
+
+export const paymentMethodsEnum = pgEnum("PaymentMethods", paymentMethodsArr);
+
+export const paymentStatus = pgEnum("PaymentStatus", paymentStatusArr);
 
 const phone = varchar("phone", { length: 20 }).unique().notNull();
 
@@ -41,6 +48,7 @@ export const users = pgTable("user", {
   phone: phone,
   ...commonFields,
 });
+
 const userId = text("userId")
   .notNull()
   .references(() => users.id, { onDelete: "cascade" });
@@ -73,10 +81,19 @@ export const organizationUsers = pgTable(
   }),
 );
 
+// export const appointmentsPayment = pgTable("appointments_payment", {
+//   ...commonFields,
+//   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+//   currency: text("currency").notNull(),
+//   status: appointmentStatus("status").notNull(),
+//   transactionId: text("transaction_id")
+// });
+
 export const appointments = pgTable("appointments", {
   userId: userId,
   patientName: text("patient_name").notNull(),
   reasonForVisit: visitReasons("patient_reason").notNull(),
+
   organizationId: text("organization_id")
     // .notNull()
     .references(() => organizations.id, {
@@ -93,10 +110,7 @@ export const appointments = pgTable("appointments", {
   }).notNull(),
   image: text("image"),
   revisitTime: timestamp("revisit_time"),
-  // organization: text("organization").references(() => organizations.id, {
-  //   onDelete: "no action",
-  //   onUpdate: "cascade",
-  // }),
+  isPaid: boolean("is_paid").notNull().default(false),
   ...commonFields,
 });
 
@@ -107,10 +121,10 @@ export const orgTransaction = pgTable("org_transaction", {
   due: numeric("due", { precision: 10, scale: 2 }).notNull(),
   organizationId: text("organization_id")
     .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
+    .references(() => organizations.id, { onDelete: "no action" }),
 });
 
-export const orgPaymentMethods = pgTable("org_payment_methods", {
+export const paymentMethods = pgTable("payment_methods", {
   ...commonFields,
   name: text("name").notNull().unique(),
 });
@@ -122,9 +136,65 @@ export const orgPayments = pgTable("org_payments", {
     .references(() => orgTransaction.id, { onDelete: "cascade" }),
   paymentMethodId: text("payment_method_id")
     .notNull()
-    .references(() => orgPaymentMethods.id, { onDelete: "cascade" }),
+    .references(() => paymentMethods.id, { onDelete: "cascade" }),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  razorpayOrderId: text("razorpay_order_id").unique(),
+});
+
+export const appointmentPayments = pgTable("appointment_payments", {
+  ...commonFields,
+  userId: userId, // Associated user ID
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "no action" }),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: paymentMethodsEnum("payment_method").notNull(),
+  paymentStatus: paymentStatus("payment_status").default("PENDING"),
+  razorpayOrderId: text("razorpay_order_id"),
+});
+
+export const appointmentPaymentLink = pgTable("payment_appointments_link", {
+  ...commonFields,
+  userId,
+  paymentId: text("payment_id")
+    .notNull()
+    .references(() => appointmentPayments.id, { onDelete: "no action" }),
+  appointmentId: text("appointment_id")
+    .notNull()
+    .references(() => appointments.id, { onDelete: "no action" }),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
 });
+
+// export const userPayments = pgTable("user_payments", {
+//   ...commonFields,
+//   appointmentId: text("appointment_id").references(() => appointments.id, {
+//     onDelete: "cascade",
+//   }),
+//   paymentMethodId: text("payment_method_id")
+//     .notNull()
+//     .references(() => paymentMethods.id, { onDelete: "cascade" }),
+//   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+//   transactionId: text("transaction_id")
+//     .notNull()
+//     .references(() => orgTransaction.id, { onDelete: "cascade" }),
+//   status: appointmentStatus("status"),
+// });
+
+// export const orgAppointmentsReasonVariants = pgTable(
+//   "org_appointments_reason_variants",
+//   {
+//     ...commonFields,
+//     organizationId: text("organization_id")
+//       .notNull()
+//       .references(() => organizations.id, { onDelete: "cascade" }),
+//     price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+//     currency: text("currency").notNull(),
+//     name: text("name").notNull(),
+//   },
+// );
+
+// export type InsertUserPaymentsT = typeof userPayments.$inferInsert;
+// export type SelectUserPaymentsT = typeof userPayments.$inferSelect;
 
 export type InsertUserT = typeof users.$inferInsert;
 export type SelectUserT = typeof users.$inferSelect;

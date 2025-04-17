@@ -13,7 +13,7 @@ const AddEditOrgDialog = () => {
   const { isOpen, onClose, orgInfo } = useAddEditOrgDialog();
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>
             {orgInfo?.type === "edit"

@@ -2,25 +2,32 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import {
   enrollmentSchema,
-  EnrollmentSchemaT,
+  // EnrollmentSchemaT,
 } from "@/zodSchema/enrollmentSchema";
 import { signIn } from "@/config/authConfig";
 import { db } from "@/lib/db/db";
 import {
   users,
-  appointments,
   InsertAppointmentsT,
-  AppointmentStatusT,
+  // AppointmentStatusT,
   organizations,
+  appointments,
 } from "@/lib/db/schema"; // Assuming you have an appointments and sessions table
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, lte, or } from "drizzle-orm";
 import { normalizePhoneNumber } from "@/lib/utils/numberUtils";
 import { currentUser } from "@/action/currentUser";
+import { formatAppointmentData } from "@/lib/utils/dataUtils";
+import { z } from "zod";
+import { APPOINTMENT_ID_HASH_NAME } from "@/constant";
+import {
+  decryptAppointmentIds,
+  encryptAppointmentIds,
+} from "@/lib/utils/encryptionFormatDataUtils";
+import { calculateTotalAppointmentCost } from "@/lib/utils/mathUtils";
+import { formatError } from "@/lib/utils/stringUtils";
 
-export const enrollmentRoute = new Hono().post(
-  "/:webName",
-  zValidator("json", enrollmentSchema),
-  async (c) => {
+export const enrollmentRoute = new Hono()
+  .post("/:webName", zValidator("json", enrollmentSchema), async (c) => {
     const body = c.req.valid("json");
     const webName = c.req.param("webName");
     try {
@@ -109,7 +116,7 @@ export const enrollmentRoute = new Hono().post(
       }
 
       // Format data for appointments with organizationId
-      const formattedData: InsertAppointmentsT[] = formatData({
+      const formattedData: InsertAppointmentsT[] = formatAppointmentData({
         body,
         userId: user.id,
         latestTokenNumber: latestTokenNumber + 1, // Start token numbers from the next available number
@@ -120,10 +127,12 @@ export const enrollmentRoute = new Hono().post(
         .insert(appointments)
         .values(formattedData)
         .returning({
-          token: appointments.tokenNumber,
-          patientName: appointments.patientName,
+          // token: appointments.tokenNumber,
+          // patientName: appointments.patientName,
           id: appointments.id,
         });
+
+      const hash = encryptAppointmentIds(result);
 
       return c.json(
         {
@@ -133,6 +142,7 @@ export const enrollmentRoute = new Hono().post(
           data: {
             phone: user.phone,
             appointments: result,
+            [APPOINTMENT_ID_HASH_NAME]: hash,
           },
         },
         201,
@@ -141,27 +151,57 @@ export const enrollmentRoute = new Hono().post(
       console.error(error);
       return c.json({ error: "An error occurred" }, 500);
     }
-  },
-);
+  })
+  .post(
+    "/:webName/payment-overview",
+    zValidator(
+      "json",
+      z.object({
+        [APPOINTMENT_ID_HASH_NAME]: z.string().min(1),
+      }),
+    ),
+    async (c) => {
+      try {
+        // const webName = c.req.param("webName");
+        const body = c.req.valid("json");
+        const encryptedAppointmentIds = body[APPOINTMENT_ID_HASH_NAME];
+        const ids = decryptAppointmentIds(encryptedAppointmentIds);
+        if (!ids) {
+          return c.json({ error: "Invalid appointment IDs" }, 400);
+        }
 
-export const formatData = ({
-  body,
-  userId,
-  latestTokenNumber,
-  organizationId,
-}: {
-  body: EnrollmentSchemaT;
-  userId: string;
-  organizationId: string;
-  latestTokenNumber: number;
-}) => {
-  return body.patients.map((p, i) => ({
-    patientName: p.patientName,
-    reasonForVisit: p.reasonForVisit,
-    appointmentStatus: "Scheduled" as AppointmentStatusT,
-    tokenNumber: String(latestTokenNumber + i), // Increment tokenNumber sequentially
-    userId,
-    createdAt: new Date(),
-    organizationId: organizationId,
-  }));
-};
+        const appointmentsDb = await db
+          .select({
+            id: appointments.id,
+            patientName: appointments.patientName,
+            reasonForVisit: appointments.reasonForVisit,
+            tokenNumber: appointments.tokenNumber,
+            organizationId: appointments.organizationId,
+          })
+          .from(appointments)
+          .where(or(...ids.map(({ id }) => eq(appointments.id, id))));
+
+        // const [organization] = await db
+        //   .select({ id: organizations.id })
+        //   .from(organizations)
+        //   .where(eq(organizations.doctorWebName, webName))
+        //   .limit(1);
+
+        const { appointmentWithCost, totalCost } =
+          calculateTotalAppointmentCost(appointmentsDb);
+
+        return c.json({ ids, appointmentWithCost, totalCost });
+      } catch (error) {
+        console.error(error);
+        // Handle unexpected errors
+        const err = formatError(error);
+        return c.json(
+          {
+            message: err.message || "Internal server error while login",
+            error,
+          },
+          err.statusCode,
+        );
+      }
+    },
+  );

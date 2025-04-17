@@ -206,8 +206,19 @@ export async function getReadableErrorMessage(error: unknown): Promise<string> {
     return "Network error. Please check your connection.";
   }
 
-  // Handle Drizzle/PostgreSQL errors
+  // Handle standard JS and crypto-related errors
   if (error instanceof Error) {
+    // Crypto-specific error code
+    if ((error as { code?: string }).code === "ERR_CRYPTO_INVALID_IV") {
+      return "Data decryption failed. The data may be corrupted or has been tampered with.";
+    }
+
+    // Crypto message fallback
+    if (error.message.includes("Invalid initialization vector")) {
+      return "Data decryption failed. The data may be corrupted or has been tampered with.";
+    }
+
+    // Drizzle/PostgreSQL errors
     if (/relation .* does not exist/.test(error.message)) {
       return "Database error: Table not found.";
     }
@@ -217,6 +228,7 @@ export async function getReadableErrorMessage(error: unknown): Promise<string> {
     if (/violates not-null constraint/.test(error.message)) {
       return "Database error: Missing required field.";
     }
+
     return error.message;
   }
 
@@ -225,9 +237,9 @@ export async function getReadableErrorMessage(error: unknown): Promise<string> {
     typeof error === "object" &&
     error !== null &&
     "error" in error &&
-    typeof error.error === "string"
+    typeof (error as { error?: unknown }).error === "string"
   ) {
-    return error.error;
+    return (error as { error?: string })?.error || "An unknown error occurred.";
   }
 
   return "An unknown error occurred. Please try again.";

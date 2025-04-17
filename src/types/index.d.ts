@@ -29,3 +29,10 @@ export type SignatureReturnT = {
   source: string;
   signature: string;
 };
+
+
+export type RazorpayResponseT = {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+};

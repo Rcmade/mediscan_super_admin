@@ -179,6 +179,7 @@ export const tokenRoute = new Hono()
             reasonForVisit: appointments.reasonForVisit,
             createdAt: appointments.createdAt,
             appointmentStatus: appointments.appointmentStatus,
+            isPaid: appointments.isPaid,
             phone: users.phone,
           })
           .from(appointments)

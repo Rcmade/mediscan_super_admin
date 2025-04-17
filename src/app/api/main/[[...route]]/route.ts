@@ -11,6 +11,8 @@ import organizationRoutes from "@/feature/organization/server/route";
 import { orgUsersRoute } from "@/feature/organization/users/server/route";
 import { transactionRoutes } from "@/feature/transaction/server/route";
 import { subscriptionRoute } from "@/feature/subscription/server/route";
+import appointmentRoutes from "@/feature/payments/appointmentPayments/server/route";
+import { paymentWebhook } from "@/feature/payments/webhooks/server/route";
 
 // export const runtime = "edge"
 
@@ -29,6 +31,8 @@ const routes = app
   .route("/org/transactions", transactionRoutes)
   .route("/org/users", orgUsersRoute)
   .route("/org/subscription", subscriptionRoute)
+  .route("/payments/appointment", appointmentRoutes)
+  .route("/payments/webhook", paymentWebhook);
 
 export const GET = handle(app);
 export const POST = handle(app);

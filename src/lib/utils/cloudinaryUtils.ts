@@ -11,6 +11,12 @@ export const getCloudinaryId = (link: string) => {
   return parts && parts.length > 2 ? parts[parts.length - 2] : link;
 };
 
+export const generateSignature = (publicId: string, apiSecret: string) => {
+  const timestamp = new Date().getTime();
+  return `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
+};
+
+
 export const uploadToCloudinary = async (
   fileInfo: SignatureReturnT & { img?: string | File },
 ): Promise<string> => {
