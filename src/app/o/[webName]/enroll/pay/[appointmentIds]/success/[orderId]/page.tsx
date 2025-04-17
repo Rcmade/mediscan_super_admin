@@ -32,8 +32,8 @@ const api =
 
 const getOrderInfo = async (input: InferRequestType<typeof api>) => {
   const res = await api(input);
-  if (res.status !== 200) {
-    throw new Error("Failed to fetch order info");
+  if (!res.ok) {
+    return;
   }
   const data = await res.json();
   return data;
@@ -52,6 +52,10 @@ const page = async ({ params }: PagePropsPromise) => {
       orderId,
     },
   });
+
+  if (!paymentData) {
+    return <div>Payment not found</div>;
+  }
 
   return (
     <>
