@@ -1,65 +1,70 @@
 import { PagePropsPromise } from "@/types";
 import React from "react";
-// import { currentUser } from "@/action/currentUser";
-// import { client } from "@/lib/rcp";
-// import { InferRequestType } from "hono";
-// import ClientComponent from "./ClientComponent";
-// import { Calendar, CheckCircle2, Clock, FileText } from "lucide-react";
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardFooter,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { formatDate } from "@/lib/utils/dateUtils";
-// import {
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableHead,
-//   TableHeader,
-//   TableRow,
-// } from "@/components/ui/table";
-// import { Separator } from "@/components/ui/separator";
+import { currentUser } from "@/action/currentUser";
+import { client } from "@/lib/rcp";
+import { InferRequestType } from "hono";
+import ClientComponent from "./ClientComponent";
+import { Calendar, CheckCircle2, Clock, FileText } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils/dateUtils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Separator } from "@/components/ui/separator";
 
-// const api =
-//   client.api.main.payments.appointment.view.u[":userId"]["o"][":orderId"][
-//     "$get"
-//   ];
+const api =
+  client.api.main.payments.appointment.view.u[":userId"]["o"][":orderId"][
+    "$get"
+  ];
 
-// const getOrderInfo = async (input: InferRequestType<typeof api>) => {
-//   const res = await api(input);
-//   if (!res.ok) {
-//     return;
-//   }
-//   const data = await res.json();
-//   return data;
-// };
-const page = async ({  }: PagePropsPromise) => {
-  // const awaitedParams = await params;
-  // const user = await currentUser();
-  // if (!user || !user.id) {
-  //   return <div>Unauthorized</div>;
-  // }
+const getOrderInfo = async (input: InferRequestType<typeof api>) => {
+  try {
+    const res = await api(input);
+    if (!res.ok) {
+      return null;
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching order info:", error);
+    return null;
+  }
+};
+const page = async ({ params }: PagePropsPromise) => {
+  const awaitedParams = await params;
+  const user = await currentUser();
+  if (!user || !user?.id) {
+    return <div>Unauthorized</div>;
+  }
 
-  // const orderId = awaitedParams?.orderId;
-  // const paymentData = await getOrderInfo({
-  //   param: {
-  //     userId: user.id,
-  //     orderId,
-  //   },
-  // });
+  const orderId = awaitedParams?.orderId;
+  const paymentData = await getOrderInfo({
+    param: {
+      userId: user.id,
+      orderId,
+    },
+  });
 
-  // if (!paymentData) {
-  //   return <div>Payment not found</div>;
-  // }
+  if (!paymentData) {
+    return <div>Payment not found</div>;
+  }
 
   return (
     <>
-      {/* <ClientComponent paymentId={paymentData?.data?.payment?.id}>
+      <ClientComponent paymentId={paymentData?.data?.payment?.id}>
         <div className="mb-4 flex flex-col items-center gap-4 text-center">
           <div className="flex h-24 w-24 items-center justify-center rounded-full">
             <CheckCircle2 className="h-12 w-12" />
@@ -224,7 +229,7 @@ const page = async ({  }: PagePropsPromise) => {
             </div>
           </CardContent>
         </Card>
-      </ClientComponent> */}
+      </ClientComponent>
     </>
   );
 };
