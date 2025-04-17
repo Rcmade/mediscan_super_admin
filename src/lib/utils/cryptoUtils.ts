@@ -9,7 +9,6 @@ export const generateSHA1 = (data: unknown) => {
   return hash.digest("hex");
 };
 
-
 export function isValidSecret(secret: string) {
   const API_SECRET = process.env.REVISIT_SCHEDULE_API_SECRET;
   if (!API_SECRET) {
@@ -24,13 +23,23 @@ export function isValidSecret(secret: string) {
   }
 }
 
-const algorithm = "aes-256-cbc";
-const key = crypto.createHash("sha256").update(process.env.CRYPTO_HASH_SECRET!).digest(); // 32 bytes
-const iv = crypto.randomBytes(16); // Initialization vector
-
+const initCrypto = () => {
+  const algorithm = "aes-256-cbc";
+  const key = crypto
+    .createHash("sha256")
+    .update(process.env.CRYPTO_HASH_SECRET!)
+    .digest(); // 32 bytes
+  const iv = crypto.randomBytes(16); // Initialization vector
+  return {
+    algorithm,
+    key,
+    iv,
+  };
+};
 export function encrypt(
   data: Record<string, string> | Record<string, string>[],
 ): string {
+  const { algorithm, key, iv } = initCrypto();
   const jsonData = JSON.stringify(data);
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   const encrypted = Buffer.concat([
@@ -41,6 +50,8 @@ export function encrypt(
 }
 
 export function decrypt(encryptedData: string) {
+  const { algorithm, key } = initCrypto();
+
   const [ivHex, encryptedHex] = encryptedData.split(":");
   const iv = Buffer.from(ivHex, "hex");
   const encrypted = Buffer.from(encryptedHex, "hex");
