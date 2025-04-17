@@ -25,7 +25,7 @@ export function isValidSecret(secret: string) {
 }
 
 const algorithm = "aes-256-cbc";
-const key = crypto.createHash("sha256").update("your-very-secret-key").digest(); // 32 bytes
+const key = crypto.createHash("sha256").update(process.env.CRYPTO_HASH_SECRET!).digest(); // 32 bytes
 const iv = crypto.randomBytes(16); // Initialization vector
 
 export function encrypt(
