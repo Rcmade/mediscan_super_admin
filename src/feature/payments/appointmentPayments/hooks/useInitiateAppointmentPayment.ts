@@ -49,7 +49,6 @@ const useInitiateAppointmentPayment = () => {
           order_id: data.razorpayOrder?.id,
 
           handler: async function (response: RazorpayResponseT) {
-            console.log({ response });
             if (response.razorpay_payment_id) {
               setIsLoading(true);
               setMessages("Redirecting, Please wait...");

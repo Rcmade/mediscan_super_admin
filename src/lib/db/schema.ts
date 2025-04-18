@@ -8,6 +8,7 @@ import {
   integer,
   unique,
   boolean,
+  AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { nId } from "@/lib/utils/dbUtils";
 import {
@@ -54,11 +55,13 @@ const userId = text("userId")
   .references(() => users.id, { onDelete: "cascade" });
 
 export const organizations = pgTable("organization", {
-  // doctorName: text("name").notNull(),
+  orgEmail: text("email"),
   doctorWebName: text("web_name").notNull().unique(),
   serviceStartDate: timestamp("service_start_date").notNull(),
   serviceEndDate: timestamp("service_end_date").notNull(),
   userLimit: integer("user_limit").notNull(),
+  enabled: boolean("enabled").notNull().default(true),
+  businessType: text("business_type").notNull().default("individual"),
   ...commonFields,
 });
 
@@ -80,14 +83,6 @@ export const organizationUsers = pgTable(
     uniqueConstraint: unique().on(table.userId, table.organizationId),
   }),
 );
-
-// export const appointmentsPayment = pgTable("appointments_payment", {
-//   ...commonFields,
-//   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-//   currency: text("currency").notNull(),
-//   status: appointmentStatus("status").notNull(),
-//   transactionId: text("transaction_id")
-// });
 
 export const appointments = pgTable("appointments", {
   userId: userId,
@@ -122,6 +117,10 @@ export const orgTransaction = pgTable("org_transaction", {
   organizationId: text("organization_id")
     .notNull()
     .references(() => organizations.id, { onDelete: "no action" }),
+  orgTransactionId: text("org_transaction_id").references(
+    (): AnyPgColumn => orgTransaction.id,
+    { onDelete: "cascade" },
+  ),
 });
 
 export const paymentMethods = pgTable("payment_methods", {
@@ -165,36 +164,35 @@ export const appointmentPaymentLink = pgTable("payment_appointments_link", {
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
 });
 
-// export const userPayments = pgTable("user_payments", {
-//   ...commonFields,
-//   appointmentId: text("appointment_id").references(() => appointments.id, {
-//     onDelete: "cascade",
-//   }),
-//   paymentMethodId: text("payment_method_id")
-//     .notNull()
-//     .references(() => paymentMethods.id, { onDelete: "cascade" }),
-//   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-//   transactionId: text("transaction_id")
-//     .notNull()
-//     .references(() => orgTransaction.id, { onDelete: "cascade" }),
-//   status: appointmentStatus("status"),
-// });
+export const orgBusinessProfile = pgTable("org_business_profile", {
+  ...commonFields,
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" })
+    .unique(),
+  ...commonFields,
+  category: text("category").notNull(),
+  street1: varchar("street1", {
+    length: 100,
+  }),
+  street2: varchar("street2", {
+    length: 100,
+  }),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 100 }),
+  postalCode: varchar("postal_code", { length: 100 }),
+  country: varchar("country", { length: 100 }),
+});
 
-// export const orgAppointmentsReasonVariants = pgTable(
-//   "org_appointments_reason_variants",
-//   {
-//     ...commonFields,
-//     organizationId: text("organization_id")
-//       .notNull()
-//       .references(() => organizations.id, { onDelete: "cascade" }),
-//     price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-//     currency: text("currency").notNull(),
-//     name: text("name").notNull(),
-//   },
-// );
-
-// export type InsertUserPaymentsT = typeof userPayments.$inferInsert;
-// export type SelectUserPaymentsT = typeof userPayments.$inferSelect;
+export const orgLegalInfo = pgTable("org_legal_info", {
+  pan: varchar("pan", { length: 10 }).unique(),
+  gst: varchar("gst", { length: 15 }).unique(),
+  organizationId: text("organization_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" })
+    .unique(),
+  ...commonFields,
+});
 
 export type InsertUserT = typeof users.$inferInsert;
 export type SelectUserT = typeof users.$inferSelect;

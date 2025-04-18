@@ -4,6 +4,8 @@ import { isValidDate } from "@/lib/utils/dateUtils";
 import { startOfDay, endOfDay as endOfDayFn, parseISO } from "date-fns";
 export const phoneSchema = z
   .string()
+  .min(8)
+  .max(15)
   .refine(
     (value) => {
       const normalizedNumber = normalizePhoneNumber(value);

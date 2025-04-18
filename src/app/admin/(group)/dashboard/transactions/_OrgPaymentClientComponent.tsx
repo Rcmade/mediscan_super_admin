@@ -45,14 +45,21 @@ import useViewAdminTransactionColumns from "@/feature/transaction/hooks/useViewA
 import ResponsiveTable from "@/components/table/ResponsiveTable";
 import PaginationButtons from "@/components/buttons/PaginationButtons";
 
-export default function ClientComponent() {
+interface OrgPaymentClientComponent {
+  doctorWebName?: string;
+  children?: React.ReactNode;
+}
+export default function OrgPaymentClientComponent({
+  doctorWebName,
+  children,
+}: OrgPaymentClientComponent) {
   const searchParams = useSearchParams();
 
   const { updateSearchParams } = useUpdateSearchParams();
   const { data } = useViewDueTransaction();
 
   const [filters, setFilters] = useState<TransactionRequestType["query"]>({
-    search: searchParams.get("search") || "",
+    search: searchParams.get("search") || doctorWebName || "",
     fromDate: searchParams.get("fromDate")
       ? new Date(searchParams.get("fromDate") || "").toISOString()
       : undefined,
@@ -63,7 +70,6 @@ export default function ClientComponent() {
     sortOrder: searchParams.get("sortOrder") || "desc",
     page: searchParams.get("page") || "1",
   });
-
 
   const [openPopovers, setOpenPopovers] = useState({
     fromDate: false,
@@ -97,6 +103,7 @@ export default function ClientComponent() {
     <div className="">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Transactions</h1>
+        {children}
       </div>
 
       <Card className="mb-6">
@@ -107,24 +114,30 @@ export default function ClientComponent() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="space-y-2">
-              <Label htmlFor="search">Search by Org name</Label>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="search"
-                  placeholder="Search..."
-                  className="pl-8"
-                  value={filters.search}
-                  onChange={(e) => {
-                    setFilters((prev) => ({ ...prev, search: e.target.value }));
-                    // debounceSearch({ search: e.target.value });
-                  }}
-                />
+          <div
+            className={`grid grid-cols-1 gap-4 ${doctorWebName ? "md:grid-cols-3" : "md:grid-cols-4"}`}
+          >
+            {!doctorWebName && (
+              <div className="space-y-2">
+                <Label htmlFor="search">Search by Org name</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="search"
+                    placeholder="Search..."
+                    className="pl-8"
+                    value={filters.search}
+                    onChange={(e) => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        search: e.target.value,
+                      }));
+                      // debounceSearch({ search: e.target.value });
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-
+            )}
             <div className="space-y-2">
               <Label>From Date</Label>
               <Popover
@@ -229,7 +242,6 @@ export default function ClientComponent() {
 
                       return (
                         (fromDate && date < fromDate) ||
-                        date < today ||
                         date < new Date("1900-01-01")
                       );
                     }}

@@ -1,9 +1,4 @@
-import {
-  organizations,
-  // organizationsWithUsersView,
-  organizationUsers,
-  orgTransaction,
-} from "@/lib/db/schema";
+import { organizations, organizationUsers } from "@/lib/db/schema";
 import { currentUser } from "@/action/currentUser";
 import { db } from "@/lib/db/db";
 import { users } from "@/lib/db/schema";
@@ -86,7 +81,7 @@ const organizationRoutes = new Hono()
         .insert(organizations)
         .values({
           ...rest,
-          doctorWebName:rest.doctorWebName.toLowerCase(),
+          doctorWebName: rest.doctorWebName.toLowerCase(),
           serviceEndDate,
           serviceStartDate,
         })
@@ -100,15 +95,15 @@ const organizationRoutes = new Hono()
         userId: createOrgUser.id,
         organizationId: org.id,
       });
-      const { transaction } = rest;
+      // const { transaction } = rest;
 
-      await db.insert(orgTransaction).values({
-        ...transaction,
-        organizationId: org.id,
-        total: transaction.total.toString(),
-        paid: transaction.paid.toString(),
-        due: transaction.due.toString(),
-      });
+      // await db.insert(orgTransaction).values({
+      //   ...transaction,
+      //   organizationId: org.id,
+      //   total: transaction.total.toString(),
+      //   paid: transaction.paid.toString(),
+      //   due: transaction.due.toString(),
+      // });
 
       // Send OTP confirmation if the service is enabled
       if (process.env.OTP_SERVICE_AVAILABLE === "true") {
@@ -123,12 +118,16 @@ const organizationRoutes = new Hono()
         }
       }
 
-      return c.json({ message: "Organization created" }, 201);
+      return c.json(
+        { message: "Organization created", doctorWebName: org.doctorWebName },
+        201,
+      );
     } catch (error) {
       const err = formatError(error);
       return c.json({ error: err.message }, err.statusCode);
     }
   })
+
   .put(
     "/o/:orgName",
     zValidator("json", createOrgSchema.partial()),
@@ -195,29 +194,29 @@ const organizationRoutes = new Hono()
           .where(eq(organizations.id, org.id))
           .returning({ doctorWebName: organizations.doctorWebName });
 
-        let transactionMessage = "";
-        // if transaction id exists which mean user want to update the transaction if now user want to create new transaction
-        if (body.transaction?.transactionId) {
-          transactionMessage = "Transaction updated";
-          await db
-            .update(orgTransaction)
-            .set({
-              ...body.transaction,
-              total: body.transaction.total.toString(),
-              paid: body.transaction.paid.toString(),
-              due: body.transaction.due.toString(),
-            })
-            .where(eq(orgTransaction.id, body.transaction.transactionId));
-        } else if (body.transaction) {
-          transactionMessage = "Transaction created";
-          await db.insert(orgTransaction).values({
-            ...body.transaction,
-            organizationId: org.id,
-            total: body.transaction.total.toString(),
-            paid: body.transaction.paid.toString(),
-            due: body.transaction.due.toString(),
-          });
-        }
+        // let transactionMessage = "";
+        // // if transaction id exists which mean user want to update the transaction if now user want to create new transaction
+        // if (body.transaction?.transactionId) {
+        //   transactionMessage = "Transaction updated";
+        //   await db
+        //     .update(orgTransaction)
+        //     .set({
+        //       ...body.transaction,
+        //       total: body.transaction.total.toString(),
+        //       paid: body.transaction.paid.toString(),
+        //       due: body.transaction.due.toString(),
+        //     })
+        //     .where(eq(orgTransaction.id, body.transaction.transactionId));
+        // } else if (body.transaction) {
+        //   transactionMessage = "Transaction created";
+        //   await db.insert(orgTransaction).values({
+        //     ...body.transaction,
+        //     organizationId: org.id,
+        //     total: body.transaction.total.toString(),
+        //     paid: body.transaction.paid.toString(),
+        //     due: body.transaction.due.toString(),
+        //   });
+        // }
         if (!updatedOrg) {
           return c.json({ error: "Failed to update organization" }, 500);
         }
@@ -248,10 +247,7 @@ const organizationRoutes = new Hono()
           }
         }
 
-        return c.json(
-          { message: `Organization updated and  ${transactionMessage}` },
-          200,
-        );
+        return c.json({ message: `Organization updated` }, 200);
       } catch (error) {
         const err = formatError(error);
         return c.json({ error: err.message }, err.statusCode);
@@ -326,7 +322,10 @@ const organizationRoutes = new Hono()
           userLimit: organizations.userLimit,
           name: users.name,
           phone: users.phone,
+          email: organizations.orgEmail,
+          businessType: organizations.businessType,
         })
+
         .from(organizations)
         .leftJoin(
           organizationUsers,

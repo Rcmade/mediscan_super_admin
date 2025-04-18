@@ -1,62 +1,71 @@
 import { Hono } from "hono";
 import { and, asc, count, desc, eq, gte, like, lte } from "drizzle-orm";
-// import { z } from "zod";
-// import { zValidator } from "@hono/zod-validator";
 import { db } from "@/lib/db/db";
-import {
-  organizations,
-  // orgPaymentMethods,
-  // orgPayments,
-  orgTransaction,
-} from "@/lib/db/schema";
+import { organizations, orgTransaction, users } from "@/lib/db/schema";
 import { zValidator } from "@hono/zod-validator";
 import { transactionPaginationSchema } from "@/zodSchema/paginationSchema";
 import { tableLimitArr } from "@/content";
+import { z } from "zod";
+import { orgTransactionSchema } from "@/zodSchema/transactionSchema";
+import { currentUser } from "@/action/currentUser";
 
 // Create Hono app
 export const transactionRoutes = new Hono()
-  .get("/last-transaction/:orgWebName", async (c) => {
-    try {
-      const orgWebName = c.req.param("orgWebName");
+  .get(
+    "/:orgWebName",
+    zValidator(
+      "query",
+      z.object({
+        transactionId: z.string().optional(),
+      }),
+    ),
+    async (c) => {
+      try {
+        const orgWebName = c.req.param("orgWebName");
+        const { transactionId } = c.req.valid("query");
 
-      const transaction = await db
-        .select({
-          total: orgTransaction.total,
-          paid: orgTransaction.paid,
-          due: orgTransaction.due,
-          createdAt: orgTransaction.createdAt,
-          organizationId: orgTransaction.organizationId,
-          id: orgTransaction.id,
-          updatedAt: orgTransaction.updatedAt,
-        })
-        .from(orgTransaction)
-        .innerJoin(
-          organizations,
-          eq(orgTransaction.organizationId, organizations.id),
-        )
-        .where(eq(organizations.doctorWebName, orgWebName))
-        .orderBy(desc(orgTransaction.createdAt))
-        .limit(1);
+        const baseQuery = db
+          .select({
+            total: orgTransaction.total,
+            paid: orgTransaction.paid,
+            due: orgTransaction.due,
+            createdAt: orgTransaction.createdAt,
+            organizationId: orgTransaction.organizationId,
+            id: orgTransaction.id,
+            updatedAt: orgTransaction.updatedAt,
+          })
+          .from(orgTransaction)
+          .innerJoin(
+            organizations,
+            eq(orgTransaction.organizationId, organizations.id),
+          )
+          .where(
+            transactionId
+              ? and(
+                  eq(organizations.doctorWebName, orgWebName),
+                  eq(orgTransaction.id, transactionId),
+                )
+              : eq(organizations.doctorWebName, orgWebName),
+          );
 
-      if (!transaction.length) {
-        return c.json({ error: "Transaction not found" }, 404);
+        if (!transactionId) {
+          baseQuery.orderBy(desc(orgTransaction.createdAt)).limit(1);
+        }
+
+        const transaction = await baseQuery;
+
+        if (!transaction.length) {
+          return c.json({ error: "Transaction not found" }, 404);
+        }
+
+        return c.json(transaction[0]);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+        return c.json({ error: "Failed to fetch transactions" }, 500);
       }
-
-      return c.json(transaction[0]); // Returning the first (latest) transaction
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-      return c.json({ error: "Failed to fetch transactions" }, 500);
-    }
-  })
+    },
+  )
   .get("/", zValidator("query", transactionPaginationSchema), async (c) => {
-    // const {
-    //   search,
-    //   dateFrom,
-    //   dateTo,
-    //   sortBy = "createdAt",
-    //   sortOrder = "desc",
-    // } = c.req.query();
-
     const queryParam = c.req.valid("query");
 
     const {
@@ -118,7 +127,9 @@ export const transactionRoutes = new Hono()
 
       // Search by doctor name
       if (search) {
-        filters.push(like(organizations.doctorWebName, `%${search}%`));
+        filters.push(
+          like(organizations.doctorWebName, `%${decodeURIComponent(search)}%`),
+        );
       }
 
       if (fromDate) {
@@ -249,199 +260,276 @@ export const transactionRoutes = new Hono()
       console.error("Error fetching transaction:", error);
       return c.json({ error: "Failed to fetch transaction" }, 500);
     }
+  })
+  // .get("/", async (c) => {
+  //   try {
+  //     const transactions = await db.query.orgTransaction.findMany({
+  //       orderBy: (transaction, { desc }) => [desc(transaction.createdAt)],
+  //     });
+
+  //     return c.json(transactions);
+  //   } catch (error) {
+  //     console.error("Error fetching transactions:", error);
+  //     return c.json({ error: "Failed to fetch transactions" }, 500);
+  //   }
+  // })
+  // // Create a new transaction
+  // .post(
+  //   "/",
+  //   zValidator(
+  //     "json",
+  //     z.object({
+  //       total: z.number().positive(),
+  //       organizationId: z.string().min(1),
+  //     }),
+  //   ),
+  //   async (c) => {
+  //     try {
+  //       const { total, organizationId } = c.req.valid("json");
+
+  //       const newTransaction = await db
+  //         .insert(orgTransaction)
+  //         .values({
+  //           total: total.toString(),
+  //           paid: String(0),
+  //           due: total.toString(),
+  //           organizationId,
+  //           createdAt: new Date(),
+  //           updatedAt: new Date(),
+  //         })
+  //         .returning();
+
+  //       return c.json(newTransaction[0]);
+  //     } catch (error) {
+  //       console.error("Error creating transaction:", error);
+  //       return c.json({ error: "Failed to create transaction" }, 500);
+  //     }
+  //   },
+  // )
+
+  // // Get transaction by ID
+  // .get("/api/transactions/:id", async (c) => {
+  //   try {
+  //     const id = c.req.param("id");
+
+  //     const transaction = await db.query.orgTransaction.findFirst({
+  //       where: eq(orgTransaction.id, id),
+  //     });
+
+  //     if (!transaction) {
+  //       return c.json({ error: "Transaction not found" }, 404);
+  //     }
+
+  //     return c.json(transaction);
+  //   } catch (error) {
+  //     console.error("Error fetching transaction:", error);
+  //     return c.json({ error: "Failed to fetch transaction" }, 500);
+  //   }
+  // })
+  // // Get payments for a transaction
+  // .get("/api/transactions/:id/payments", async (c) => {
+  //   try {
+  //     const id = c.req.param("id");
+
+  //     const payments = await db.query.orgPayments.findMany({
+  //       where: eq(orgPayments.transactionId, id),
+  //       with: {
+  //         paymentMethod: true,
+  //       },
+  //       orderBy: (payment, { desc }) => [desc(payment.paidAt)],
+  //     });
+
+  //     return c.json(payments);
+  //   } catch (error) {
+  //     console.error("Error fetching payments:", error);
+  //     return c.json({ error: "Failed to fetch payments" }, 500);
+  //   }
+  // })
+  // // Add a payment to a transaction
+  // .post(
+  //   "/api/transactions/:id/payments",
+  //   zValidator(
+  //     "json",
+  //     z.object({
+  //       paymentMethodId: z.string().min(1),
+  //       amount: z.number().positive(),
+  //     }),
+  //   ),
+  //   async (c) => {
+  //     try {
+  //       const id = c.req.param("id");
+  //       const { paymentMethodId, amount } = c.req.valid("json");
+
+  //       // Get the transaction
+  //       const transaction = await db.query.orgTransaction.findFirst({
+  //         where: eq(orgTransaction.id, id),
+  //       });
+
+  //       if (!transaction) {
+  //         return c.json({ error: "Transaction not found" }, 404);
+  //       }
+
+  //       // Check if payment amount is valid
+  //       if (amount > +transaction.due) {
+  //         return c.json({ error: "Payment amount exceeds due amount" }, 400);
+  //       }
+
+  //       // Create the payment
+  //       const newPayment = await db
+  //         .insert(orgPayments)
+  //         .values({
+  //           //   id: crypto.randomUUID(),
+  //           transactionId: id,
+  //           paymentMethodId,
+  //           amount: amount.toString(),
+  //           paidAt: new Date(),
+  //           createdAt: new Date(),
+  //           updatedAt: new Date(),
+  //         })
+  //         .returning();
+
+  //       // Update the transaction
+  //       const updatedPaid = transaction.paid + amount;
+  //       const updatedDue = +transaction.total - +updatedPaid;
+
+  //       await db
+  //         .update(orgTransaction)
+  //         .set({
+  //           paid: updatedPaid,
+  //           due: updatedDue.toString(),
+  //           updatedAt: new Date(),
+  //         })
+  //         .where(eq(orgTransaction.id, id));
+
+  //       // Get the payment method for the response
+  //       const paymentMethod = await db.query.orgPaymentMethods.findFirst({
+  //         where: eq(orgPaymentMethods.id, paymentMethodId),
+  //       });
+
+  //       return c.json({
+  //         ...newPayment[0],
+  //         paymentMethod,
+  //       });
+  //     } catch (error) {
+  //       console.error("Error adding payment:", error);
+  //       return c.json({ error: "Failed to add payment" }, 500);
+  //     }
+  //   },
+  // )
+  // // Get all payment methods
+  // .get("/api/payment-methods", async (c) => {
+  //   try {
+  //     const paymentMethods = await db.query.orgPaymentMethods.findMany();
+  //     return c.json(paymentMethods);
+  //   } catch (error) {
+  //     console.error("Error fetching payment methods:", error);
+  //     return c.json({ error: "Failed to fetch payment methods" }, 500);
+  //   }
+  // })
+  // // Create a new payment method
+  // .post(
+  //   "/api/payment-methods",
+  //   zValidator(
+  //     "json",
+  //     z.object({
+  //       name: z.string().min(1),
+  //     }),
+  //   ),
+  //   async (c) => {
+  //     try {
+  //       const { name } = c.req.valid("json");
+
+  //       const newPaymentMethod = await db
+  //         .insert(orgPaymentMethods)
+  //         .values({
+  //           id: crypto.randomUUID(),
+  //           name,
+  //           createdAt: new Date(),
+  //           updatedAt: new Date(),
+  //         })
+  //         .returning();
+
+  //       return c.json(newPaymentMethod[0]);
+  //     } catch (error) {
+  //       console.error("Error creating payment method:", error);
+  //       return c.json({ error: "Failed to create payment method" }, 500);
+  //     }
+  //   },
+  // );
+  .post("/", zValidator("json", orgTransactionSchema), async (c) => {
+    const user = await currentUser();
+    if (!user || !user.id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const [existingUser] = await db
+      .select({ role: users.role })
+      .from(users)
+      .where(eq(users.id, user.id));
+
+    if (existingUser?.role !== "SUPER_ADMIN") {
+      return c.json(
+        { error: "Forbidden. You don't have access to these resources!" },
+        403,
+      );
+    }
+
+    const body = c.req.valid("json");
+
+    const [getOrg] = await db
+      .select({
+        id: organizations.id,
+        doctorWebName: organizations.doctorWebName,
+      })
+      .from(organizations)
+      .where(eq(organizations.doctorWebName, body.orgWebName));
+
+    if (!getOrg) {
+      return c.json(
+        {
+          error: "Organization not found",
+        },
+        404,
+      );
+    }
+
+    if (body.transactionId) {
+      const [updateTransaction] = await db
+        .update(orgTransaction)
+        .set({
+          total: String(body.total),
+          paid: String(body.paid),
+          due: String(body.due),
+        })
+        .where(
+          and(
+            eq(orgTransaction.id, body.transactionId),
+            eq(orgTransaction.organizationId, getOrg.id),
+          ),
+        )
+        .returning({
+          id: orgTransaction.id,
+        });
+
+      return c.json({
+        message: "Transaction updated successfully",
+        transaction: updateTransaction,
+      });
+    }
+
+    const [insertTransaction] = await db
+      .insert(orgTransaction)
+      .values({
+        total: String(body.total),
+        paid: String(body.paid),
+        due: String(body.due),
+        organizationId: getOrg.id,
+      })
+      .returning({
+        id: orgTransaction.id,
+      });
+    return c.json({
+      message: "Transaction created successfully",
+      transaction: insertTransaction,
+    });
   });
-// .get("/", async (c) => {
-//   try {
-//     const transactions = await db.query.orgTransaction.findMany({
-//       orderBy: (transaction, { desc }) => [desc(transaction.createdAt)],
-//     });
-
-//     return c.json(transactions);
-//   } catch (error) {
-//     console.error("Error fetching transactions:", error);
-//     return c.json({ error: "Failed to fetch transactions" }, 500);
-//   }
-// })
-// // Create a new transaction
-// .post(
-//   "/",
-//   zValidator(
-//     "json",
-//     z.object({
-//       total: z.number().positive(),
-//       organizationId: z.string().min(1),
-//     }),
-//   ),
-//   async (c) => {
-//     try {
-//       const { total, organizationId } = c.req.valid("json");
-
-//       const newTransaction = await db
-//         .insert(orgTransaction)
-//         .values({
-//           total: total.toString(),
-//           paid: String(0),
-//           due: total.toString(),
-//           organizationId,
-//           createdAt: new Date(),
-//           updatedAt: new Date(),
-//         })
-//         .returning();
-
-//       return c.json(newTransaction[0]);
-//     } catch (error) {
-//       console.error("Error creating transaction:", error);
-//       return c.json({ error: "Failed to create transaction" }, 500);
-//     }
-//   },
-// )
-
-// // Get transaction by ID
-// .get("/api/transactions/:id", async (c) => {
-//   try {
-//     const id = c.req.param("id");
-
-//     const transaction = await db.query.orgTransaction.findFirst({
-//       where: eq(orgTransaction.id, id),
-//     });
-
-//     if (!transaction) {
-//       return c.json({ error: "Transaction not found" }, 404);
-//     }
-
-//     return c.json(transaction);
-//   } catch (error) {
-//     console.error("Error fetching transaction:", error);
-//     return c.json({ error: "Failed to fetch transaction" }, 500);
-//   }
-// })
-// // Get payments for a transaction
-// .get("/api/transactions/:id/payments", async (c) => {
-//   try {
-//     const id = c.req.param("id");
-
-//     const payments = await db.query.orgPayments.findMany({
-//       where: eq(orgPayments.transactionId, id),
-//       with: {
-//         paymentMethod: true,
-//       },
-//       orderBy: (payment, { desc }) => [desc(payment.paidAt)],
-//     });
-
-//     return c.json(payments);
-//   } catch (error) {
-//     console.error("Error fetching payments:", error);
-//     return c.json({ error: "Failed to fetch payments" }, 500);
-//   }
-// })
-// // Add a payment to a transaction
-// .post(
-//   "/api/transactions/:id/payments",
-//   zValidator(
-//     "json",
-//     z.object({
-//       paymentMethodId: z.string().min(1),
-//       amount: z.number().positive(),
-//     }),
-//   ),
-//   async (c) => {
-//     try {
-//       const id = c.req.param("id");
-//       const { paymentMethodId, amount } = c.req.valid("json");
-
-//       // Get the transaction
-//       const transaction = await db.query.orgTransaction.findFirst({
-//         where: eq(orgTransaction.id, id),
-//       });
-
-//       if (!transaction) {
-//         return c.json({ error: "Transaction not found" }, 404);
-//       }
-
-//       // Check if payment amount is valid
-//       if (amount > +transaction.due) {
-//         return c.json({ error: "Payment amount exceeds due amount" }, 400);
-//       }
-
-//       // Create the payment
-//       const newPayment = await db
-//         .insert(orgPayments)
-//         .values({
-//           //   id: crypto.randomUUID(),
-//           transactionId: id,
-//           paymentMethodId,
-//           amount: amount.toString(),
-//           paidAt: new Date(),
-//           createdAt: new Date(),
-//           updatedAt: new Date(),
-//         })
-//         .returning();
-
-//       // Update the transaction
-//       const updatedPaid = transaction.paid + amount;
-//       const updatedDue = +transaction.total - +updatedPaid;
-
-//       await db
-//         .update(orgTransaction)
-//         .set({
-//           paid: updatedPaid,
-//           due: updatedDue.toString(),
-//           updatedAt: new Date(),
-//         })
-//         .where(eq(orgTransaction.id, id));
-
-//       // Get the payment method for the response
-//       const paymentMethod = await db.query.orgPaymentMethods.findFirst({
-//         where: eq(orgPaymentMethods.id, paymentMethodId),
-//       });
-
-//       return c.json({
-//         ...newPayment[0],
-//         paymentMethod,
-//       });
-//     } catch (error) {
-//       console.error("Error adding payment:", error);
-//       return c.json({ error: "Failed to add payment" }, 500);
-//     }
-//   },
-// )
-// // Get all payment methods
-// .get("/api/payment-methods", async (c) => {
-//   try {
-//     const paymentMethods = await db.query.orgPaymentMethods.findMany();
-//     return c.json(paymentMethods);
-//   } catch (error) {
-//     console.error("Error fetching payment methods:", error);
-//     return c.json({ error: "Failed to fetch payment methods" }, 500);
-//   }
-// })
-// // Create a new payment method
-// .post(
-//   "/api/payment-methods",
-//   zValidator(
-//     "json",
-//     z.object({
-//       name: z.string().min(1),
-//     }),
-//   ),
-//   async (c) => {
-//     try {
-//       const { name } = c.req.valid("json");
-
-//       const newPaymentMethod = await db
-//         .insert(orgPaymentMethods)
-//         .values({
-//           id: crypto.randomUUID(),
-//           name,
-//           createdAt: new Date(),
-//           updatedAt: new Date(),
-//         })
-//         .returning();
-
-//       return c.json(newPaymentMethod[0]);
-//     } catch (error) {
-//       console.error("Error creating payment method:", error);
-//       return c.json({ error: "Failed to create payment method" }, 500);
-//     }
-//   },
-// );

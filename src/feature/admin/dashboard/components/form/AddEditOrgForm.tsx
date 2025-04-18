@@ -21,9 +21,17 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import useAddEditOrgForm from "../../hooks/useAddEditOrgForm";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NumberInput } from "@/components/ui/number-input";
-import { formatDate } from "@/lib/utils/dateUtils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { businessTypeObj } from "@/constant";
+// import { formatDate } from "@/lib/utils/dateUtils";
 
 export default function AddEditOrgForm() {
   const {
@@ -32,23 +40,23 @@ export default function AddEditOrgForm() {
     isLoading,
     orgInfo,
     startDate,
-    transaction,
-    transactionId,
+    // transaction,
+    // transactionId,
   } = useAddEditOrgForm();
   const [openPopovers, setOpenPopovers] = useState({
     startDate: false,
     endDate: false,
   });
 
-  const paidAmount = form.watch("transaction.paid");
-  const totalAmount = form.watch("transaction.total");
-  useEffect(() => {
-    if (paidAmount === undefined || totalAmount === undefined) return;
-    if (paidAmount > totalAmount) return;
-    form.setValue("transaction.due", totalAmount - paidAmount);
-    return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paidAmount, totalAmount]);
+  // const paidAmount = form.watch("transaction.paid");
+  // const totalAmount = form.watch("transaction.total");
+  // useEffect(() => {
+  //   if (paidAmount === undefined || totalAmount === undefined) return;
+  //   if (paidAmount > totalAmount) return;
+  //   form.setValue("transaction.due", totalAmount - paidAmount);
+  //   return () => {};
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [paidAmount, totalAmount]);
 
   return (
     <Form {...form}>
@@ -58,7 +66,7 @@ export default function AddEditOrgForm() {
           name="doctorName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Doctor Name</FormLabel>
+              <FormLabel isRequiredField>Doctor Name</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
@@ -72,10 +80,28 @@ export default function AddEditOrgForm() {
         />
         <FormField
           control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel isRequiredField>Email</FormLabel>
+              <FormControl>
+                <Input
+                  disabled={isLoading}
+                  placeholder="example@example.com"
+                  readOnly={orgInfo?.type === "edit"}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="doctorWebName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Doctor Web Name</FormLabel>
+              <FormLabel isRequiredField>Doctor Web Name</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
@@ -99,7 +125,7 @@ export default function AddEditOrgForm() {
           name="serviceStartDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Service Start Date</FormLabel>
+              <FormLabel isRequiredField>Service Start Date</FormLabel>
               <Popover
                 open={openPopovers.startDate}
                 onOpenChange={(o) =>
@@ -156,7 +182,7 @@ export default function AddEditOrgForm() {
           name="serviceEndDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Service End Date</FormLabel>
+              <FormLabel isRequiredField>Service End Date</FormLabel>
               <Popover
                 open={openPopovers.endDate}
                 onOpenChange={(o) =>
@@ -217,7 +243,7 @@ export default function AddEditOrgForm() {
           name="userLimit"
           render={({ field: { value, onChange, ...rest } }) => (
             <FormItem>
-              <FormLabel>User Limit</FormLabel>
+              <FormLabel isRequiredField>User Limit</FormLabel>
               <FormControl>
                 <NumberInput
                   value={value}
@@ -235,7 +261,7 @@ export default function AddEditOrgForm() {
           name="phone"
           render={({ field: { onChange, ...field } }) => (
             <FormItem>
-              <FormLabel>Phone Number</FormLabel>
+              <FormLabel isRequiredField>Phone Number</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
@@ -253,7 +279,37 @@ export default function AddEditOrgForm() {
             </FormItem>
           )}
         />
-        {orgInfo?.type === "edit" && (
+
+        <FormField
+          control={form.control}
+          name="businessType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel isRequiredField>Business Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Business Type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {Object.keys(businessTypeObj).map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {
+                        businessTypeObj[type as keyof typeof businessTypeObj]
+                          .name
+                      }
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* {orgInfo?.type === "edit" && (
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
             <span>
               {transaction?.createdAt
@@ -293,8 +349,8 @@ export default function AddEditOrgForm() {
               )}
             </span>
           </div>
-        )}
-        <FormField
+        )} */}
+        {/* <FormField
           control={form.control}
           name="transaction.total"
           render={({ field: { value, onChange, ...rest } }) => (
@@ -313,8 +369,8 @@ export default function AddEditOrgForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
-        <FormField
+        /> */}
+        {/* <FormField
           control={form.control}
           name="transaction.paid"
           render={({ field: { value, onChange, ...rest } }) => (
@@ -333,8 +389,8 @@ export default function AddEditOrgForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
-        <FormField
+        /> */}
+        {/* <FormField
           control={form.control}
           name="transaction.due"
           render={({ field: { value, onChange, ...rest } }) => (
@@ -351,12 +407,11 @@ export default function AddEditOrgForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
-
+        /> */}
         <Button type="submit" spinner disabled={isLoading}>
-          {orgInfo?.type === "create"
-            ? "Create Organization"
-            : "Update Organization"}
+          {orgInfo?.type === "edit"
+            ? "Update Organization"
+            : "Create Organization"}
         </Button>
       </form>
     </Form>

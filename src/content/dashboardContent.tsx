@@ -61,8 +61,8 @@ export const superAdminOnlyMenu: (TopNavT & {
     icon: BuildingIcon,
   },
   {
-    title: "Transaction",
-    url: "/admin/dashboard/transaction",
+    title: "Transactions",
+    url: "/admin/dashboard/transactions",
     accessBy: ["SUPER_ADMIN"],
     icon: PieChart,
   },
@@ -102,6 +102,13 @@ export const topNavMenu: TopNavT[] = [
     url: "/overview",
     accessBy: ["ADMIN", "RECEPTIONIST"],
     icon: Eclipse,
+  },
+
+  {
+    title: "Transaction",
+    url: "/transaction",
+    accessBy: ["ADMIN"],
+    icon: PieChart,
   },
 
   // {

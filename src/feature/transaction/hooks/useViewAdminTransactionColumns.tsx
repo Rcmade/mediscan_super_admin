@@ -4,9 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { getInitials } from "@/lib/utils/stringUtils";
 import { formatDate } from "@/lib/utils/dateUtils";
 import { TransactionResponseType } from "./useViewTransaction";
+import useAddEditTransactionDialog from "./useAddEditTransactionDialog";
+import { Button } from "@/components/ui/button";
 
 const useViewAdminTransactionColumns = () => {
-  // const onOpen = useDeleteEmployee((s) => s.onOpen);
+  const onOpen = useAddEditTransactionDialog((s) => s.onOpen);
   // const onEditEmployee = useEditEmployeeDialog((s) => s.onOpen);
 
   /* 
@@ -98,21 +100,35 @@ const useViewAdminTransactionColumns = () => {
         </Badge>
       ),
     },
-    // {
-    //   id: "actions",
-    //   header: "Action",
-    //   cell: ({ row }) => {
-    //     return (
-    //       <ViewEditDeleteButton
-    //         // onDelete={() => onOpen(row.original)}
-    //         // onEdit={() => onEditEmployee(row.original)}
-    //         onDelete={() => {}}
-    //         onEdit={() => {}}
-    //         viewLink={`/dashboard/employee/${row.original.id}`}
-    //       />
-    //     );
-    //   },
-    // },
+    {
+      id: "actions",
+      header: "Action",
+      cell: ({ row }) => {
+        return (
+          <>
+            <Button
+              onClick={() => {
+                onOpen({
+                  type: "edit",
+                  webName: row.original.organization.doctorWebName,
+                  transactionInfo: {
+                    id: row.original.transaction.id,
+                    total: row.original.transaction.total,
+                    paid: row.original.transaction.paid,
+                    due: row.original.transaction.due,
+                    createdAt: row.original.transaction.createdAt,
+                    updatedAt: row.original.transaction.updatedAt,
+                    organizationId: row.original.organization.id,
+                  },
+                });
+              }}
+            >
+              Edit
+            </Button>
+          </>
+        );
+      },
+    },
   ];
   return { columns };
 };

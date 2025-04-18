@@ -33,3 +33,68 @@ export const userRoleArr = [
 export const paymentMethodsArr = ["ONLINE", "CASH"] as const;
 
 export const paymentStatusArr = ["PENDING", "COMPLETED", "FAILED"] as const;
+
+export const businessTypeArr = [
+  "llp",
+  "ngo",
+  "individual",
+  "partnership",
+  "proprietorship",
+  "public_limited",
+  "private_limited",
+  "trust",
+  "society",
+  "not_yet_registered",
+  "educational_institutes",
+  "other",
+] as const;
+export const businessTypeObj: {
+  [key in (typeof businessTypeArr)[number]]: {
+    name: string;
+  };
+} = {
+  llp: {
+    name: "Limited Liability Partnership",
+  },
+  ngo: {
+    name: "Non-Governmental Organization",
+  },
+  individual: {
+    name: "Individual",
+  },
+  partnership: {
+    name: "Partnership",
+  },
+  proprietorship: {
+    name: "Proprietorship",
+  },
+  public_limited: {
+    name: "Public Limited Company",
+  },
+  private_limited: {
+    name: "Private Limited Company",
+  },
+  trust: {
+    name: "Trust",
+  },
+  society: {
+    name: "Society",
+  },
+  not_yet_registered: {
+    name: "Not Yet Registered",
+  },
+  educational_institutes: {
+    name: "Educational Institutes",
+  },
+  other: {
+    name: "Other",
+  },
+} as const;
+
+export const orgBusinessCategoryArr = ["healthcare", "government"] as const;
+
+export const panRegex = /^[A-Z]{3}[CHFABTJGEL]{1}[A-Z]{1}\d{4}[A-Z]{1}$/;
+export const gstRegex =
+  /^[0123][0-9][A-Z]{5}[0-9]{4}[A-Z][0-9][A-Z0-9][A-Z0-9]$/i;
+
+export const countryArr = ["IN"] as const;

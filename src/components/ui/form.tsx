@@ -14,6 +14,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import RequiredDotText from "./required-dot-text";
 
 const Form = FormProvider;
 
@@ -86,19 +87,24 @@ const FormItem = React.forwardRef<
 });
 FormItem.displayName = "FormItem";
 
+
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
->(({ className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> & {
+    isRequiredField?: boolean;
+  }
+>(({ className, children, isRequiredField, ...props }, ref) => {
   const { error, formItemId } = useFormField();
 
   return (
     <Label
       ref={ref}
-      className={cn(error && "text-destructive", className)}
+      className={cn(error && "text-base text-destructive", className)}
       htmlFor={formItemId}
       {...props}
-    />
+    >
+      {children} {isRequiredField && <RequiredDotText />}
+    </Label>
   );
 });
 FormLabel.displayName = "FormLabel";

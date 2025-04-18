@@ -23,11 +23,14 @@ function DashboardSidebarNav() {
   // Memoize the filtered top navigation menu
   const filteredTopNavMenu = useMemo(() => {
     if (!user) return [];
-    return dashboardContent.topNavMenu.filter(
-      (item) =>
+    // console.log({ dashboardContent });
+    return dashboardContent.topNavMenu.filter((item) => {
+     
+      return (
         item.accessBy.includes(user.role) ||
-        (webName && user.role === "SUPER_ADMIN"),
-    );
+        (webName && user.role === "SUPER_ADMIN")
+      );
+    });
   }, [user, webName]);
 
   // Reusable function to render a menu button
