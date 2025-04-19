@@ -10,17 +10,13 @@ const preprocessPhoneNumber = (
   phoneNumber: string,
   countryCode: string,
 ): string => {
-  //   console.log(`Raw Input: ${phoneNumber}`);
   if (!phoneNumber.startsWith("+")) {
     const sanitizedNumber = phoneNumber.replace(/^0+/, ""); // Remove leading zeros
-    // console.log(`Sanitized N umber (without leading zeros): ${sanitizedNumber}`);
     if (sanitizedNumber.length === 10) {
       return `${countryCode}${sanitizedNumber}`;
     }
-    // console.log(`Invalid local number length: ${sanitizedNumber}`);
     return ""; // Invalid local number
   }
-  //   console.log(`Number already in E.164 format: ${phoneNumber}`);
   return phoneNumber; // Return as-is if already in E.164 format
 };
 
@@ -39,23 +35,18 @@ export const normalizePhoneNumber = (
     const preprocessedNumber = preprocessPhoneNumber(phoneNumber, countryCode);
 
     if (!preprocessedNumber) {
-      //   console.log("Preprocessed number is invalid");
       return null;
     }
-
-    // console.log("Preprocessed Number:", preprocessedNumber);
 
     const phone = parsePhoneNumberFromString(
       preprocessedNumber,
       defaultCountry,
     );
-    // console.log(`Parsed Phone Object: ${JSON.stringify(phone)}`);
 
     if (phone && phone.isValid() && phone.country === defaultCountry) {
       return phone.number; // Returns in E.164 format
     }
 
-    // console.log("Invalid phone number:", preprocessedNumber);
     return null; // Invalid phone number
   } catch (error) {
     console.error("Error normalizing phone number:", error);

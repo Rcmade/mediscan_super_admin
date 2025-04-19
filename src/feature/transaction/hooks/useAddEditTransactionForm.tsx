@@ -88,7 +88,6 @@ const useAddEditTransactionForm = () => {
     }
   };
 
-  console.log(form.formState.errors);
 
   return {
     form,

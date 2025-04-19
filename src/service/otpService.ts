@@ -22,7 +22,6 @@ class OTPService {
     }
 
     if (new Date() > new Date(expires)) {
-      // console.log("expired");
       return false; // OTP has expired
     }
 

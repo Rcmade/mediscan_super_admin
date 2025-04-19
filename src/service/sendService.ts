@@ -28,7 +28,6 @@ class SendService {
       return client.messages
         .create(formateData)
         .then(() => {
-          // console.log({message});
           return true; // SMS sent successfully
         })
         .catch((error) => {

@@ -56,13 +56,16 @@ const appointmentPaymentRoutes = new Hono()
           return c.json({ error: "No appointments found" }, 404);
         }
 
+
         const { appointmentWithCost, totalCost } =
           calculateTotalAppointmentCost(appointmentsDb);
 
         const organizationId = appointmentsDb[0].organizationId;
         const userId = appointmentsDb[0].userId;
 
+
         const paymentMethod = body.paymentMethods; // "ONLINE" | "CASH"
+
 
         const instance = new Razorpay({
           key_id: process.env.NEXT_PUBLIC_RAZORPAY_ID as string,
@@ -109,11 +112,13 @@ const appointmentPaymentRoutes = new Hono()
           return { paymentId: paymentRecord.id };
         });
 
+
         const [userInfo] = await db
           .select()
           .from(users)
           .where(eq(users.id, userId))
           .limit(1);
+
 
         return c.json({
           message:
@@ -135,82 +140,87 @@ const appointmentPaymentRoutes = new Hono()
     },
   )
   .get("/view/u/:userId/o/:paymentId", async (c) => {
-    const userId = c.req.param("userId");
-    const paymentId = c.req.param("paymentId");
-    const data = await db
-      .select({
-        payment: {
-          id: appointmentPayments.id,
-          totalAmount: appointmentPayments.totalAmount,
-          paymentMethod: appointmentPayments.paymentMethod,
-          paymentStatus: appointmentPayments.paymentStatus,
-          createdAt: appointmentPayments.createdAt,
-          updatedAt: appointmentPayments.updatedAt,
-        },
-        paymentLink: {
-          amount: appointmentPaymentLinks.amount,
-        },
-        appointment: {
-          id: appointments.id,
-          patientName: appointments.patientName,
-          reasonForVisit: appointments.reasonForVisit,
-          appointmentStatus: appointments.appointmentStatus,
-          tokenNumber: appointments.tokenNumber,
-          image: appointments.image,
-          isPaid: appointments.isPaid,
-        },
-      })
-      .from(appointmentPayments)
-      .where(
-        and(
-          eq(appointmentPayments.id, paymentId),
-          eq(appointmentPayments.userId, userId),
+    try {
+      // const userId = c.req.param("userId");
+      const paymentId = c.req.param("paymentId");
+      const data = await db
+        .select({
+          payment: {
+            id: appointmentPayments.id,
+            totalAmount: appointmentPayments.totalAmount,
+            paymentMethod: appointmentPayments.paymentMethod,
+            paymentStatus: appointmentPayments.paymentStatus,
+            createdAt: appointmentPayments.createdAt,
+            updatedAt: appointmentPayments.updatedAt,
+          },
+          paymentLink: {
+            amount: appointmentPaymentLinks.amount,
+          },
+          appointment: {
+            id: appointments.id,
+            patientName: appointments.patientName,
+            reasonForVisit: appointments.reasonForVisit,
+            appointmentStatus: appointments.appointmentStatus,
+            tokenNumber: appointments.tokenNumber,
+            image: appointments.image,
+            isPaid: appointments.isPaid,
+          },
+        })
+        .from(appointmentPayments)
+        .where(
+          and(
+            eq(appointmentPayments.id, paymentId),
+            // eq(appointmentPayments.userId, userId),
+          ),
+        )
+        .leftJoin(
+          appointmentPaymentLinks,
+          eq(appointmentPaymentLinks.paymentId, appointmentPayments.id),
+        )
+        .leftJoin(
+          appointments,
+          eq(appointments.id, appointmentPaymentLinks.appointmentId),
+        );
+
+      const grouped = Object.values(
+        data.reduce(
+          (acc, row) => {
+            const paymentId = row.payment.id;
+
+            if (!acc[paymentId]) {
+              acc[paymentId] = {
+                payment: row.payment,
+                appointments: [],
+              };
+            }
+
+            acc[paymentId].appointments.push({
+              paymentLink: row.paymentLink,
+              appointment: row.appointment,
+            });
+
+            return acc;
+          },
+          {} as Record<
+            string,
+            {
+              payment: (typeof data)[0]["payment"];
+              appointments: {
+                paymentLink: (typeof data)[0]["paymentLink"];
+                appointment: (typeof data)[0]["appointment"];
+              }[];
+            }
+          >,
         ),
-      )
-      .leftJoin(
-        appointmentPaymentLinks,
-        eq(appointmentPaymentLinks.paymentId, appointmentPayments.id),
-      )
-      .leftJoin(
-        appointments,
-        eq(appointments.id, appointmentPaymentLinks.appointmentId),
       );
 
-    const grouped = Object.values(
-      data.reduce(
-        (acc, row) => {
-          const paymentId = row.payment.id;
-
-          if (!acc[paymentId]) {
-            acc[paymentId] = {
-              payment: row.payment,
-              appointments: [],
-            };
-          }
-
-          acc[paymentId].appointments.push({
-            paymentLink: row.paymentLink,
-            appointment: row.appointment,
-          });
-
-          return acc;
-        },
-        {} as Record<
-          string,
-          {
-            payment: (typeof data)[0]["payment"];
-            appointments: {
-              paymentLink: (typeof data)[0]["paymentLink"];
-              appointment: (typeof data)[0]["appointment"];
-            }[];
-          }
-        >,
-      ),
-    );
-
-    // return c.json({ data: grouped });
-    const first = Object.values(grouped)[0];
-    return c.json({ data: first });
+      // return c.json({ data: grouped });
+      const first = Object.values(grouped)[0];
+      return c.json({ data: first });
+    } catch (error) {
+      const err = formatError(error);
+      return c.json({ error: err.message }, err.statusCode);
+    }
   })
   // .get("/view/a/:appointmentId", async (c) => {
   //   const appointmentId = c.req.param("appointmentId");

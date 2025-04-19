@@ -71,12 +71,8 @@ export const appointmentFormSchema = z.object({
 // testCases.forEach(({ input, expected }, index) => {
 //   try {
 //     const result = schema.parse(input);
-//     console.log(
-//       `Test ${index + 1}: Input = ${JSON.stringify(input)}, Output = ${JSON.stringify(result)}, Expected = ${expected}`,
-//     );
+
 //   } catch (error) {
-//     console.log(
-//       `Test ${index + 1}: Input = ${JSON.stringify(input)}, Error = ${error.message}, Expected = ${expected}`,
-//     );
+
 //   }
 // });

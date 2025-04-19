@@ -8,6 +8,8 @@ import { RazorpayResponseT } from "@/types";
 import { useRouter } from "next/navigation";
 import useWebName from "@/hooks/useWebName";
 import useAppointmentIds from "./useAppointmentIds";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import useGetUserOrg from "@/feature/organization/hooks/useGetUserOrg";
 
 const api = client.api.main.payments["appointment"]["initiate"]["$post"];
 
@@ -22,10 +24,12 @@ declare global {
 
 const useInitiateAppointmentPayment = () => {
   const [messages, setMessages] = useState("");
+  const { data: userOrg } = useGetUserOrg();
   const { replace } = useRouter();
   const { webName } = useWebName();
   const [isLoading, setIsLoading] = useState(false);
   const { appointmentIds } = useAppointmentIds();
+  const user = useCurrentUser();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json }) => {
       setMessages("");
@@ -82,6 +86,24 @@ const useInitiateAppointmentPayment = () => {
 
         setIsLoading(true);
         setMessages("Redirecting, Please wait...");
+
+        if (
+          user?.role === "ADMIN" ||
+          user?.role === "RECEPTIONIST" ||
+          user?.role === "SUPER_ADMIN"
+        ) {
+          if (user?.role === "SUPER_ADMIN") {
+            replace(
+              `/admin/dashboard/organization/o/${webName}/pay/a/${data?.appointmentWithCost[0]?.appointment?.id}`,
+            );
+            return;
+          }
+
+          replace(
+            `/admin/dashboard/organization/o/${userOrg?.organizations?.webName}/pay/a/${data?.appointmentWithCost[0]?.appointment?.id}`,
+          );
+          return;
+        }
         replace(
           `/o/${webName}/enroll/pay/${appointmentIds}/success/${data.paymentId}`,
         );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,15 @@ import { formatDate } from "@/lib/utils/dateUtils";
 import Tooltip from "@/components/tooltip/Tooltip";
 import Link from "next/link";
 import useWebName from "@/hooks/useWebName";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { appointmentStatusArr } from "@/constant";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface SearchFormProps {
   placeholder?: string;
@@ -36,6 +45,9 @@ export function SearchForm({
     searchParams.get("startTime") ||
       (isGlobalSearch ? undefined : new Date().toISOString()),
   );
+  const [appointmentStatus, setAppointmentStatus] = useState(
+    searchParams.get("appointmentStatus") || "Scheduled",
+  );
   const submitRef = useRef<HTMLButtonElement>(null);
 
   const [endOfDay, setEndOfDay] = useState(
@@ -53,12 +65,12 @@ export function SearchForm({
     if (search) searchParams.set("search", search || "");
     if (startTime) searchParams.set("startTime", startTime || "");
     if (endOfDay) searchParams.set("endOfDay", endOfDay || "");
+    if (appointmentStatus)
+      searchParams.set("appointmentStatus", appointmentStatus);
     router.push(`?${searchParams.toString()}` || "");
   };
 
-  useEffect(() => {
-    return () => {};
-  }, []);
+  const debounceSearch = useDebounce(handleSearch, 500);
 
   return (
     <form
@@ -72,7 +84,10 @@ export function SearchForm({
             type="search"
             placeholder={placeholder || "Search appointments, number, token..."}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              debounceSearch();
+            }}
             className="pl-10 pr-20"
           />
 
@@ -97,6 +112,26 @@ export function SearchForm({
       </div>
       {showStartEnd && (
         <div className="flex w-full items-center justify-between gap-2 md:w-auto">
+          <Select
+            onValueChange={(e) => {
+              setAppointmentStatus(e);
+              setTimeout(() => {
+                handleSearch();
+              }, 0);
+            }}
+            defaultValue={appointmentStatus}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select Option" />
+            </SelectTrigger>
+            <SelectContent>
+              {appointmentStatusArr.map((status) => (
+                <SelectItem value={status} key={status}>
+                  {status}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="flex flex-1 items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>

@@ -23,7 +23,6 @@ function DashboardSidebarNav() {
   // Memoize the filtered top navigation menu
   const filteredTopNavMenu = useMemo(() => {
     if (!user) return [];
-    // console.log({ dashboardContent });
     return dashboardContent.topNavMenu.filter((item) => {
      
       return (

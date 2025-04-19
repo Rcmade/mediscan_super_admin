@@ -19,6 +19,7 @@ export const useSearchToken = (query: RequestType["query"] = {}) => {
         search: query.search || undefined,
         startTime: query.startTime || undefined,
         endOfDay: query.endOfDay || undefined,
+        appointmentStatus: query.appointmentStatus || undefined,
       },
     ],
     queryFn: async () => {

@@ -152,7 +152,6 @@ export const authRoute = new Hono()
           });
 
           let redirect = "/";
-          // console.log({ user });
           if (user.role === "SUPER_ADMIN") {
             redirect = "/admin/dashboard/organization";
           } else if (user.role !== "USER") {

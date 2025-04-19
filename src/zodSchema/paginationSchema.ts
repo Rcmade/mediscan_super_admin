@@ -26,6 +26,7 @@ export const paginationSchema = z
         message: "Invalid endOfDay",
       })
       .optional(),
+    appointmentStatus: z.string().optional(),
   })
   .transform((data) => {
     const result: {
@@ -35,6 +36,7 @@ export const paginationSchema = z
       startTime: Date | undefined;
       endOfDay: Date | undefined;
       isGlobalSearch: boolean;
+      appointmentStatus?: string;
     } = {
       limit: data.limit,
       page: data.page,
@@ -42,6 +44,7 @@ export const paginationSchema = z
       startTime: data.startTime ? new Date(data.startTime) : undefined,
       endOfDay: data.endOfDay ? new Date(data.endOfDay) : undefined,
       isGlobalSearch: false,
+      appointmentStatus: data.appointmentStatus,
     };
 
     // Case 1: If search is not provided, and startTime and endOfDay are both invalid
@@ -177,7 +180,7 @@ export const transactionPaginationSchema = z
       fromDate: data.fromDate ? new Date(data.fromDate) : undefined,
       toDate: data.toDate ? new Date(data.toDate) : undefined,
       sortBy: data.sortBy as TransactionSortBy | undefined,
-      sortOrder: data.sortOrder as TransactionSortOrder | undefined
+      sortOrder: data.sortOrder as TransactionSortOrder | undefined,
     };
 
     // // Case 1: If search is not provided, and fromDate and toDate are both invalid
@@ -265,7 +268,9 @@ export const transactionPaginationSchema = z
     return result;
   });
 
-export type TransactionPaginationSchemaT = z.infer<typeof transactionPaginationSchema>;
+export type TransactionPaginationSchemaT = z.infer<
+  typeof transactionPaginationSchema
+>;
 // const testData = [
 //   {
 //     input: {
@@ -401,5 +406,4 @@ export type TransactionPaginationSchemaT = z.infer<typeof transactionPaginationS
 
 // testData.forEach(({ input, expectedResult }) => {
 //   const result = paginationSchema.parse(input);
-//   console.log({ result, expectedResult });
 // });

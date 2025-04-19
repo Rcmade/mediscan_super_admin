@@ -49,11 +49,9 @@ export const enrollmentSchema = z.object({
 // testCases.forEach((testCase) => {
 //   const result = enrollmentSchema.safeParse(testCase);
 
-//   console.log(`Test Case: ${JSON.stringify(testCase)}`);
 //   if (!result.success) {
 //     console.error(result.error.errors);
 //   } else {
-//     console.log(result.data); // Process the valid data
 //   }
 // });
 

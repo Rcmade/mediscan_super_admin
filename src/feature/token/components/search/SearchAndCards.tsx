@@ -24,6 +24,7 @@ const SearchAndCards = () => {
     startTime: startTime
       ? startOfDay(startTime).toISOString()
       : startOfDay(new Date()).toISOString(),
+    appointmentStatus: searchParams.get("appointmentStatus") || "Scheduled",
   });
   const [editAppointmentId, setEditAppointmentId] = useState("");
 

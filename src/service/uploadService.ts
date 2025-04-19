@@ -14,7 +14,6 @@ export class CloudinaryService {
    */
   async signUploadRequest(paramsToSign: Record<string, string>) {
     // Sign the request using Cloudinary API secret
-    // console.log(process.env.CLOUDINARY_API_SECRET);
     const signature = cloudinary.utils.api_sign_request(
       paramsToSign,
       process.env.CLOUDINARY_API_SECRET as string,

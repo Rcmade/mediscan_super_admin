@@ -7,7 +7,7 @@ const layout = async ({ children }: Children) => {
   const user = await currentUser();
   if (user) return redirect("/", RedirectType.replace);
   return (
-    <div className="flex min-h-screen justify-center">
+    <div className="flex justify-center">
       <div className="my-8 max-h-fit w-full max-w-md rounded-lg border p-8 shadow-md">
         {children}
       </div>

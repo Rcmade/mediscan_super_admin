@@ -23,7 +23,7 @@ const EditableOrgCard = ({
           // target="_blank"
           className="flex max-w-fit items-center gap-2 whitespace-nowrap text-lg font-medium text-blue-600 dark:text-blue-400"
         >
-          <span className="max-w-16 truncate">{org.doctorWebName}</span>
+          <span className="max-w-24 truncate">{org.doctorWebName}</span>
           <ExternalLink className="size-4" />
         </Link>
         <p className="text-sm text-muted-foreground">ID: {org.id}</p>

@@ -55,6 +55,7 @@ export const useEnrollForm = (
       queryClient.invalidateQueries({ queryKey: ["userTokens"] });
       const hash = data[APPOINTMENT_ID_HASH_NAME];
       replace(`/o/${webName}/enroll/pay/${encodeURIComponent(hash)}`);
+
       // push(`/token/t/${data.phone}`);
     },
     onError: (error) => {

@@ -55,7 +55,7 @@ export default function OrgPaymentClientComponent({
 }: OrgPaymentClientComponent) {
   const searchParams = useSearchParams();
 
-  const { updateSearchParams } = useUpdateSearchParams();
+  const { updateSearchParams } = useUpdateSearchParams(true);
   const { data } = useViewDueTransaction();
 
   const [filters, setFilters] = useState<TransactionRequestType["query"]>({

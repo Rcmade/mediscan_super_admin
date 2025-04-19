@@ -23,6 +23,7 @@ import { currentUser } from "@/action/currentUser";
 import { deleteCldResources } from "@/lib/utils/serverCldUtils";
 import { getCloudinaryId } from "@/lib/utils/cloudinaryUtils";
 import { isValidDate } from "@/lib/utils/dateUtils";
+import { appointmentStatusArr } from "@/constant";
 
 export const tokenRoute = new Hono()
   .get("/recent/:phoneNo", async (c) => {
@@ -145,6 +146,7 @@ export const tokenRoute = new Hono()
       startTime: startTimeString,
       endOfDay: endOfDayString,
       isGlobalSearch,
+      appointmentStatus,
     } = paginationSchema.parse(query);
     // Pagination calculations
     const offset = (page - 1) * limit;
@@ -168,6 +170,14 @@ export const tokenRoute = new Hono()
           endOfDayString && lte(appointments.createdAt, endOfDayString),
         );
 
+    type AppointmentStatusT = (typeof appointmentStatusArr)[number];
+    const appointmentStatusSelected: AppointmentStatusT =
+      appointmentStatus &&
+      appointmentStatusArr.includes(appointmentStatus as AppointmentStatusT)
+        ? (appointmentStatus as AppointmentStatusT)
+        : "Scheduled";
+
+
     try {
       // Fetch scheduled and today's appointments in a single query
       const [appointmentsData, totalRecords] = await Promise.all([
@@ -190,7 +200,8 @@ export const tokenRoute = new Hono()
           )
           .where(
             and(
-              eq(appointments.appointmentStatus, "Scheduled"),
+              // eq(appointments.appointmentStatus, "Scheduled"),
+              eq(appointments.appointmentStatus, appointmentStatusSelected),
               eq(organizations.doctorWebName, webName),
               baseConditions,
               todayConditions,
@@ -209,6 +220,7 @@ export const tokenRoute = new Hono()
           ) // Filter count by `webName`
           .where(
             and(
+              eq(appointments.appointmentStatus, appointmentStatusSelected),
               eq(organizations.doctorWebName, webName),
               baseConditions,
               todayConditions,

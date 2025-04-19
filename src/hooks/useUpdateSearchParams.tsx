@@ -1,5 +1,5 @@
 import { useRouter, useSearchParams } from "next/navigation";
-const useUpdateSearchParams = () => {
+const useUpdateSearchParams = (replace = false) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -14,6 +14,10 @@ const useUpdateSearchParams = () => {
         params.delete(key);
       }
     });
+    if (replace) {
+      router.replace(`?${params.toString()}`);
+      return;
+    }
     router.push(`?${params.toString()}`);
   };
 
