@@ -10,6 +10,7 @@ import EditableAppointmentCard from "@/feature/token/components/card/EditableApp
 import EditAppointmentDialog from "../dialog/EditAppointmentDialog";
 import { useState } from "react";
 import { startOfDay } from "date-fns";
+import useWebName from "@/hooks/useWebName";
 
 const SearchAndCards = () => {
   const searchParams = useSearchParams();
@@ -28,7 +29,7 @@ const SearchAndCards = () => {
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "10", 10);
-
+  const { webName } = useWebName();
   const handleEdit = (id: string) => {
     setEditAppointmentId(id);
   };
@@ -59,6 +60,7 @@ const SearchAndCards = () => {
                     key={appointment.id}
                     appointment={appointment}
                     onEdit={handleEdit}
+                    webName={webName}
                   />
                 ))}
           </div>

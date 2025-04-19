@@ -281,13 +281,13 @@ const EditAppointmentForm = ({
           )}
         />
 
-        <Button spinner type="button" className="w-full" disabled={isLoading}>
+        {/* <Button spinner type="button" className="w-full" disabled={isLoading}>
           Save and Add Payment
-        </Button>
+        </Button> */}
 
-        <div className="relative flex w-full justify-center border-b border-input">
+        {/* <div className="relative flex w-full justify-center border-b border-input">
           <span className="absolute -top-3 bg-background px-4">OR</span>
-        </div>
+        </div> */}
         <Button spinner type="submit" className="w-full" disabled={isLoading}>
           Confirm
         </Button>

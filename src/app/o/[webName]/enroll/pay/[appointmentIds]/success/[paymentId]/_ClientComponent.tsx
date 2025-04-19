@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Printer } from "lucide-react";
 // import { format } from "date-fns";
 // import { jsPDF } from "jspdf";
@@ -17,8 +17,17 @@ const ClientComponent = ({
 }: Children & { paymentId: string }) => {
   //   const [isDownloading, setIsDownloading] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const receiptRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+
+    return () => {};
+  }, []);
+
+  if (!isMounted) return null;
 
   //   const { webName } = useWebName();
   //   const handleDownloadReceipt = async () => {

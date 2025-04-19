@@ -1,16 +1,19 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { UseSearchTokenResponseT } from "../../hook/useSearchToken";
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+import { Edit, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formateReadableDateTime } from "@/lib/utils/dateUtils";
+import Link from "next/link";
 
 const EditableAppointmentCard = ({
   appointment,
   onEdit,
+  webName,
 }: {
   appointment: UseSearchTokenResponseT["data"][number];
   onEdit: (id: string) => void;
+  webName: string;
 }) => (
   <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
     <CardContent className="flex justify-between gap-2 p-2 sm:p-4">
@@ -41,6 +44,13 @@ const EditableAppointmentCard = ({
         >
           <Edit />
         </Button>
+        <Link
+          href={`/admin/dashboard/organization/o/${webName}/pay/a/${appointment.id}`}
+          className="flex gap-2 text-blue-500"
+          target="_blank"
+        >
+          Payment <ExternalLink />
+        </Link>
 
         <p className="text-sm">
           {formateReadableDateTime(appointment.createdAt)}

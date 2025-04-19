@@ -1,4 +1,4 @@
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { signUpSchema, SignUpSchemaT } from "@/zodSchema/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";

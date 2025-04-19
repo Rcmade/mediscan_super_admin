@@ -1,4 +1,4 @@
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";

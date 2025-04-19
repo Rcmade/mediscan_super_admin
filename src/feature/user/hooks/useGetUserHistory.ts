@@ -1,4 +1,4 @@
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { useQuery } from "@tanstack/react-query";
 import { InferResponseType } from "hono";
 

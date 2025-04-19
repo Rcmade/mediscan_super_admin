@@ -30,6 +30,7 @@ export const userRoleArr = [
 ] as const;
 
 // Do not change the order of this array, and do not change it will also change the database schema
+// export const paymentMethodsArr = ["ONLINE", "CASH"] as const;
 export const paymentMethodsArr = ["ONLINE", "CASH"] as const;
 
 export const paymentStatusArr = ["PENDING", "COMPLETED", "FAILED"] as const;

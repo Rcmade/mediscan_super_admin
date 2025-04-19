@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { APPOINTMENT_ID_HASH_NAME } from "@/constant";
 import PaymentTabsSection from "@/feature/payments/appointmentPayments/components/sections/PaymentTabsSection";
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 import { PagePropsPromise } from "@/types";
 import { CreditCard, Package, Receipt, User } from "lucide-react";

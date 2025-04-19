@@ -9,6 +9,7 @@ import {
   unique,
   boolean,
   AnyPgColumn,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { nId } from "@/lib/utils/dbUtils";
 import {
@@ -150,19 +151,28 @@ export const appointmentPayments = pgTable("appointment_payments", {
   paymentMethod: paymentMethodsEnum("payment_method").notNull(),
   paymentStatus: paymentStatus("payment_status").default("PENDING"),
   razorpayOrderId: text("razorpay_order_id"),
+  // appointmentIds: text("appointment_ids"),
 });
 
-export const appointmentPaymentLink = pgTable("payment_appointments_link", {
-  ...commonFields,
-  userId,
-  paymentId: text("payment_id")
-    .notNull()
-    .references(() => appointmentPayments.id, { onDelete: "no action" }),
-  appointmentId: text("appointment_id")
-    .notNull()
-    .references(() => appointments.id, { onDelete: "no action" }),
-  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-});
+export const appointmentPaymentLinks = pgTable(
+  "appointment_payment_links",
+  {
+    // ...commonFields,
+    userId,
+    paymentId: text("payment_id")
+      .notNull()
+      .references(() => appointmentPayments.id, { onDelete: "no action" }),
+    appointmentId: text("appointment_id")
+      .notNull()
+      .references(() => appointments.id, { onDelete: "no action" }),
+    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({
+      columns: [t.appointmentId, t.paymentId],
+    }),
+  }),
+);
 
 export const orgBusinessProfile = pgTable("org_business_profile", {
   ...commonFields,

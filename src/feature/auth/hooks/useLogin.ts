@@ -1,5 +1,5 @@
 import { OTP_HASH_NAME } from "@/constant";
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { LoginVerificationStage } from "@/types/enum";
 import { loginSchema, LoginSchemaT } from "@/zodSchema/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";

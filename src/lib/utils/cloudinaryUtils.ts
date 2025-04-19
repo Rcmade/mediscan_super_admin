@@ -1,7 +1,7 @@
 import { CLOUDINARY_REGEX, CLOUDINARY_UPLOAD_URL } from "@/constant";
 import { SignatureReturnT } from "@/types";
 import axios from "axios";
-import { client } from "../rcp";
+import { client } from "../rpc";
 import imageCompression from "browser-image-compression";
 
 export const getCloudinaryId = (link: string) => {

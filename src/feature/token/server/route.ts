@@ -274,6 +274,7 @@ export const tokenRoute = new Hono()
         .limit(1);
 
       if (
+        permissionUser.role !== "SUPER_ADMIN" &&
         permissionUser.role !== "ADMIN" &&
         permissionUser.role !== "RECEPTIONIST"
       ) {

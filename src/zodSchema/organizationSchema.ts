@@ -11,7 +11,7 @@ import {
 
 export const createOrgSchema = z.object({
   doctorName: z.string().nonempty(),
-  email: z.string().email().nonempty(),
+  orgEmail: z.string().email().nonempty(),
   // Work as business legal name
   doctorWebName: z.string().nonempty().min(4).max(200),
   serviceStartDate: z.coerce.date(),

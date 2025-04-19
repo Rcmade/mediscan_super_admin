@@ -1,4 +1,4 @@
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { InferRequestType, InferResponseType } from "hono";
 
 export type DashboardStatsResponseT = InferResponseType<

@@ -80,15 +80,14 @@ export default function AddEditOrgForm() {
         />
         <FormField
           control={form.control}
-          name="email"
+          name="orgEmail"
           render={({ field }) => (
             <FormItem>
-              <FormLabel isRequiredField>Email</FormLabel>
+              <FormLabel isRequiredField>Org Email</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
                   placeholder="example@example.com"
-                  readOnly={orgInfo?.type === "edit"}
                   {...field}
                 />
               </FormControl>

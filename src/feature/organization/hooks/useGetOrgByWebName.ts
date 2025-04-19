@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { InferResponseType } from "hono";
 import { toast } from "sonner";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";

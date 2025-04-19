@@ -98,17 +98,17 @@ export const topNavMenu: TopNavT[] = [
   },
 
   {
-    title: "Overview",
-    url: "/overview",
-    accessBy: ["ADMIN", "RECEPTIONIST"],
-    icon: Eclipse,
-  },
-
-  {
     title: "Transaction",
     url: "/transaction",
     accessBy: ["ADMIN"],
     icon: PieChart,
+  },
+
+  {
+    title: "Overview",
+    url: "/overview",
+    accessBy: ["ADMIN", "RECEPTIONIST"],
+    icon: Eclipse,
   },
 
   // {

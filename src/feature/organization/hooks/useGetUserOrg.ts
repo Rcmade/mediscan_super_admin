@@ -1,5 +1,5 @@
 import { InferResponseType } from "hono";
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 // import { toast } from "sonner";

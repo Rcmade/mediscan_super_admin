@@ -81,6 +81,7 @@ const organizationRoutes = new Hono()
         .insert(organizations)
         .values({
           ...rest,
+          orgEmail:rest.orgEmail,
           doctorWebName: rest.doctorWebName.toLowerCase(),
           serviceEndDate,
           serviceStartDate,
@@ -247,7 +248,13 @@ const organizationRoutes = new Hono()
           }
         }
 
-        return c.json({ message: `Organization updated` }, 200);
+        return c.json(
+          {
+            message: `Organization updated`,
+            doctorWebName: updatedOrg.doctorWebName,
+          },
+          200,
+        );
       } catch (error) {
         const err = formatError(error);
         return c.json({ error: err.message }, err.statusCode);
@@ -322,7 +329,7 @@ const organizationRoutes = new Hono()
           userLimit: organizations.userLimit,
           name: users.name,
           phone: users.phone,
-          email: organizations.orgEmail,
+          orgEmail: organizations.orgEmail,
           businessType: organizations.businessType,
         })
 

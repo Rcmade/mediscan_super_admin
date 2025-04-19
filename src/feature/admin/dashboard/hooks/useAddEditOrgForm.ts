@@ -7,7 +7,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -47,7 +47,7 @@ const useAddEditOrgForm = () => {
         serviceEndDate: orgInfo.orgInfo.serviceEndDate
           ? new Date(orgInfo.orgInfo.serviceEndDate)
           : undefined,
-        email: orgInfo.orgInfo.email || "",
+        orgEmail: orgInfo.orgInfo.orgEmail || "",
         businessType: (orgInfo.orgInfo.businessType ||
           "individual") as (typeof businessTypeArr)[number],
         // transaction: {
@@ -62,7 +62,7 @@ const useAddEditOrgForm = () => {
     }
     return {
       doctorName: "",
-      email: "",
+      orgEmail: "",
       doctorWebName: "",
       phone: "+91",
       userLimit: 1,
@@ -136,16 +136,13 @@ const useAddEditOrgForm = () => {
 
       queryClient.invalidateQueries({ queryKey: ["organizations"] });
 
-      if (orgInfo?.type === "edit") {
-      } else {
-        if ("doctorWebName" in data) {
-          // push(
-          //   `/admin/dashboard/organization/o/${data.doctorWebName}/business-profile`,
-          // );
-          push(
-            `/admin/dashboard/organization/o/${data.doctorWebName}/transaction`,
-          );
-        }
+      if ("doctorWebName" in data) {
+        // push(
+        //   `/admin/dashboard/organization/o/${data.doctorWebName}/business-profile`,
+        // );
+        push(
+          `/admin/dashboard/organization/o/${data.doctorWebName}/transaction`,
+        );
       }
 
       setTimeout(() => {

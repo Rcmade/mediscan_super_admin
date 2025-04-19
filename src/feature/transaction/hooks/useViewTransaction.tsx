@@ -1,4 +1,4 @@
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
 import { useSearchParams } from "next/navigation";

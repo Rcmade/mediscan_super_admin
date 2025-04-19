@@ -1,5 +1,5 @@
 import useWebName from "@/hooks/useWebName";
-import { client } from "@/lib/rcp";
+import { client } from "@/lib/rpc";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 import {
   BusinessProfileFormValues,
