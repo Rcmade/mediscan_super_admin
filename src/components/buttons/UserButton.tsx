@@ -56,7 +56,9 @@ export const UserButton = () => {
               </Link>
             </DropdownMenuItem>
 
-            {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") &&
+            {(user.role === "ADMIN" ||
+              user?.role === "RECEPTIONIST" ||
+              user.role === "SUPER_ADMIN") &&
               data?.organizations?.webName && (
                 <>
                   <DropdownMenuItem

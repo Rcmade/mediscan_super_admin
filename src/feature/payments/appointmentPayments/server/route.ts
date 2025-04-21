@@ -476,15 +476,6 @@ const appointmentPaymentRoutes = new Hono()
         sortOrder = "desc",
       } = appointmentPaginationSchema.parse(c.req.valid("query"));
 
-      console.log({
-        limit,
-        page,
-        search,
-        fromDate,
-        toDate,
-        sortBy,
-        sortOrder,
-      });
 
       const offset = (page - 1) * limit;
 
@@ -560,7 +551,6 @@ const appointmentPaymentRoutes = new Hono()
             .where(and(...filters))
             .execute(),
         ]);
-        console.log(JSON.stringify(data, null, 2));
 
         return c.json({
           data,
