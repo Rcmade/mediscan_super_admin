@@ -8,6 +8,12 @@ import {
   transactionSortOrderArr,
 } from "@/content/transactionContent";
 import { tableLimitArr } from "@/content";
+import {
+  AppointmentPaymentSortBy,
+  appointmentPaymentSortByArr,
+  AppointmentPaymentSortOrder,
+  appointmentPaymentSortOrderArr,
+} from "@/content/appointmentPaymentContent";
 
 export const paginationSchema = z
   .object({
@@ -271,139 +277,47 @@ export const transactionPaginationSchema = z
 export type TransactionPaginationSchemaT = z.infer<
   typeof transactionPaginationSchema
 >;
-// const testData = [
-//   {
-//     input: {
-//       limit: 20,
-//       page: 1,
-//       // search: "test",
-//       // startTime: "2024-12-28T00:00:00",
-//     },
-//     expectedResult: {
-//       limit: 20,
-//       page: 1,
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: undefined,
-//       isGlobalSearch: false,
-//     },
-//   },
-//   {
-//     input: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: null,
-//       endOfDay: null,
-//     },
-//     expectedResult: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: undefined,
-//       endOfDay: undefined,
-//       isGlobalSearch: true,
-//     },
-//   },
-//   {
-//     input: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: "2024-12-28T23:59:59",
-//     },
-//     expectedResult: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: "2024-12-28T23:59:59",
-//       isGlobalSearch: false,
-//     },
-//   },
-//   {
-//     input: {
-//       limit: 20,
-//       page: 1,
-//       startTime: "2024-12-28T00:00:00",
-//     },
-//     expectedResult: {
-//       limit: 20,
-//       page: 1,
-//       search: "",
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: undefined,
-//       isGlobalSearch: false,
-//     },
-//   },
-//   {
-//     input: {
-//       limit: 20,
-//       page: 1,
-//       endOfDay: "2024-12-28T23:59:59",
-//     },
-//     expectedResult: {
-//       limit: 20,
-//       page: 1,
-//       search: "",
-//       startTime: undefined,
-//       endOfDay: "2024-12-28T23:59:59",
-//       isGlobalSearch: false,
-//     },
-//   },
-//   {
-//     input: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: null,
-//     },
-//     expectedResult: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: undefined,
-//       isGlobalSearch: false,
-//     },
-//   },
-//   {
-//     input: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: "2024-12-28T23:59:59",
-//     },
-//     expectedResult: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: "2024-12-28T23:59:59",
-//       isGlobalSearch: false,
-//     },
-//   },
-//   {
-//     input: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: "2024-12-28T23:59:59",
-//     },
-//     expectedResult: {
-//       limit: 20,
-//       page: 1,
-//       search: "test",
-//       startTime: "2024-12-28T00:00:00",
-//       endOfDay: "2024-12-28T23:59:59",
-//       isGlobalSearch: false,
-//     },
-//   },
-// ];
 
-// testData.forEach(({ input, expectedResult }) => {
-//   const result = paginationSchema.parse(input);
-// });
+export const appointmentPaginationSchema = z
+  .object({
+    limit: z.coerce.number().int().positive().default(tableLimitArr[0]),
+    page: z.coerce.number().int().positive().default(1),
+    search: z.string().optional(),
+    fromDate: z
+      .union([z.string(), z.date(), z.null(), z.undefined()])
+      .refine((val) => !val || isValidDate(val), {
+        message: "Invalid startTime",
+      })
+      .optional(),
+    toDate: z
+      .union([z.string(), z.date(), z.null(), z.undefined()])
+      .refine((val) => !val || isValidDate(val), {
+        message: "Invalid endOfDay",
+      })
+      .optional(),
+
+    sortBy: z.enum(appointmentPaymentSortByArr).optional().nullable(),
+    sortOrder: z.enum(appointmentPaymentSortOrderArr).optional().nullable(),
+  })
+  .transform((data) => {
+    const result: {
+      limit: number;
+      page: number;
+      search: string;
+      fromDate: Date | undefined;
+      toDate: Date | undefined;
+      sortBy: AppointmentPaymentSortBy | undefined;
+      sortOrder: AppointmentPaymentSortOrder | undefined;
+    } = {
+      ...data,
+      limit: data.limit,
+      page: data.page,
+      search: data.search || "", // Default to empty string if search is not provided
+      fromDate: data.fromDate ? new Date(data.fromDate) : undefined,
+      toDate: data.toDate ? new Date(data.toDate) : undefined,
+      sortBy: data.sortBy as AppointmentPaymentSortBy | undefined,
+      sortOrder: data.sortOrder as AppointmentPaymentSortOrder | undefined,
+    };
+
+    return result;
+  });

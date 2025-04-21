@@ -7,7 +7,13 @@ import { validateDateRange } from "@/zodSchema";
 import SendService from "@/service/sendService";
 import { createOrgSchema } from "@/zodSchema/organizationSchema";
 import { zValidator } from "@hono/zod-validator";
-import { desc, eq, ilike, or, sql } from "drizzle-orm";
+import {
+  desc,
+  eq,
+  //  ilike,
+  or,
+  sql,
+} from "drizzle-orm";
 import { Hono } from "hono";
 import { paginationSchema } from "@/zodSchema/paginationSchema";
 import { formatError } from "@/lib/utils/stringUtils";
@@ -81,7 +87,7 @@ const organizationRoutes = new Hono()
         .insert(organizations)
         .values({
           ...rest,
-          orgEmail:rest.orgEmail,
+          orgEmail: rest.orgEmail,
           doctorWebName: rest.doctorWebName.toLowerCase(),
           serviceEndDate,
           serviceStartDate,
@@ -271,7 +277,9 @@ const organizationRoutes = new Hono()
       // Search conditions
       const searchCondition = search
         ? or(
-            ilike(organizations.doctorWebName, `%${search}%`),
+            // ilike(organizations.doctorWebName, `%${search}%`),
+            sql`LOWER(${organizations.doctorWebName}) LIKE LOWER(${`%${search}%`})`,
+
             // ilike(users.phone, `%${search}%`),
             // ilike(users.name, `%${search}%`),
           )

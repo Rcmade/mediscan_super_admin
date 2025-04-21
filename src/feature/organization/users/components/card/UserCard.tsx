@@ -15,6 +15,8 @@ interface UserCardProps {
   usersCount: number;
   onEdit: (user: useGetUsersResponseT["users"][number]) => void;
   onDelete: (user: useGetUsersResponseT["users"][number]) => void;
+  showEdit?: boolean;
+  showDelete?: boolean;
 }
 
 const UserCard: React.FC<UserCardProps> = ({
@@ -22,6 +24,8 @@ const UserCard: React.FC<UserCardProps> = ({
   usersCount,
   onEdit,
   onDelete,
+  showEdit = true,
+  showDelete = true,
 }) => {
   return (
     <Card key={user.userId} className="overflow-hidden">
@@ -38,11 +42,13 @@ const UserCard: React.FC<UserCardProps> = ({
         </div>
       </CardContent>
       <CardFooter className="flex justify-end gap-2 pt-0">
-        <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit
-        </Button>
-        {usersCount >= 2 && (
+        {showEdit && (
+          <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
+        )}
+        {usersCount >= 2 && showDelete && (
           <Button
             variant="outline"
             size="sm"

@@ -11,6 +11,7 @@ import useWebName from "@/hooks/useWebName";
 import { userRoleLimitedAccess } from "@/constant";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import useDeleteOrgUser from "@/feature/organization/users/hooks/useDeleteOrgUser";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const AddEditOrgUserDialog = dynamic(
   () =>
@@ -30,6 +31,7 @@ const ViewUsers = () => {
   const { webName } = useWebName();
   const onOpen = useAddEditOrgUserDialog((s) => s.onOpen);
 
+  const currentUser = useCurrentUser();
   const { showAlertDialog, setAlertDialogLoading, closeAlertDialog } =
     useAlertDialog();
   const { mutateAsync: deleteMutateAsync } = useDeleteOrgUser();
@@ -99,6 +101,18 @@ const ViewUsers = () => {
                   },
                 });
               }}
+              showEdit={
+                !!(
+                  currentUser?.role === "ADMIN" ||
+                  currentUser?.role === "SUPER_ADMIN"
+                )
+              }
+              showDelete={
+                !!(
+                  currentUser?.role === "ADMIN" ||
+                  currentUser?.role === "SUPER_ADMIN"
+                )
+              }
             />
           ))}
         </div>

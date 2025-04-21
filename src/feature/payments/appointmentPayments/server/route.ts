@@ -5,6 +5,7 @@ import {
   appointmentPaymentLinks,
   appointmentPayments,
   appointments,
+  organizations,
   users,
 } from "@/lib/db/schema";
 import { decryptAppointmentIds } from "@/lib/utils/encryptionFormatDataUtils";
@@ -16,12 +17,14 @@ import {
   appointmentPaymentInitiateSchema,
 } from "@/zodSchema/payments/appointmentPaymentSchema";
 import { zValidator } from "@hono/zod-validator";
-import { and, eq, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, lte, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import Razorpay from "razorpay";
 import type { Orders } from "razorpay/dist/types/orders";
 import { updateAppointmentPaymentStatus } from "../queries/appointmentQueries";
 import { formatError } from "@/lib/utils/stringUtils";
+import { appointmentPaginationSchema } from "@/zodSchema/paginationSchema";
+import { tableLimitArr } from "@/content";
 
 const appointmentPaymentRoutes = new Hono()
   .post(
@@ -56,16 +59,13 @@ const appointmentPaymentRoutes = new Hono()
           return c.json({ error: "No appointments found" }, 404);
         }
 
-
         const { appointmentWithCost, totalCost } =
           calculateTotalAppointmentCost(appointmentsDb);
 
         const organizationId = appointmentsDb[0].organizationId;
         const userId = appointmentsDb[0].userId;
 
-
         const paymentMethod = body.paymentMethods; // "ONLINE" | "CASH"
-
 
         const instance = new Razorpay({
           key_id: process.env.NEXT_PUBLIC_RAZORPAY_ID as string,
@@ -112,13 +112,11 @@ const appointmentPaymentRoutes = new Hono()
           return { paymentId: paymentRecord.id };
         });
 
-
         const [userInfo] = await db
           .select()
           .from(users)
           .where(eq(users.id, userId))
           .limit(1);
-
 
         return c.json({
           message:
@@ -459,6 +457,122 @@ const appointmentPaymentRoutes = new Hono()
       } catch (error) {
         const err = formatError(error);
         return c.json({ error: err.message }, err.statusCode);
+      }
+    },
+  )
+  .get(
+    "/o/:doctorWebName",
+    zValidator("query", appointmentPaginationSchema),
+    async (c) => {
+      const doctorWebName = c.req.param("doctorWebName");
+
+      const {
+        limit = tableLimitArr[0],
+        page = 1,
+        search,
+        fromDate,
+        toDate,
+        sortBy = "createdAt",
+        sortOrder = "desc",
+      } = appointmentPaginationSchema.parse(c.req.valid("query"));
+
+      console.log({
+        limit,
+        page,
+        search,
+        fromDate,
+        toDate,
+        sortBy,
+        sortOrder,
+      });
+
+      const offset = (page - 1) * limit;
+
+      try {
+        let query = db
+          .select({
+            payment: {
+              id: appointmentPayments.id,
+              totalAmount: appointmentPayments.totalAmount,
+              paymentStatus: appointmentPayments.paymentStatus,
+              createdAt: appointmentPayments.createdAt,
+              organizationId: appointmentPayments.organizationId,
+            },
+            appointment: {
+              id: appointments.id,
+              patientName: appointments.patientName,
+            },
+            organization: {
+              doctorWebName: organizations.doctorWebName,
+            },
+          })
+          .from(appointmentPayments)
+          .innerJoin(
+            appointments,
+            eq(appointmentPayments.userId, appointments.userId),
+          )
+          .innerJoin(
+            organizations,
+            eq(appointmentPayments.organizationId, organizations.id),
+          )
+          .$dynamic();
+
+        // Filters
+        const filters = [eq(organizations.doctorWebName, doctorWebName)];
+
+        if (search) {
+          filters.push(
+            sql`LOWER(${appointments.patientName}) LIKE LOWER(${`%${search}%`})`,
+          );
+        }
+        if (fromDate) {
+          filters.push(gte(appointmentPayments.createdAt, new Date(fromDate)));
+        }
+
+        if (toDate) {
+          filters.push(lte(appointmentPayments.createdAt, new Date(toDate)));
+        }
+
+        if (filters.length > 0) {
+          query = query.where(and(...filters));
+        }
+
+        // Sorting
+        query = query.orderBy(
+          sortOrder === "desc"
+            ? desc(appointmentPayments[sortBy])
+            : asc(appointmentPayments[sortBy]),
+        );
+
+        const [data, total] = await Promise.all([
+          query.offset(offset).limit(limit).execute(),
+          db
+            .select({ total: count() })
+            .from(appointmentPayments)
+            .innerJoin(
+              appointments,
+              eq(appointmentPayments.userId, appointments.userId),
+            )
+            .innerJoin(
+              organizations,
+              eq(appointmentPayments.organizationId, organizations.id),
+            )
+            .where(and(...filters))
+            .execute(),
+        ]);
+        console.log(JSON.stringify(data, null, 2));
+
+        return c.json({
+          data,
+          pagination: {
+            page,
+            limit,
+            total: total[0]?.total || 0,
+          },
+        });
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        return c.json({ error: "Something went wrong" }, 500);
       }
     },
   );

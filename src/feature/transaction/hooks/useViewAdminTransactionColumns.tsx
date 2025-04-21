@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { ClockIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getInitials } from "@/lib/utils/stringUtils";
@@ -6,9 +6,11 @@ import { formatDate } from "@/lib/utils/dateUtils";
 import { TransactionResponseType } from "./useViewTransaction";
 import useAddEditTransactionDialog from "./useAddEditTransactionDialog";
 import { Button } from "@/components/ui/button";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const useViewAdminTransactionColumns = () => {
   const onOpen = useAddEditTransactionDialog((s) => s.onOpen);
+  const user = useCurrentUser();
   // const onEditEmployee = useEditEmployeeDialog((s) => s.onOpen);
 
   /* 
@@ -100,35 +102,68 @@ const useViewAdminTransactionColumns = () => {
         </Badge>
       ),
     },
-    {
-      id: "actions",
-      header: "Action",
-      cell: ({ row }) => {
-        return (
-          <>
-            <Button
-              onClick={() => {
-                onOpen({
-                  type: "edit",
-                  webName: row.original.organization.doctorWebName,
-                  transactionInfo: {
-                    id: row.original.transaction.id,
-                    total: row.original.transaction.total,
-                    paid: row.original.transaction.paid,
-                    due: row.original.transaction.due,
-                    createdAt: row.original.transaction.createdAt,
-                    updatedAt: row.original.transaction.updatedAt,
-                    organizationId: row.original.organization.id,
-                  },
-                });
-              }}
-            >
-              Edit
-            </Button>
-          </>
-        );
-      },
-    },
+    // {
+    //   id: "actions",
+    //   header: "Action",
+    //   cell: ({ row }) => {
+    //     return (
+    //       <>
+    //         { (
+    //           <Button
+    //             onClick={() => {
+    //               onOpen({
+    //                 type: "edit",
+    //                 webName: row.original.organization.doctorWebName,
+    //                 transactionInfo: {
+    //                   id: row.original.transaction.id,
+    //                   total: row.original.transaction.total,
+    //                   paid: row.original.transaction.paid,
+    //                   due: row.original.transaction.due,
+    //                   createdAt: row.original.transaction.createdAt,
+    //                   updatedAt: row.original.transaction.updatedAt,
+    //                   organizationId: row.original.organization.id,
+    //                 },
+    //               });
+    //             }}
+    //           >
+    //             Edit
+    //           </Button>
+    //         )}
+    //       </>
+    //     );
+    //   },
+    // },
+    ...(user?.role === "SUPER_ADMIN"
+      ? [
+          {
+            id: "actions",
+            header: "Action",
+            cell: (info: {
+              row: Row<TransactionResponseType["data"][number]>;
+            }) => (
+              <Button
+                onClick={() => {
+                  onOpen({
+                    type: "edit",
+                    webName: info.row.original.organization.doctorWebName,
+                    transactionInfo: {
+                      id: info.row.original.transaction.id,
+                      total: info.row.original.transaction.total,
+                      paid: info.row.original.transaction.paid,
+                      due: info.row.original.transaction.due,
+                      createdAt: info.row.original.transaction.createdAt,
+                      updatedAt: info.row.original.transaction.updatedAt,
+                      organizationId: info.row.original.organization.id,
+                    },
+                  });
+                }}
+              >
+                Edit
+              </Button>
+            ),
+          },
+        ]
+      : []),
   ];
   return { columns };
 };

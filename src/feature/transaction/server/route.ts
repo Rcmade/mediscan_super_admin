@@ -9,7 +9,6 @@ import { z } from "zod";
 import { orgTransactionSchema } from "@/zodSchema/transactionSchema";
 import { currentUser } from "@/action/currentUser";
 
-// Create Hono app
 export const transactionRoutes = new Hono()
   .get(
     "/:orgWebName",
@@ -532,4 +531,4 @@ export const transactionRoutes = new Hono()
       message: "Transaction created successfully",
       transaction: insertTransaction,
     });
-  });
+  })
