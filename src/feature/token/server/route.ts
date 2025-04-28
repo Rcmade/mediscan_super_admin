@@ -177,7 +177,6 @@ export const tokenRoute = new Hono()
         ? (appointmentStatus as AppointmentStatusT)
         : "Scheduled";
 
-
     try {
       // Fetch scheduled and today's appointments in a single query
       const [appointmentsData, totalRecords] = await Promise.all([
@@ -258,6 +257,7 @@ export const tokenRoute = new Hono()
         image: appointments.image,
         phone: users.phone,
         reasonForVisit: appointments.reasonForVisit,
+        reasonForVisitTypeId: appointments.reasonForVisitTypeId,
         createdAt: appointments.createdAt,
         id: appointments.id,
         revisitTime: appointments.revisitTime,
@@ -296,7 +296,7 @@ export const tokenRoute = new Hono()
       const {
         patientName,
         appointmentStatus,
-        reasonForVisit,
+        reasonForVisitTypeId,
         image,
         deletedImage,
         revisitTime = undefined,
@@ -327,7 +327,7 @@ export const tokenRoute = new Hono()
           .set({
             patientName: patientName,
             appointmentStatus,
-            reasonForVisit,
+            reasonForVisitTypeId,
             image: imgUrl,
             revisitTime:
               revisitTime && isValidDate(revisitTime)

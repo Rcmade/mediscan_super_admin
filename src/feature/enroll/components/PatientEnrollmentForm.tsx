@@ -22,9 +22,9 @@ import { useEnrollForm } from "../hooks/useEnrollForm";
 import { EnrollmentSchemaT } from "@/zodSchema/enrollmentSchema";
 import { useFieldArray } from "react-hook-form";
 import { PlusCircle, X } from "lucide-react";
-import { EnrollmentReasonT, UserRole } from "@/lib/db/schema";
-import { appointmentsReasons } from "@/constant";
+import { UserRole } from "@/lib/db/schema";
 import { Separator } from "@/components/ui/separator";
+import useViewAppointmentReasonType from "@/feature/appointmentReasonType/hooks/useViewAppointmentReasonType";
 
 interface PatientEnrollmentFormProps {
   defaultValue?: EnrollmentSchemaT;
@@ -37,6 +37,7 @@ export function PatientEnrollmentForm({
 }: PatientEnrollmentFormProps) {
   const { form, onSubmit, isLoading } = useEnrollForm(defaultValue, from);
 
+  const { data } = useViewAppointmentReasonType();
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "patients",
@@ -110,7 +111,7 @@ export function PatientEnrollmentForm({
               />
               <FormField
                 control={form.control}
-                name={`patients.${index}.reasonForVisit`}
+                name={`patients.${index}.reasonForVisitTypeId`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Reason for Visit</FormLabel>
@@ -119,14 +120,21 @@ export function PatientEnrollmentForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger disabled={isLoading}>
+                        <SelectTrigger
+                          className="capitalize"
+                          disabled={isLoading}
+                        >
                           <SelectValue placeholder="Select a reason" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {appointmentsReasons.map((reason) => (
-                          <SelectItem value={reason} key={reason}>
-                            {reason}
+                        {(data?.appointmentReasons || []).map((reason) => (
+                          <SelectItem
+                            value={reason.reasonId}
+                            key={reason.reasonId}
+                            className="capitalize"
+                          >
+                            {reason.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -150,7 +158,7 @@ export function PatientEnrollmentForm({
             onClick={() =>
               append({
                 patientName: "",
-                reasonForVisit: "" as EnrollmentReasonT,
+                reasonForVisitTypeId: "",
               })
             }
             disabled={isLoading}

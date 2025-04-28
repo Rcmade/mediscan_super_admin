@@ -18,7 +18,7 @@ const ViewHistoryCard = ({ appointment, onDownload }: ViewHistoryCardProps) => {
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg">{appointment.patientName}</CardTitle>
-          <Badge variant={appointment.reasonForVisit}>
+          <Badge>
             {appointment.reasonForVisit}
           </Badge>
         </div>

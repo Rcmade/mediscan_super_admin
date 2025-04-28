@@ -79,6 +79,7 @@ const page = async ({ params }: PagePropsPromise) => {
       </>
     );
   }
+
   return (
     <>
       <Script
@@ -122,7 +123,7 @@ const page = async ({ params }: PagePropsPromise) => {
                           <TableCell className="font-medium">
                             {item.appointment.patientName}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="capitalize">
                             {item.appointment.reasonForVisit}
                           </TableCell>
                           <TableCell>{item.appointment.tokenNumber}</TableCell>

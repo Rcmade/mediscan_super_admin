@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { phoneSchema } from ".";
-import { appointmentsReasons, appointmentStatusArr } from "@/constant";
+import { appointmentStatusArr } from "@/constant";
 
 export const appointmentSchema = z.object({
   image: z
@@ -16,8 +16,11 @@ export const appointmentSchema = z.object({
   patientName: z.string().min(2, {
     message: "Patient name must be at least 2 characters.",
   }),
-  reasonForVisit: z.enum(appointmentsReasons, {
-    required_error: "Please select a reason for visit.",
+  // reasonForVisit: z.enum(appointmentsReasons, {
+  //   required_error: "Please select a reason for visit.",
+  // }),
+  reasonForVisitTypeId: z.string().min(2, {
+    message: "Reason for visit must be at least 2 characters.",
   }),
   deletedImage: z.string().optional(),
   revisitTime: z

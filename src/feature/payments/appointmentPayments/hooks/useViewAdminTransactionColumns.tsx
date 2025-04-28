@@ -12,28 +12,31 @@ const useViewAppointmentPaymentColumns = () => {
   // const onEditEmployee = useEditEmployeeDialog((s) => s.onOpen);
 
   const columns: ColumnDef<AppointmentPaymentResponseType["data"][number]>[] = [
-    // {
-    //   accessorKey: "organization.doctorWebName",
-    //   header: "Doctor Web Name",
-    //   cell: ({ row }) => (
-    //     <div className="flex items-center space-x-2">
-    //       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-    //         <span className="text-sm font-medium text-primary">
-    //           {getInitials(row.original.organization.doctorWebName)}
-    //         </span>
-    //       </div>
-    //       <span className="font-medium">
-    //         {row.original.organization.doctorWebName}
-    //       </span>
-    //     </div>
-    //   ),
-    // },
+
+    {
+      accessorKey: "payment.id",
+      header: "Payment ID",
+      cell: ({ row }) => (
+        <div className="font-medium">{row.original.payment.id?.substring(0,8) || "N/A"}...</div>
+      ),
+    },
+
     {
       accessorKey: "appointment.patientName",
       header: "Patient Name",
       cell: ({ row }) => (
         <div className="font-medium">
           {row.original.appointment.patientName || "N/A"}
+        </div>
+      ),
+    },
+
+    {
+      accessorKey: "appointment.amount",
+      header: "Amount",
+      cell: ({ row }) => (
+        <div className="font-medium">
+          ₹{row.original.appointment.amount?.toLocaleString() || 0}
         </div>
       ),
     },

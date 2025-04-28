@@ -142,7 +142,7 @@ export function DataTable<TData, TValue>({
           value={pageSize.toString()}
           onValueChange={(value) => updateLimit(Number(value))}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger  className="w-[180px]">
             <SelectValue placeholder="Select page size" />
           </SelectTrigger>
           <SelectContent>

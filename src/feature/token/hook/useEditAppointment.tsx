@@ -22,7 +22,7 @@ export const useEditAppointment = ({
   appointmentStatus,
   patientName,
   phone,
-  reasonForVisit,
+  reasonForVisitTypeId,
   image,
   onSuccessFn,
   ...rest
@@ -37,7 +37,7 @@ export const useEditAppointment = ({
       appointmentStatus: appointmentStatus,
       image: image || "",
       phone: phone || "",
-      reasonForVisit,
+      reasonForVisitTypeId,
       ...rest,
     },
   });

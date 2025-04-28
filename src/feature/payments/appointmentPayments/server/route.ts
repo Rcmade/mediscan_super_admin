@@ -17,7 +17,20 @@ import {
   appointmentPaymentInitiateSchema,
 } from "@/zodSchema/payments/appointmentPaymentSchema";
 import { zValidator } from "@hono/zod-validator";
-import { and, asc, count, desc, eq, gte, lte, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  // count,
+  countDistinct,
+  desc,
+  eq,
+  gte,
+  lte,
+  or,
+  sql,
+  sum,
+} from "drizzle-orm";
 import { Hono } from "hono";
 import Razorpay from "razorpay";
 import type { Orders } from "razorpay/dist/types/orders";
@@ -25,6 +38,8 @@ import { updateAppointmentPaymentStatus } from "../queries/appointmentQueries";
 import { formatError } from "@/lib/utils/stringUtils";
 import { appointmentPaginationSchema } from "@/zodSchema/paginationSchema";
 import { tableLimitArr } from "@/content";
+import { dashboardStatsQuerySchema } from "@/zodSchema/dashboardStatsSchema";
+import { eachDayOfInterval, eachMonthOfInterval, format, parseISO } from "date-fns";
 
 const appointmentPaymentRoutes = new Hono()
   .post(
@@ -48,6 +63,7 @@ const appointmentPaymentRoutes = new Hono()
             reasonForVisit: appointments.reasonForVisit,
             tokenNumber: appointments.tokenNumber,
             organizationId: appointments.organizationId,
+            reasonForVisitTypeId: appointments.reasonForVisitTypeId,
             userId: appointments.userId,
           })
           .from(appointments)
@@ -60,12 +76,12 @@ const appointmentPaymentRoutes = new Hono()
         }
 
         const { appointmentWithCost, totalCost } =
-          calculateTotalAppointmentCost(appointmentsDb);
+          await calculateTotalAppointmentCost(appointmentsDb);
 
         const organizationId = appointmentsDb[0].organizationId;
         const userId = appointmentsDb[0].userId;
 
-        const paymentMethod = body.paymentMethods; // "ONLINE" | "CASH"
+        const paymentMethod = body.paymentMethods;
 
         const instance = new Razorpay({
           key_id: process.env.NEXT_PUBLIC_RAZORPAY_ID as string,
@@ -105,7 +121,7 @@ const appointmentPaymentRoutes = new Hono()
               appointmentId: appointment.appointment.id!,
               paymentId: paymentRecord.id,
               userId: userId!,
-              amount: String(appointment.cost?.price || 0),
+              amount: String(appointment.cost.price || 0),
             })),
           );
 
@@ -220,95 +236,7 @@ const appointmentPaymentRoutes = new Hono()
       return c.json({ error: err.message }, err.statusCode);
     }
   })
-  // .get("/view/a/:appointmentId", async (c) => {
-  //   const appointmentId = c.req.param("appointmentId");
-
-  //   const data = await db
-  //     .select({
-  //       payment: {
-  //         id: appointmentPayments.id,
-  //         totalAmount: appointmentPayments.totalAmount,
-  //         paymentMethod: appointmentPayments.paymentMethod,
-  //         paymentStatus: appointmentPayments.paymentStatus,
-  //         orgId: appointmentPayments.organizationId,
-  //         createdAt: appointmentPayments.createdAt,
-  //         updatedAt: appointmentPayments.updatedAt,
-  //       },
-  //       paymentLink: {
-  //         // id: appointmentPaymentLinks.id,
-  //         amount: appointmentPaymentLinks.amount,
-  //       },
-  //       appointment: {
-  //         id: appointments.id,
-  //         patientName: appointments.patientName,
-  //         reasonForVisit: appointments.reasonForVisit,
-  //         appointmentStatus: appointments.appointmentStatus,
-  //         tokenNumber: appointments.tokenNumber,
-  //         image: appointments.image,
-  //         isPaid: appointments.isPaid,
-  //       },
-  //       user: {
-  //         id: users.id,
-  //         name: users.name,
-  //         phone: users.phone,
-  //       },
-  //     })
-  //     .from(appointmentPaymentLinks)
-  //     .where(eq(appointmentPaymentLinks.appointmentId, appointmentId))
-  //     .innerJoin(
-  //       appointmentPayments,
-  //       eq(appointmentPayments.id, appointmentPaymentLinks.paymentId),
-  //     )
-  //     .innerJoin(
-  //       appointments,
-  //       eq(appointments.id, appointmentPaymentLinks.appointmentId),
-  //     )
-  //     .innerJoin(
-  //       users,
-  //       eq(users.id, appointments.userId), // assuming appointments.userId exists
-  //     );
-
-  //   const grouped = Object.values(
-  //     data.reduce(
-  //       (acc, row) => {
-  //         if (!row.payment) {
-  //           throw new Error(`Missing payment for appointment ${appointmentId}`);
-  //         }
-  //         const paymentId = row.payment.id;
-
-  //         if (!acc[paymentId]) {
-  //           acc[paymentId] = {
-  //             payment: row.payment,
-  //             user: row.user,
-  //             appointments: [],
-  //           };
-  //         }
-
-  //         acc[paymentId].appointments.push({
-  //           paymentLink: row.paymentLink,
-  //           appointment: row.appointment,
-  //         });
-
-  //         return acc;
-  //       },
-  //       {} as Record<
-  //         string,
-  //         {
-  //           payment: (typeof data)[0]["payment"];
-  //           user: (typeof data)[0]["user"];
-  //           appointments: {
-  //             paymentLink: (typeof data)[0]["paymentLink"];
-  //             appointment: (typeof data)[0]["appointment"];
-  //           }[];
-  //         }
-  //       >,
-  //     ),
-  //   );
-
-  //   const first = Object.values(grouped)[0];
-  //   return c.json({ data: first });
-  // })
-
+ 
   .get("/view/a/:appointmentId", async (c) => {
     const appointmentId = c.req.param("appointmentId");
 
@@ -465,7 +393,6 @@ const appointmentPaymentRoutes = new Hono()
     zValidator("query", appointmentPaginationSchema),
     async (c) => {
       const doctorWebName = c.req.param("doctorWebName");
-
       const {
         limit = tableLimitArr[0],
         page = 1,
@@ -476,10 +403,10 @@ const appointmentPaymentRoutes = new Hono()
         sortOrder = "desc",
       } = appointmentPaginationSchema.parse(c.req.valid("query"));
 
-
       const offset = (page - 1) * limit;
 
       try {
+        // Base query: select payment, appointment and organization fields
         let query = db
           .select({
             payment: {
@@ -492,6 +419,7 @@ const appointmentPaymentRoutes = new Hono()
             appointment: {
               id: appointments.id,
               patientName: appointments.patientName,
+              amount: appointmentPaymentLinks.amount,
             },
             organization: {
               doctorWebName: organizations.doctorWebName,
@@ -499,8 +427,12 @@ const appointmentPaymentRoutes = new Hono()
           })
           .from(appointmentPayments)
           .innerJoin(
+            appointmentPaymentLinks,
+            eq(appointmentPayments.id, appointmentPaymentLinks.paymentId),
+          )
+          .innerJoin(
             appointments,
-            eq(appointmentPayments.userId, appointments.userId),
+            eq(appointmentPaymentLinks.appointmentId, appointments.id),
           )
           .innerJoin(
             organizations,
@@ -508,7 +440,7 @@ const appointmentPaymentRoutes = new Hono()
           )
           .$dynamic();
 
-        // Filters
+        // Build WHERE filters
         const filters = [eq(organizations.doctorWebName, doctorWebName)];
 
         if (search) {
@@ -519,52 +451,589 @@ const appointmentPaymentRoutes = new Hono()
         if (fromDate) {
           filters.push(gte(appointmentPayments.createdAt, new Date(fromDate)));
         }
-
         if (toDate) {
           filters.push(lte(appointmentPayments.createdAt, new Date(toDate)));
         }
 
-        if (filters.length > 0) {
-          query = query.where(and(...filters));
-        }
+        // Apply filters, sorting, pagination
+        query = query
+          .where(and(...filters))
+          .orderBy(
+            sortOrder === "desc"
+              ? desc(appointmentPayments[sortBy])
+              : asc(appointmentPayments[sortBy]),
+          )
+          .offset(offset)
+          .limit(limit);
 
-        // Sorting
-        query = query.orderBy(
-          sortOrder === "desc"
-            ? desc(appointmentPayments[sortBy])
-            : asc(appointmentPayments[sortBy]),
-        );
+        // Count distinct payments for total
+        const countQuery = db
+          .select({ total: countDistinct(appointmentPayments.id) })
+          .from(appointmentPayments)
+          .innerJoin(
+            appointmentPaymentLinks,
+            eq(appointmentPayments.id, appointmentPaymentLinks.paymentId),
+          )
+          .innerJoin(
+            appointments,
+            eq(appointmentPaymentLinks.appointmentId, appointments.id),
+          )
+          .innerJoin(
+            organizations,
+            eq(appointmentPayments.organizationId, organizations.id),
+          )
+          .where(and(...filters));
 
-        const [data, total] = await Promise.all([
-          query.offset(offset).limit(limit).execute(),
-          db
-            .select({ total: count() })
-            .from(appointmentPayments)
-            .innerJoin(
-              appointments,
-              eq(appointmentPayments.userId, appointments.userId),
-            )
-            .innerJoin(
-              organizations,
-              eq(appointmentPayments.organizationId, organizations.id),
-            )
-            .where(and(...filters))
-            .execute(),
+        // Execute queries in parallel
+        const [data, countResult] = await Promise.all([
+          query.execute(),
+          countQuery.execute(),
         ]);
 
+        // Return JSON response
         return c.json({
           data,
           pagination: {
             page,
             limit,
-            total: total[0]?.total || 0,
+            total: countResult[0]?.total ?? 0,
           },
         });
       } catch (err) {
-        console.error("Error fetching data:", err);
-        return c.json({ error: "Something went wrong" }, 500);
+        console.error("Error fetching appointment payments:", err);
+        return c.json({ error: "Something went wrong." }, 500);
       }
+      // const doctorWebName = c.req.param("doctorWebName");
+
+      // const {
+      //   limit = tableLimitArr[0],
+      //   page = 1,
+      //   search,
+      //   fromDate,
+      //   toDate,
+      //   sortBy = "createdAt",
+      //   sortOrder = "desc",
+      // } = appointmentPaginationSchema.parse(c.req.valid("query"));
+
+      // const offset = (page - 1) * limit;
+
+      // try {
+      //   let query = db
+      //     .select({
+      //       payment: {
+      //         id: appointmentPayments.id,
+      //         totalAmount: appointmentPayments.totalAmount,
+      //         paymentStatus: appointmentPayments.paymentStatus,
+      //         createdAt: appointmentPayments.createdAt,
+      //         organizationId: appointmentPayments.organizationId,
+      //       },
+      //       appointment: {
+      //         id: appointments.id,
+      //         patientName: appointments.patientName,
+      //       },
+      //       organization: {
+      //         doctorWebName: organizations.doctorWebName,
+      //       },
+      //     })
+      //     .from(appointmentPayments)
+      //     .innerJoin(
+      //       appointments,
+      //       // eq(appointmentPayments.userId, appointments.userId),
+      //       eq(appointmentPayments.id, appointmentPaymentLinks.paymentId),
+      //     )
+      //     .innerJoin(
+      //       organizations,
+      //       eq(appointmentPayments.organizationId, organizations.id),
+      //     )
+
+      //     .$dynamic();
+
+      //   // Filters
+      //   const filters = [eq(organizations.doctorWebName, doctorWebName)];
+
+      //   if (search) {
+      //     filters.push(
+      //       sql`LOWER(${appointments.patientName}) LIKE LOWER(${`%${search}%`})`,
+      //     );
+      //   }
+      //   if (fromDate) {
+      //     filters.push(gte(appointmentPayments.createdAt, new Date(fromDate)));
+      //   }
+
+      //   if (toDate) {
+      //     filters.push(lte(appointmentPayments.createdAt, new Date(toDate)));
+      //   }
+
+      //   if (filters.length > 0) {
+      //     query = query.where(and(...filters));
+      //   }
+
+      //   // Sorting
+      //   query = query.orderBy(
+      //     sortOrder === "desc"
+      //       ? desc(appointmentPayments[sortBy])
+      //       : asc(appointmentPayments[sortBy]),
+      //   );
+
+      //   const [data, total] = await Promise.all([
+      //     query.offset(offset).limit(limit).execute(),
+      //     db
+      //       .select({ total: count() })
+      //       .from(appointmentPayments)
+      //       .innerJoin(
+      //         appointments,
+      //         eq(appointmentPayments.userId, appointments.userId),
+      //       )
+      //       .innerJoin(
+      //         organizations,
+      //         eq(appointmentPayments.organizationId, organizations.id),
+      //       )
+      //       .where(and(...filters))
+      //       .execute(),
+      //   ]);
+
+      //   return c.json({
+      //     data,
+      //     pagination: {
+      //       page,
+      //       limit,
+      //       total: total[0]?.total || 0,
+      //     },
+      //   });
+      // } catch (err) {
+      //   console.error("Error fetching data:", err);
+      //   return c.json({ error: "Something went wrong" }, 500);
+      // }
     },
-  );
+  )
+//   .get(
+//   '/payment-overview/o/:doctorWebName',
+//   zValidator('query', dashboardStatsQuerySchema),
+//   async (c) => {
+//     try {
+//       // 1. Path and validated query
+//       const doctorWebName = c.req.param('doctorWebName')
+//       const { startDate: validStartDate, endDate: validEndDate } = c.req.valid('query')
+
+//       // 2. Parse dates and format for SQL
+//       const start = new Date(validStartDate)
+//       const end = new Date(validEndDate)
+//       const formattedStart = start.toISOString().split('T')[0]
+//       const formattedEnd = end.toISOString().split('T')[0]
+
+//       console.log({formattedEnd,formattedStart})
+
+//       // 3. Lookup org by doctorWebName
+//       const [org] = await db
+//         .select({ id: organizations.id })
+//         .from(organizations)
+//         .where(eq(organizations.doctorWebName, doctorWebName))
+
+//       if (!org) {
+//         return c.json({ error: 'Organization not found' }, 404)
+//       }
+
+//       // 4. Compute previous period
+//       const periodMs = end.getTime() - start.getTime()
+//       const periodDays = Math.ceil(periodMs / (1000 * 60 * 60 * 24))
+//       const prevFrom = new Date(start)
+//       prevFrom.setDate(prevFrom.getDate() - periodDays)
+//       const prevTo = new Date(start)
+//       prevTo.setDate(prevTo.getDate() - 1)
+//       const prevStart = prevFrom.toISOString().split('T')[0]
+//       const prevEnd = prevTo.toISOString().split('T')[0]
+
+//       // 5. Total appointments now & before
+//       const [totApp] = await db
+//         .select({ count: count() })
+//         .from(appointments)
+//         .where(
+//           and(
+//             eq(appointments.organizationId, org.id),
+//             sql`${appointments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`,
+//           ),
+//         )
+//       const [prevApp] = await db
+//         .select({ count: count() })
+//         .from(appointments)
+//         .where(
+//           and(
+//             eq(appointments.organizationId, org.id),
+//             sql`${appointments.createdAt}::date BETWEEN ${prevStart} AND ${prevEnd}`,
+//           ),
+//         )
+//       const totalAppointments = totApp.count || 0
+//       const prevTotalAppointments = prevApp.count || 0
+//       const appointmentChange =
+//         prevTotalAppointments === 0
+//           ? 0
+//           : Math.round(
+//               ((totalAppointments - prevTotalAppointments) / prevTotalAppointments) * 100,
+//             )
+
+//       // 6. Total revenue now & before (PAID)
+//       const [rev] = await db
+//         .select({ sum: sum(appointmentPayments.totalAmount) })
+//         .from(appointmentPayments)
+//         .where(
+//           and(
+//             eq(appointmentPayments.organizationId, org.id),
+//             eq(appointmentPayments.paymentStatus, 'COMPLETED'),
+//             sql`${appointmentPayments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`,
+//           ),
+//         )
+//       const [prevRev] = await db
+//         .select({ sum: sum(appointmentPayments.totalAmount) })
+//         .from(appointmentPayments)
+//         .where(
+//           and(
+//             eq(appointmentPayments.organizationId, org.id),
+//             eq(appointmentPayments.paymentStatus, 'COMPLETED'),
+//             sql`${appointmentPayments.createdAt}::date BETWEEN ${prevStart} AND ${prevEnd}`,
+//           ),
+//         )
+//       const totalRevenue = Number(rev.sum || 0)
+//       const prevTotalRevenue = Number(prevRev.sum || 0)
+//       const revenueChange =
+//         prevTotalRevenue === 0
+//           ? 0
+//           : Math.round(
+//               ((totalRevenue - prevTotalRevenue) / prevTotalRevenue) * 100,
+//             )
+
+//       // 7. Pending payments
+//       const [pending] = await db
+//         .select({ sum: sum(appointmentPayments.totalAmount), count: count() })
+//         .from(appointmentPayments)
+//         .where(
+//           and(
+//             eq(appointmentPayments.organizationId, org.id),
+//             eq(appointmentPayments.paymentStatus, 'PENDING'),
+//             sql`${appointmentPayments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`,
+//           ),
+//         )
+
+//       // 8. Unique patients
+//       const [uniquePat] = await db
+//         .select({ count: sql`COUNT(DISTINCT ${appointments.patientName})`.as('count') })
+//         .from(appointments)
+//         .where(
+//           and(
+//             eq(appointments.organizationId, org.id),
+//             sql`${appointments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`,
+//           ),
+//         )
+
+//       // 9. New patients
+//       const [newPat] = await db
+//         .select({ count: count() })
+//         .from(appointments)
+//         .where(
+//           and(
+//             eq(appointments.organizationId, org.id),
+//             sql`${appointments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`,
+//             sql`${appointments.patientName} NOT IN (
+//                 SELECT DISTINCT ${appointments.patientName}
+//                 FROM ${appointments}
+//                 WHERE ${appointments.organizationId} = ${org.id}
+//                   AND ${appointments.createdAt} < ${formattedStart}
+//               )`,
+//           ),
+//         )
+
+//       // 10. Respond
+//       return c.json({
+//         totalAppointments,
+//         appointmentChange,
+//         totalRevenue,
+//         revenueChange,
+//         pendingPayments: Number(pending.sum || 0),
+//         pendingCount: pending.count || 0,
+//         uniquePatients: uniquePat.count as number || 0,
+//         newPatients: newPat.count || 0,
+//       })
+//     } catch (err) {
+//       console.error('Error fetching stats:', err)
+//       return c.json({ error: 'Failed to fetch stats' }, 500)
+//     }
+//   },
+// )
+.get(
+  '/payment-overview/o/:doctorWebName',
+  zValidator('query', dashboardStatsQuerySchema),
+  async (c) => {
+    try {
+      // 1. Path and validated query
+      const doctorWebName = c.req.param('doctorWebName')
+      const {
+        startDate: validStartDate,
+        endDate: validEndDate,
+      } = c.req.valid('query')
+
+      // 2. Parse dates and format
+      const fromDate = new Date(validStartDate)
+      const toDate = new Date(validEndDate)
+      const formattedStart = fromDate.toISOString().split('T')[0]
+      const formattedEnd = toDate.toISOString().split('T')[0]
+      console.log({ formattedStart, formattedEnd })
+
+      // 3. Lookup organization
+      const [org] = await db
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.doctorWebName, doctorWebName))
+
+      if (!org) {
+        return c.json({ error: 'Organization not found' }, 404)
+      }
+
+      // 4. Compute previous period
+      const periodMs = toDate.getTime() - fromDate.getTime()
+      const periodDays = Math.ceil(periodMs / (1000 * 60 * 60 * 24))
+      const prevFrom = new Date(fromDate)
+      prevFrom.setDate(prevFrom.getDate() - periodDays)
+      const prevTo = new Date(fromDate)
+      prevTo.setDate(prevTo.getDate() - 1)
+      const prevStart = prevFrom.toISOString().split('T')[0]
+      const prevEnd = prevTo.toISOString().split('T')[0]
+
+      // 5. Overview: appointments
+      const [totApp] = await db
+        .select({ count: count() })
+        .from(appointments)
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            sql`${appointments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`
+          )
+        )
+      const [prevApp] = await db
+        .select({ count: count() })
+        .from(appointments)
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            sql`${appointments.createdAt}::date BETWEEN ${prevStart} AND ${prevEnd}`
+          )
+        )
+      const totalAppointments = totApp.count || 0
+      const prevTotalAppointments = prevApp.count || 0
+      const appointmentChange =
+        prevTotalAppointments === 0
+          ? 0
+          : Math.round(
+              ((totalAppointments - prevTotalAppointments) / prevTotalAppointments) * 100
+            )
+
+      // 6. Overview: revenue
+      const [rev] = await db
+        .select({ sum: sum(appointmentPayments.totalAmount) })
+        .from(appointmentPayments)
+        .where(
+          and(
+            eq(appointmentPayments.organizationId, org.id),
+            eq(appointmentPayments.paymentStatus, 'COMPLETED'),
+            sql`${appointmentPayments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`
+          )
+        )
+      const [prevRev] = await db
+        .select({ sum: sum(appointmentPayments.totalAmount) })
+        .from(appointmentPayments)
+        .where(
+          and(
+            eq(appointmentPayments.organizationId, org.id),
+            eq(appointmentPayments.paymentStatus, 'COMPLETED'),
+            sql`${appointmentPayments.createdAt}::date BETWEEN ${prevStart} AND ${prevEnd}`
+          )
+        )
+      const totalRevenue = Number(rev.sum || 0)
+      const prevTotalRevenue = Number(prevRev.sum || 0)
+      const revenueChange =
+        prevTotalRevenue === 0
+          ? 0
+          : Math.round(
+              ((totalRevenue - prevTotalRevenue) / prevTotalRevenue) * 100
+            )
+
+      // 7. Pending payments
+      const [pending] = await db
+        .select({ sum: sum(appointmentPayments.totalAmount), count: count() })
+        .from(appointmentPayments)
+        .where(
+          and(
+            eq(appointmentPayments.organizationId, org.id),
+            eq(appointmentPayments.paymentStatus, 'PENDING'),
+            sql`${appointmentPayments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`
+          )
+        )
+
+      // 8. Unique patients
+      const [uniquePat] = await db
+        .select({ count: sql`COUNT(DISTINCT ${appointments.patientName})`.as('count') })
+        .from(appointments)
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            sql`${appointments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`
+          )
+        )
+
+      // 9. New patients
+      const [newPat] = await db
+        .select({ count: count() })
+        .from(appointments)
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            sql`${appointments.createdAt}::date BETWEEN ${formattedStart} AND ${formattedEnd}`,
+            sql`${appointments.patientName} NOT IN (
+                SELECT DISTINCT ${appointments.patientName}
+                FROM ${appointments}
+                WHERE ${appointments.organizationId} = ${org.id}
+                  AND ${appointments.createdAt} < ${formattedStart}
+              )`
+          )
+        )
+
+      // 10. Chart: appointments by date & status
+      const appointmentsByDate = await db
+        .select({ date: sql`DATE(${appointments.createdAt})`, status: appointments.appointmentStatus, count: count() })
+        .from(appointments)
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            gte(appointments.createdAt, fromDate),
+            lte(appointments.createdAt, toDate)
+          )
+        )
+        .groupBy(sql`DATE(${appointments.createdAt})`, appointments.appointmentStatus)
+        .orderBy(sql`DATE(${appointments.createdAt})`)
+
+      const allDates = eachDayOfInterval({ start: fromDate, end: toDate })
+      const appointmentMap = new Map<string, { date: string; scheduled: number; completed: number; cancelled: number }>()
+      allDates.forEach((date) => {
+        const dateStr = format(date, 'yyyy-MM-dd')
+        appointmentMap.set(dateStr, { date: format(date, 'MMM dd'), scheduled: 0, completed: 0, cancelled: 0 })
+      })
+      appointmentsByDate.forEach((item) => {
+        const dateStr = format(parseISO((item.date as string).toString()), 'yyyy-MM-dd')
+        const dateData = appointmentMap.get(dateStr)
+        if (dateData) {
+          const key = item.status.toLowerCase() as 'scheduled' | 'completed' | 'cancelled'
+          dateData[key] = item.count
+        }
+      })
+      const appointmentChart = Array.from(appointmentMap.values())
+
+      // 11. Chart: revenue by month
+      const revenueByMonth = await db
+        .select({ month: sql`DATE_TRUNC('month', ${appointmentPayments.createdAt})`, revenue: sum(appointmentPayments.totalAmount) })
+        .from(appointmentPayments)
+        .where(
+          and(
+            eq(appointmentPayments.organizationId, org.id),
+            gte(appointmentPayments.createdAt, fromDate),
+            lte(appointmentPayments.createdAt, toDate),
+            eq(appointmentPayments.paymentStatus, 'COMPLETED')
+          )
+        )
+        .groupBy(sql`DATE_TRUNC('month', ${appointmentPayments.createdAt})`)
+        .orderBy(sql`DATE_TRUNC('month', ${appointmentPayments.createdAt})`)
+
+      const allMonths = eachMonthOfInterval({ start: fromDate, end: toDate })
+      const revenueMap = new Map<string, { month: string; revenue: number }>()
+      allMonths.forEach((date) => {
+        const monthStr = format(date, 'yyyy-MM')
+        revenueMap.set(monthStr, { month: format(date, 'MMM yyyy'), revenue: 0 })
+      })
+      revenueByMonth.forEach((item) => {
+        const monthStr = format(parseISO((item.month as string).toString()), 'yyyy-MM')
+        const data = revenueMap.get(monthStr)
+        if (data) data.revenue = Number(item.revenue)
+      })
+      const revenueChart = Array.from(revenueMap.values())
+
+      // 12. Pie: payment status counts
+      const paymentStatusCounts = await db
+        .select({ status: appointmentPayments.paymentStatus, count: count() })
+        .from(appointmentPayments)
+        .where(
+          and(
+            eq(appointmentPayments.organizationId, org.id),
+            gte(appointmentPayments.createdAt, fromDate),
+            lte(appointmentPayments.createdAt, toDate)
+          )
+        )
+        .groupBy(appointmentPayments.paymentStatus)
+
+      const paymentPieChart = paymentStatusCounts.map((item) => ({ status: item.status, count: item.count }))
+
+      // 13. Pie: visit reasons
+      const visitReasonCounts = await db
+        .select({ reason: appointments.reasonForVisit, count: count() })
+        .from(appointments)
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            gte(appointments.createdAt, fromDate),
+            lte(appointments.createdAt, toDate)
+          )
+        )
+        .groupBy(appointments.reasonForVisit)
+        .orderBy(desc(count()) )
+        .limit(10)
+
+      // 14. Recent appointments
+      const recentAppointments = await db
+        .select({ id: appointments.id, patientName: appointments.patientName, date: appointments.createdAt, reason: appointments.reasonForVisit, status: appointments.appointmentStatus, paymentId: appointmentPaymentLinks.paymentId, amount: appointmentPaymentLinks.amount })
+        .from(appointments)
+        .leftJoin(appointmentPaymentLinks, eq(appointments.id, appointmentPaymentLinks.appointmentId))
+        .where(
+          and(
+            eq(appointments.organizationId, org.id),
+            gte(appointments.createdAt, fromDate),
+            lte(appointments.createdAt, toDate)
+          )
+        )
+        .orderBy(desc(appointments.createdAt))
+        .limit(10)
+
+      const paymentIds = recentAppointments.filter((a) => a.paymentId).map((a) => a.paymentId)
+      const paymentStatuses = paymentIds.length && typeof paymentIds[0] === 'string'
+        ? await db
+            .select({ id: appointmentPayments.id, status: appointmentPayments.paymentStatus })
+            .from(appointmentPayments)
+            .where(paymentIds[0] ? eq(appointmentPayments.id, paymentIds[0]) : sql`false`)
+        : []
+      const paymentStatusMap = new Map<string, string>()
+      paymentStatuses.forEach((p) =>p.status&& paymentStatusMap.set(p.id, p.status))
+
+      const recentList = recentAppointments.map((app) => ({
+        id: app.id,
+        patientName: app.patientName,
+        date: app.date,
+        reason: app.reason,
+        status: app.status,
+        paymentStatus: app.paymentId ? paymentStatusMap.get(app.paymentId) ?? 'UNKNOWN' : 'PENDING',
+        amount: Number(app.amount || 0),
+      }))
+
+      // 15. Return
+      return c.json({
+        overview: { totalAppointments, appointmentChange, totalRevenue, revenueChange, pendingPayments: Number(pending.sum || 0), pendingCount: pending.count || 0, uniquePatients: uniquePat.count  as number|| 0, newPatients: newPat.count || 0 },
+        appointmentChart,
+        revenueChart,
+        paymentPieChart,
+        visitReasonCounts,
+        recentAppointments: recentList,
+      })
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+      return c.json({ error: 'Failed to fetch dashboard data' }, 500)
+    }
+  }
+)
+
+
 
 export default appointmentPaymentRoutes;

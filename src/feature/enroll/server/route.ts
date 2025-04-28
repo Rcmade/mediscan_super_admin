@@ -12,6 +12,7 @@ import {
   // AppointmentStatusT,
   organizations,
   appointments,
+  orgAppointmentReasonsTypes,
 } from "@/lib/db/schema"; // Assuming you have an appointments and sessions table
 import { and, desc, eq, gte, lte, or } from "drizzle-orm";
 import { normalizePhoneNumber } from "@/lib/utils/numberUtils";
@@ -114,6 +115,13 @@ export const enrollmentRoute = new Hono()
           redirect: false,
         });
       }
+      const reasonTypes = await db
+        .select({
+          id: orgAppointmentReasonsTypes.id,
+          name: orgAppointmentReasonsTypes.name,
+        })
+        .from(orgAppointmentReasonsTypes)
+        .where(eq(orgAppointmentReasonsTypes.organizationId, organization.id));
 
       // Format data for appointments with organizationId
       const formattedData: InsertAppointmentsT[] = formatAppointmentData({
@@ -121,6 +129,7 @@ export const enrollmentRoute = new Hono()
         userId: user.id,
         latestTokenNumber: latestTokenNumber + 1, // Start token numbers from the next available number
         organizationId: organization.id,
+        reasonTypes,
       });
       // Insert new appointments
       const result = await db
@@ -177,6 +186,7 @@ export const enrollmentRoute = new Hono()
             reasonForVisit: appointments.reasonForVisit,
             tokenNumber: appointments.tokenNumber,
             organizationId: appointments.organizationId,
+            reasonForVisitTypeId: appointments.reasonForVisitTypeId,
           })
           .from(appointments)
           .where(or(...ids.map(({ id }) => eq(appointments.id, id))));
@@ -188,7 +198,7 @@ export const enrollmentRoute = new Hono()
         //   .limit(1);
 
         const { appointmentWithCost, totalCost } =
-          calculateTotalAppointmentCost(appointmentsDb);
+          await calculateTotalAppointmentCost(appointmentsDb);
 
         return c.json({ ids, appointmentWithCost, totalCost });
       } catch (error) {
@@ -197,7 +207,9 @@ export const enrollmentRoute = new Hono()
         const err = formatError(error);
         return c.json(
           {
-            message: err.message || "Internal server error while login",
+            message:
+              err.message ||
+              "Internal server error while processing payment overview",
             error,
           },
           err.statusCode,

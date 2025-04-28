@@ -66,6 +66,19 @@ export const organizations = pgTable("organization", {
   ...commonFields,
 });
 
+export const orgAppointmentReasonsTypes = pgTable(
+  "org_appointment_reason_types",
+  {
+    ...commonFields,
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 20 }).notNull(),
+
+    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  },
+);
+
 export const organizationUsers = pgTable(
   "organization_users",
   {
@@ -88,7 +101,14 @@ export const organizationUsers = pgTable(
 export const appointments = pgTable("appointments", {
   userId: userId,
   patientName: text("patient_name").notNull(),
-  reasonForVisit: visitReasons("patient_reason").notNull(),
+  reasonForVisit: text("patient_reason").notNull(),
+  reasonForVisitTypeId: text("reason_for_visit_type_id").references(
+    () => orgAppointmentReasonsTypes.id,
+    {
+      onDelete: "set null",
+      onUpdate: "set null",
+    },
+  ),
 
   organizationId: text("organization_id")
     // .notNull()
@@ -100,6 +120,7 @@ export const appointments = pgTable("appointments", {
   appointmentStatus: appointmentStatus("appointment_status")
     .notNull()
     .default("Scheduled"),
+
   tokenNumber: numeric({
     precision: 10,
     scale: 0,

@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CalendarIcon, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEditAppointment } from "../../hook/useEditAppointment";
-import { appointmentsReasons, appointmentStatusArr } from "@/constant";
+import { appointmentStatusArr } from "@/constant";
 import { getCloudinaryId } from "@/lib/utils/cloudinaryUtils";
 import {
   Popover,
@@ -31,6 +31,7 @@ import {
 import { calendarDateFormat } from "@/lib/utils/dateUtils";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
+import useViewAppointmentReasonType from "@/feature/appointmentReasonType/hooks/useViewAppointmentReasonType";
 
 interface Props {
   data: UseGetAppointmentResponseT & { tokenNumber: string };
@@ -44,7 +45,7 @@ const EditAppointmentForm = ({
     phone,
     image,
     patientName,
-    reasonForVisit,
+    reasonForVisitTypeId,
     revisitTime,
   },
   setEditAppointmentId,
@@ -54,12 +55,14 @@ const EditAppointmentForm = ({
     revisit: false,
   });
 
+  const { data } = useViewAppointmentReasonType();
+
   const { onSubmit, isLoading, form } = useEditAppointment({
     patientName: patientName || "",
     appointmentStatus: appointmentStatus || "Scheduled",
     image: image || "",
     phone: phone || "",
-    reasonForVisit: reasonForVisit,
+    reasonForVisitTypeId: reasonForVisitTypeId || "",
     revisitTime: revisitTime ? new Date(revisitTime) : undefined,
     appointmentId: id,
     onSuccessFn: () => {
@@ -182,20 +185,25 @@ const EditAppointmentForm = ({
         />
         <FormField
           control={form.control}
-          name="reasonForVisit"
+          name="reasonForVisitTypeId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Reason for Visit</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select disabled onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="capitalize">
                     <SelectValue placeholder="Select Option" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {appointmentsReasons.map((reason) => (
-                    <SelectItem value={reason} key={reason}>
-                      {reason}
+               
+                  {(data?.appointmentReasons || []).map((reason) => (
+                    <SelectItem
+                      value={reason.reasonId}
+                      key={reason.reasonId}
+                      className="capitalize"
+                    >
+                      {reason.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

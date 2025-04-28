@@ -61,6 +61,7 @@ export default function EditAppointmentDialog({
           <EditAppointmentForm
             data={{
               ...data,
+              reasonForVisitTypeId: data?.reasonForVisitTypeId || null,
               patientName: data?.patientName || "",
               tokenNumber: data?.tokenNumber || "",
               appointmentStatus: data?.appointmentStatus || "Scheduled",

@@ -3,6 +3,7 @@ import { UserRole } from "@/lib/db/schema";
 import {
   BuildingIcon,
   Calendar,
+  CalendarCheck,
   Coins,
   Eclipse,
   Frame,
@@ -110,6 +111,13 @@ export const topNavMenu: TopNavT[] = [
     url: "/payments",
     accessBy: ["ADMIN", "RECEPTIONIST"],
     icon: Coins,
+  },
+
+  {
+    title: "Appointment Type",
+    url: "/appointment-type",
+    accessBy: ["ADMIN", "RECEPTIONIST"],
+    icon: CalendarCheck,
   },
 
   {
