@@ -22,8 +22,8 @@ const LogoButton = ({
       )}
     >
       {webName
-        ? decodeURIComponent(webName)
-        : process.env.NEXT_PUBLIC_WEB_NAME || "MediScan"}
+        ? `Shivaay ${decodeURIComponent(webName)}`
+        : process.env.NEXT_PUBLIC_WEB_NAME || "Shivaay MediScan"}
     </Link>
   );
 };
