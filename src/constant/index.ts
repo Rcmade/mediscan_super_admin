@@ -99,3 +99,5 @@ export const gstRegex =
   /^[0123][0-9][A-Z]{5}[0-9]{4}[A-Z][0-9][A-Z0-9][A-Z0-9]$/i;
 
 export const countryArr = ["IN"] as const;
+
+export const strTrueFalse = ["true", "false"] as const;

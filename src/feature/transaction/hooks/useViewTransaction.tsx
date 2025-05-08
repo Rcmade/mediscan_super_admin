@@ -1,3 +1,4 @@
+import useWebName from "@/hooks/useWebName";
 import { client } from "@/lib/rpc";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
@@ -5,15 +6,15 @@ import { useSearchParams } from "next/navigation";
 
 const api = client.api.main.org.transactions.$get;
 export type TransactionRequestType = InferRequestType<typeof api>;
-export type TransactionResponseType = InferResponseType<typeof api,200>;
+export type TransactionResponseType = InferResponseType<typeof api, 200>;
 const useViewDueTransaction = () => {
   const searchParams = useSearchParams();
-
+  const { webName } = useWebName();
   const filter: TransactionRequestType = {
     query: {
       page: searchParams.get("page") || undefined,
       limit: searchParams.get("limit") || undefined,
-      search: searchParams.get("search") || undefined,
+      search: searchParams.get("search") || webName || undefined,
       fromDate: searchParams.get("fromDate") || undefined,
       toDate: searchParams.get("toDate") || undefined,
       sortBy: searchParams.get("sortBy") || undefined,

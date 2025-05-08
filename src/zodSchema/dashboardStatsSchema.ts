@@ -1,10 +1,12 @@
 import { z } from "zod";
 import { dateRangeBaseSchema, withDateRangeValidation } from ".";
+import { strTrueFalse } from "@/constant";
 
 // Example schemas with proper type inference
 export const dashboardStatsQuerySchema = withDateRangeValidation(
   z.object({
     ...dateRangeBaseSchema.shape,
+    isOverviewOnly: z.enum(strTrueFalse).optional().default("false"),
     // otherField: z.string().optional(),
   }),
 );
@@ -28,4 +30,3 @@ export const dashboardStatsQuerySchema = withDateRangeValidation(
 //   // startDate: "2201-01-01",
 //   // endDate: "2002-01-01",
 // });
-

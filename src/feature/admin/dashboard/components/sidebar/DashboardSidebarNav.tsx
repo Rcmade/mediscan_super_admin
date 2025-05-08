@@ -13,6 +13,18 @@ import { dashboardContent } from "@/content/dashboardContent";
 import useGetUserOrg from "@/feature/organization/hooks/useGetUserOrg";
 import useWebName from "@/hooks/useWebName";
 import { useMemo } from "react";
+import { ChevronRight } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar";
 
 function DashboardSidebarNav() {
   const user = useCurrentUser();
@@ -24,7 +36,16 @@ function DashboardSidebarNav() {
   const filteredTopNavMenu = useMemo(() => {
     if (!user) return [];
     return dashboardContent.topNavMenu.filter((item) => {
-     
+      return (
+        item.accessBy.includes(user.role) ||
+        (webName && user.role === "SUPER_ADMIN")
+      );
+    });
+  }, [user, webName]);
+
+  const filteredBottomNavMenu = useMemo(() => {
+    if (!user) return [];
+    return dashboardContent.bottomNavMenu.filter((item) => {
       return (
         item.accessBy.includes(user.role) ||
         (webName && user.role === "SUPER_ADMIN")
@@ -56,6 +77,8 @@ function DashboardSidebarNav() {
     </SidebarMenuButton>
   );
 
+  const orgBaseUrl = `/admin/dashboard/organization/o`;
+
   return (
     <SidebarGroup>
       <div
@@ -63,21 +86,101 @@ function DashboardSidebarNav() {
         key={`top-nav-${user?.id}-${user?.role}`}
       >
         {/* Render super admin only menu */}
-        {user && user?.role === "SUPER_ADMIN" && (
-          <>
-            {dashboardContent.superAdminOnlyMenu.map((item) =>
-              renderMenuButton(item),
-            )}
-            <SidebarSeparator />
-          </>
-        )}
+
+        <div
+          className="flex flex-col gap-1"
+          key={`top-nav${user?.id}-${user?.role}`}
+        >
+          {user && user?.role === "SUPER_ADMIN" && (
+            <>
+              {dashboardContent.superAdminOnlyMenu.map((item) =>
+                renderMenuButton(item),
+              )}
+              <SidebarSeparator />
+            </>
+          )}
+        </div>
 
         {/* Render filtered top navigation menu */}
         {user &&
           filteredTopNavMenu.map((item) =>
             renderMenuButton(
               item,
-              `/admin/dashboard/organization/o/${org?.organizations?.webName || webName}${item.url}`,
+              `${orgBaseUrl}/${org?.organizations?.webName || webName}${item.url}`,
+            ),
+          )}
+
+        <SidebarMenu className="my-1" key={`submenu-${user?.id}-${user?.role}`}>
+          {user &&
+            dashboardContent.navMenuWithSubmenu.map((item) => {
+              const filteredItems = item.items?.filter((sub) => {
+                return (
+                  sub.accessBy.includes(user?.role || "USER") ||
+                  (webName && user.role === "SUPER_ADMIN")
+                );
+              });
+
+              if (!filteredItems?.length) return null;
+
+              return (
+                <Collapsible
+                  key={`collapsible-${item.title}`}
+                  asChild
+                  className="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip={item.title}
+                        className={cn(
+                          "relative !py-5 font-normal hover:!bg-primary/20 hover:!text-primary",
+                          pathname.startsWith(item.url) &&
+                            "!bg-primary/20 !font-bold !text-primary",
+                        )}
+                      >
+                        {item.icon && <item.icon className="!size-6" />}
+                        <span>{item.title}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {filteredItems.map((sub) => (
+                          <SidebarMenuSubItem key={`sub-${sub.title}`}>
+                            <SidebarMenuButton
+                              tooltip={sub.title}
+                              className={cn(
+                                "relative font-normal hover:!text-primary",
+                                pathname ===
+                                  `${orgBaseUrl}/${
+                                    org?.organizations?.webName || webName
+                                  }${sub.url}` && "!font-bold !text-primary",
+                              )}
+                            >
+                              <span>{sub.title}</span>
+                              <Link
+                                href={`${orgBaseUrl}/${
+                                  org?.organizations?.webName || webName
+                                }${sub.url}`}
+                                className="absolute inset-0"
+                              />
+                            </SidebarMenuButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              );
+            })}
+        </SidebarMenu>
+
+        {/* Render filtered top navigation menu */}
+        {user &&
+          filteredBottomNavMenu.map((item) =>
+            renderMenuButton(
+              item,
+              `${orgBaseUrl}/${org?.organizations?.webName || webName}${item.url}`,
             ),
           )}
       </div>

@@ -84,9 +84,6 @@ export const calculateTotalAppointmentCost = async (
     .from(orgAppointmentReasonsTypes)
     .where(eq(orgAppointmentReasonsTypes.organizationId, orgId));
 
-  console.log({
-    appointments,
-  });
   const appointmentWithCost = appointments.map((appointment) => {
     if (!appointment?.reasonForVisitTypeId) {
       throw new Error("reasonForVisitTypeId is required");

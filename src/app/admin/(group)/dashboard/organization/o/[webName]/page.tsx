@@ -19,6 +19,7 @@ import React, { Suspense } from "react";
 import SuperAdminOnlyOption from "./_SuperAdminOnlyOption";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 import SubscriptionPopupAlert from "@/components/alerts/SubscriptionPopupAlert";
+import PaymentDashboardContent from "./payment-overview/PaymentDashboardContent";
 
 export const revalidate = 600;
 
@@ -179,6 +180,13 @@ const page = async ({ searchParams, params }: PagePropsPromise) => {
             nameKey="timeRange"
           />
         </div>
+
+        <h1 className="text-3xl font-bold my-4 px-4 text-foreground">
+          Appointment Payment Overview
+        </h1>
+        <Suspense>
+          <PaymentDashboardContent isOverviewOnly="false" />
+        </Suspense>
       </div>
     </div>
   );

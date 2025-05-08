@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Card,
   CardContent,
@@ -6,17 +6,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { PaymentOverviewResponseT } from "../../../types";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
+
 
 interface VisitReasonChartProps {
   stats: PaymentOverviewResponseT["visitReasonCounts"];
@@ -26,50 +24,30 @@ export function VisitReasonChart({ stats }: VisitReasonChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top Visit Reasons</CardTitle>
-        <CardDescription>
-          Most common reasons for patient visits
-        </CardDescription>
+        <CardTitle>Visit Reasons</CardTitle>
+        <CardDescription>Common reasons for appointments</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              layout="vertical"
-              data={stats}
-              margin={{
-                top: 5,
-                right: 10,
-                left: 100,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="#888"
-                strokeOpacity={0.2}
-              />
-              <XAxis
-                type="number"
-                stroke="#888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                dataKey="reason"
-                type="category"
-                stroke="#888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip formatter={(value) => [`${value}`, "Count"]} />
-              <Legend />
-              <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <CardContent className="h-64">
+        <ChartContainer
+          config={{
+            count: {
+              label: "Count",
+              color: "hsl(var(--chart-1))",
+            },
+          }}
+        >
+          <BarChart
+            layout="vertical"
+            data={stats}
+            margin={{ top: 20, right: 30, left: 40, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis type="number" />
+            <YAxis dataKey="reason" type="category" />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Bar dataKey="count" fill="var(--color-count)" />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

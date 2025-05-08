@@ -7,90 +7,57 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import React from "react";
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts";
 import { PaymentOverviewResponseT } from "../../../types";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 interface AppointmentTrendsProps {
   stats: PaymentOverviewResponseT["appointmentChart"];
 }
 const AppointmentTrends: React.FC<AppointmentTrendsProps> = ({ stats }) => {
   return (
-    <Card>
+    <Card className="col-span-1">
       <CardHeader>
-        <CardTitle>Appointment Trends</CardTitle>
+        <CardTitle>Appointments</CardTitle>
         <CardDescription>
-          Number of appointments over time by status
+          Scheduled, completed, and cancelled appointments
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={stats}
-              margin={{
-                top: 5,
-                right: 10,
-                left: 10,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="#888"
-                strokeOpacity={0.2}
-              />
-              <XAxis
-                dataKey="date"
-                stroke="#888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="#888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `${value}`}
-              />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="scheduled"
-                stroke="#0ea5e9"
-                strokeWidth={2}
-                dot={{ r: 0 }}
-                activeDot={{ r: 6 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="completed"
-                stroke="#10b981"
-                strokeWidth={2}
-                dot={{ r: 0 }}
-                activeDot={{ r: 6 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="cancelled"
-                stroke="#f43f5e"
-                strokeWidth={2}
-                dot={{ r: 0 }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartContainer
+          config={{
+            scheduled: {
+              label: "Scheduled",
+              color: "hsl(var(--chart-1))",
+            },
+            completed: {
+              label: "Completed",
+              color: "hsl(var(--chart-2))",
+            },
+            cancelled: {
+              label: "Cancelled",
+              color: "hsl(var(--chart-3))",
+            },
+          }}
+        >
+          <BarChart
+            data={stats}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Legend />
+            <Bar dataKey="scheduled" fill="var(--color-scheduled)" />
+            <Bar dataKey="completed" fill="var(--color-completed)" />
+            <Bar dataKey="cancelled" fill="var(--color-cancelled)" />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

@@ -47,9 +47,11 @@ import {
 
 interface AppointmentPaymentClientComponentProps {
   children?: React.ReactNode;
+  paymentOverviewChildren?: React.ReactNode;
 }
 export default function AppointmentPaymentClientComponent({
   // doctorWebName,
+  paymentOverviewChildren,
   children,
 }: AppointmentPaymentClientComponentProps) {
   const searchParams = useSearchParams();
@@ -106,6 +108,7 @@ export default function AppointmentPaymentClientComponent({
         <h1 className="text-3xl font-bold">Appointment Payments</h1>
         {children}
       </div>
+      {paymentOverviewChildren}
 
       <Card className="mb-6">
         <CardHeader>

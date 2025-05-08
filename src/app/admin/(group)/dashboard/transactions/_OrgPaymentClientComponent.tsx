@@ -59,7 +59,7 @@ export default function OrgPaymentClientComponent({
   const { data } = useViewDueTransaction();
 
   const [filters, setFilters] = useState<TransactionRequestType["query"]>({
-    search: searchParams.get("search") || doctorWebName || "",
+    search: doctorWebName || searchParams.get("search") || "",
     fromDate: searchParams.get("fromDate")
       ? new Date(searchParams.get("fromDate") || "").toISOString()
       : undefined,

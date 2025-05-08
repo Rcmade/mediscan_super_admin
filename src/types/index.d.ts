@@ -1,4 +1,5 @@
 import { alertVariants } from "@/components/ui/alert";
+import { strTrueFalse } from "@/constant";
 import { VariantProps } from "class-variance-authority";
 export type AlertVarientT = VariantProps<typeof alertVariants>["variant"];
 
@@ -36,3 +37,6 @@ export type RazorpayResponseT = {
   razorpay_order_id: string;
   razorpay_signature: string;
 };
+
+
+ export type TrueFalseStr =  (typeof strTrueFalse)[number] 

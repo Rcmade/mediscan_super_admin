@@ -3,17 +3,13 @@ import { UserRole } from "@/lib/db/schema";
 import {
   BuildingIcon,
   Calendar,
-  CalendarCheck,
   Coins,
   Eclipse,
-  Frame,
-  // Home,
   Layout,
   type LucideIcon,
   PieChart,
-  Plane,
+  Settings,
   Tv,
-  Users,
 } from "lucide-react";
 
 type SubMenu = {
@@ -29,33 +25,11 @@ type NavMenuWithSubmenu = {
   items: SubMenu[];
 };
 
-const navMenuWithSubmenu: NavMenuWithSubmenu[] = [
-  {
-    title: "Leaves",
-    url: "#",
-    icon: Plane,
-    items: [
-      {
-        title: "View Leaves",
-        url: "/dashboard/leaves",
-        accessBy: ["RECEPTIONIST", "ADMIN", "SUPER_ADMIN"],
-      },
-    ],
-  },
-];
-
 type TopNavT = SubMenu & { icon: LucideIcon };
 
 export const superAdminOnlyMenu: (TopNavT & {
   accessBy: [typeof SUPER_ADMIN];
 })[] = [
-  // {
-  //   title: "Dashboard",
-  //   url: "/admin/dashboard",
-  //   accessBy: ["SUPER_ADMIN"],
-  //   icon: Home,
-  // },
-
   {
     title: "Organizations",
     url: "/admin/dashboard/organization",
@@ -72,7 +46,7 @@ export const superAdminOnlyMenu: (TopNavT & {
 
 export const topNavMenu: TopNavT[] = [
   {
-    title: "Organization",
+    title: "Dashboard",
     url: "/",
     accessBy: ["ADMIN"],
     icon: Layout,
@@ -93,68 +67,56 @@ export const topNavMenu: TopNavT[] = [
   },
 
   {
-    title: "Users",
-    url: "/users",
-    accessBy: ["ADMIN", "RECEPTIONIST"],
-    icon: Users,
-  },
-
-  {
-    title: "Transaction",
-    url: "/transaction",
-    accessBy: ["ADMIN"],
-    icon: PieChart,
-  },
-
-  {
     title: "Payments",
     url: "/payments",
     accessBy: ["ADMIN", "RECEPTIONIST"],
     icon: Coins,
   },
+] as const;
 
-  {
-    title: "Appointment Type",
-    url: "/appointment-type",
-    accessBy: ["ADMIN", "RECEPTIONIST"],
-    icon: CalendarCheck,
-  },
-
+export const bottomNavMenu: TopNavT[] = [
   {
     title: "Overview",
     url: "/overview",
     accessBy: ["ADMIN", "RECEPTIONIST"],
     icon: Eclipse,
   },
-
-  // {
-  //   title: "Transactions",
-  //   url: "/transactions",
-  //   accessBy: ["ADMIN", "RECEPTIONIST"],
-  //   icon: Coins,
-  // },
 ] as const;
+
+const navMenuWithSubmenu: NavMenuWithSubmenu[] = [
+  {
+    title: "Settings",
+    url: "#",
+    icon: Settings,
+    items: [
+      {
+        title: "Users",
+        url: "/users",
+        accessBy: ["ADMIN", "RECEPTIONIST"],
+        // icon: Users,
+      },
+
+      {
+        title: "Transaction",
+        url: "/transaction",
+        accessBy: ["ADMIN"],
+        // icon: PieChart,
+      },
+
+      {
+        title: "Appointment Type",
+        url: "/appointment-type",
+        accessBy: ["ADMIN", "RECEPTIONIST"],
+        // icon: CalendarCheck,
+      },
+    ],
+  },
+];
 
 export const dashboardContent = {
   navMenuWithSubmenu,
   superAdminOnlyMenu,
+  bottomNavMenu,
   topNavMenu,
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
 } as const;
 export type DashboardContentT = typeof dashboardContent;
