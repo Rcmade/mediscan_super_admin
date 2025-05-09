@@ -20,9 +20,10 @@ const LogoButton = ({
         "inline-block bg-gradient-to-r from-red-600 to-purple-900 bg-clip-text text-4xl font-black capitalize text-transparent dark:to-purple-700",
         className,
       )}
+      suppressHydrationWarning
     >
       {webName
-        ? `Shivaay ${decodeURIComponent(webName)}`
+        ? `${decodeURIComponent(webName)}`
         : `Shivaay ${process.env.NEXT_PUBLIC_WEB_NAME}` || "Shivaay MediScan"}
     </Link>
   );
