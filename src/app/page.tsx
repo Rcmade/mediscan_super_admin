@@ -8,6 +8,7 @@ import {
   Shield,
   Smartphone,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -21,21 +22,20 @@ export default function Home() {
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Skip the Queue, Book Your Medical Scan Online
                   </h1>
-                  <p className="max-w-[600px]  md:text-xl">
-                    MediScan lets you book appointments for medical scans
-                    directly from your mobile device. No more waiting in long
-                    queues - get your token and arrive just in time.
+                  <p className="max-w-[600px] md:text-xl">
+                    Shivaay MediScan lets you book appointments for medical
+                    scans directly from your mobile device. No more waiting in
+                    long queues - get your token and arrive just in time.
                   </p>
                 </div>
-                {/* <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button size="lg" className="gap-1">
-                    <Smartphone className="h-5 w-5" />
-                    Download App
+                <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                  <Button size="lg" className="gap-1" asChild>
+                    <Link href={`${process.env.NEXT_PUBLIC_SHIVAAY_URL}`}>
+                      <Smartphone className="h-5 w-5" />
+                      Book Your Appointment Now
+                    </Link>
                   </Button>
-                  <Button size="lg" variant="outline">
-                    Learn More
-                  </Button>
-                </div> */}
+                </div>
               </div>
               <div className="flex items-center justify-center">
                 <div className="relative w-full max-w-sm">
@@ -43,7 +43,7 @@ export default function Home() {
                     src="/doctor.webp"
                     width={320}
                     height={600}
-                    alt="MediScan App Interface"
+                    alt="Shivaay MediScan App Interface"
                     className="mx-auto rounded-2xl border shadow-xl"
                   />
                   <div className="absolute -right-12 -top-6 hidden md:block">
@@ -79,7 +79,7 @@ export default function Home() {
                   Features
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                  Why Choose MediScan?
+                  Why Choose Shivaay MediScan?
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
                   Our platform is designed to make medical scanning appointments
@@ -164,7 +164,7 @@ export default function Home() {
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
                   Booking your medical scan is simple and straightforward with
-                  MediScan.
+                  Shivaay MediScan.
                 </p>
               </div>
             </div>
@@ -173,10 +173,9 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
                   1
                 </div>
-                <h3 className="text-xl font-bold">Download & Register</h3>
+                <h3 className="text-xl font-bold">Register</h3>
                 <p className="text-center text-muted-foreground">
-                  Download the MediScan app and create your account with basic
-                  information.
+                  Create your account with basic information.
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 rounded-lg border bg-background p-6 shadow-sm">
@@ -223,7 +222,7 @@ export default function Home() {
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
                   Don&apos;t just take our word for it - hear from people who
-                  have used MediScan.
+                  have used Shivaay MediScan.
                 </p>
               </div>
             </div>
@@ -246,8 +245,9 @@ export default function Home() {
                     ))}
                   </div>
                   <p className="text-muted-foreground">
-                    MediScan saved me hours of waiting time. I booked my CT scan
-                    from home and walked right in at my appointment time.
+                    Shivaay MediScan saved me hours of waiting time. I booked my
+                    CT scan from home and walked right in at my appointment
+                    time.
                   </p>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -331,11 +331,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="download" className="w-full py-12 md:py-24 lg:py-32">
+        <section  className="w-full py-12 md:py-24 lg:py-32">
           <div className="grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-10">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
-                Use the MediScan Web App Today
+                Use the Shivaay MediScan Web App Today
               </h2>
               <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed">
                 Available on any Browser. Start booking your medical scans with
@@ -397,10 +397,11 @@ export default function Home() {
               height={24}
               className="rounded-md"
             />
-            <span className="text-lg font-bold">MediScan</span>
+            <span className="text-lg font-bold">Shivaay MediScan</span>
           </div>
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            &copy; {new Date().getFullYear()} MediScan. All rights reserved.
+            &copy; {new Date().getFullYear()} Shivaay MediScan. All rights
+            reserved.
           </p>
           <div className="flex gap-4">
             <Link
