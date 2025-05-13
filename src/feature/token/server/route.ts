@@ -354,3 +354,6 @@ export const tokenRoute = new Hono()
       }
     },
   );
+
+
+export type AppType =  typeof tokenRoute

@@ -59,3 +59,5 @@ export const schedulesRoutes = new Hono().post(
     return c.json(data);
   },
 );
+
+export type AppType = typeof schedulesRoutes

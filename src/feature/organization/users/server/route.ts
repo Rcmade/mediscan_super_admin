@@ -567,3 +567,5 @@ export const orgUsersRoute = new Hono()
       return c.json({ error: err.message }, err.statusCode || 500);
     }
   });
+
+export type AppType = typeof orgUsersRoute;

@@ -300,5 +300,8 @@ function calculateCancellationRate(
   );
   return total === 0 ? "0.00" : ((cancelled / total) * 100).toFixed(2);
 }
+export type AppType = typeof dashBoardRoute
 
 export default dashBoardRoute;
+
+

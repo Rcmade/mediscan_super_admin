@@ -1,0 +1,715 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auto-generated API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/{orgWebName}": {
+      "get": {
+        "summary": "Auto-generated GET /{orgWebName}",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "orgWebName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Status 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Status 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "string"
+                    },
+                    "paid": {
+                      "type": "string"
+                    },
+                    "due": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "organizationId": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "total",
+                    "paid",
+                    "due",
+                    "createdAt",
+                    "organizationId",
+                    "id",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Auto-generated GET /",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Status 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "type": "object",
+                      "properties": {
+                        "limit": {
+                          "type": "number"
+                        },
+                        "page": {
+                          "type": "number"
+                        },
+                        "search": {
+                          "type": "string"
+                        },
+                        "fromDate": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "toDate": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "sortBy": {
+                          "type": "string",
+                          "enum": [
+                            "createdAt",
+                            "updatedAt",
+                            "total",
+                            "due"
+                          ],
+                          "nullable": true
+                        },
+                        "sortOrder": {
+                          "type": "string",
+                          "enum": [
+                            "asc",
+                            "desc"
+                          ],
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "limit",
+                        "page",
+                        "search",
+                        "fromDate",
+                        "toDate",
+                        "sortBy",
+                        "sortOrder"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "transaction": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string"
+                              },
+                              "organizationId": {
+                                "type": "string"
+                              },
+                              "total": {
+                                "type": "string"
+                              },
+                              "paid": {
+                                "type": "string"
+                              },
+                              "due": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "createdAt",
+                              "updatedAt",
+                              "organizationId",
+                              "total",
+                              "paid",
+                              "due"
+                            ]
+                          },
+                          "organization": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "doctorWebName": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "doctorWebName"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "transaction",
+                          "organization"
+                        ]
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number"
+                        },
+                        "page": {
+                          "type": "number"
+                        },
+                        "limit": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "page",
+                        "limit"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "query",
+                    "data",
+                    "pagination"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Auto-generated POST /",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orgWebName": {
+                    "type": "string"
+                  },
+                  "transactionId": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "total": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "paid": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "due": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "orgWebName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "401": {
+            "description": "Status 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Status 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Status 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "transaction": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "transaction"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{id}": {
+      "get": {
+        "summary": "Auto-generated GET /{id}",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Status 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Status 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "organization": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        },
+                        "orgEmail": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "doctorWebName": {
+                          "type": "string"
+                        },
+                        "serviceStartDate": {
+                          "type": "string"
+                        },
+                        "serviceEndDate": {
+                          "type": "string"
+                        },
+                        "userLimit": {
+                          "type": "number"
+                        },
+                        "enabled": {
+                          "oneOf": [
+                            {},
+                            {}
+                          ]
+                        },
+                        "businessType": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "createdAt",
+                        "updatedAt",
+                        "orgEmail",
+                        "doctorWebName",
+                        "serviceStartDate",
+                        "serviceEndDate",
+                        "userLimit",
+                        "enabled",
+                        "businessType"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "organizationId": {
+                      "type": "string"
+                    },
+                    "total": {
+                      "type": "string"
+                    },
+                    "paid": {
+                      "type": "string"
+                    },
+                    "due": {
+                      "type": "string"
+                    },
+                    "orgTransactionId": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "organization",
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "organizationId",
+                    "total",
+                    "paid",
+                    "due",
+                    "orgTransactionId"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

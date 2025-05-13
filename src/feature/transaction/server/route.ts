@@ -532,3 +532,7 @@ export const transactionRoutes = new Hono()
       transaction: insertTransaction,
     });
   })
+
+
+
+  export type AppType = typeof transactionRoutes

@@ -179,4 +179,6 @@ const appointmentReasonsTypeRoutes = new Hono()
     });
   });
 
+export type AppType = typeof appointmentReasonsTypeRoutes;
+
 export default appointmentReasonsTypeRoutes;

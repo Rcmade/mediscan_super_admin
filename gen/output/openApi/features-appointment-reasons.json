@@ -1,0 +1,249 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auto-generated API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/o/{orgWebName}": {
+      "get": {
+        "summary": "Auto-generated GET /o/{orgWebName}",
+        "parameters": [
+          {
+            "name": "orgWebName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appointmentReasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "reasonId": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "string"
+                          },
+                          "organizationId": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "reasonId",
+                          "name",
+                          "amount",
+                          "organizationId"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "appointmentReasons"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Auto-generated POST /o/{orgWebName}",
+        "parameters": [
+          {
+            "name": "orgWebName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "number"
+                  },
+                  "appointmentReasonsTypeId": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "amount"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "appointmentReasonsTypeId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "appointmentReasonsTypeId"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/o/{orgWebName}/{appointmentReasonId}": {
+      "delete": {
+        "summary": "Auto-generated DELETE /o/{orgWebName}/{appointmentReasonId}",
+        "parameters": [
+          {
+            "name": "orgWebName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appointmentReasonId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Status 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Status 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Status 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "appointmentReasonId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "appointmentReasonId"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

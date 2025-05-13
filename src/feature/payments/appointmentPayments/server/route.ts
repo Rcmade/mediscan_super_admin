@@ -889,4 +889,6 @@ const appointmentPaymentRoutes = new Hono()
     },
   );
 
+export type AppType = typeof appointmentPaymentRoutes;
+
 export default appointmentPaymentRoutes;

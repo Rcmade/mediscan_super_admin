@@ -1,0 +1,1324 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auto-generated API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/stats/{webName}": {
+      "get": {
+        "summary": "Auto-generated GET /stats/{webName}",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "isOverviewOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "webName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Status 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "object",
+                      "properties": {
+                        "issues": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "params": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {}
+                                      }
+                                    ]
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "expected": {
+                                    "type": "string",
+                                    "enum": [
+                                      "string",
+                                      "number",
+                                      "bigint",
+                                      "boolean",
+                                      "symbol",
+                                      "undefined",
+                                      "object",
+                                      "function",
+                                      "map",
+                                      "nan",
+                                      "integer",
+                                      "float",
+                                      "date",
+                                      "null",
+                                      "array",
+                                      "unknown",
+                                      "promise",
+                                      "void",
+                                      "never",
+                                      "set"
+                                    ]
+                                  },
+                                  "received": {
+                                    "type": "string",
+                                    "enum": [
+                                      "string",
+                                      "number",
+                                      "bigint",
+                                      "boolean",
+                                      "symbol",
+                                      "undefined",
+                                      "object",
+                                      "function",
+                                      "map",
+                                      "nan",
+                                      "integer",
+                                      "float",
+                                      "date",
+                                      "null",
+                                      "array",
+                                      "unknown",
+                                      "promise",
+                                      "void",
+                                      "never",
+                                      "set"
+                                    ]
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "expected",
+                                  "received",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "expected": {},
+                                  "received": {},
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "expected",
+                                  "received",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "keys": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "keys",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "unionErrors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "issues": {
+                                          "type": "array",
+                                          "items": {}
+                                        },
+                                        "errors": {
+                                          "type": "array",
+                                          "items": {
+                                            "oneOf": [
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {},
+                                              {}
+                                            ]
+                                          }
+                                        },
+                                        "message": {
+                                          "type": "string"
+                                        },
+                                        "isEmpty": {
+                                          "oneOf": [
+                                            {},
+                                            {}
+                                          ]
+                                        },
+                                        "addIssue": {},
+                                        "addIssues": {},
+                                        "formErrors": {
+                                          "type": "object",
+                                          "properties": {
+                                            "formErrors": {
+                                              "type": "array",
+                                              "items": {}
+                                            },
+                                            "fieldErrors": {}
+                                          },
+                                          "required": [
+                                            "formErrors",
+                                            "fieldErrors"
+                                          ]
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "stack": {
+                                          "oneOf": [
+                                            {
+                                              "type": "string"
+                                            }
+                                          ]
+                                        },
+                                        "cause": {}
+                                      },
+                                      "required": [
+                                        "issues",
+                                        "errors",
+                                        "message",
+                                        "isEmpty",
+                                        "addIssue",
+                                        "addIssues",
+                                        "formErrors",
+                                        "name"
+                                      ]
+                                    }
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "unionErrors",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "options": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        },
+                                        {},
+                                        {}
+                                      ]
+                                    }
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "options",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "received": {
+                                    "oneOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ]
+                                  },
+                                  "code": {},
+                                  "options": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "received",
+                                  "code",
+                                  "options",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "argumentsError": {},
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "argumentsError",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "returnTypeError": {},
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "returnTypeError",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "validation": {
+                                    "oneOf": [
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "includes": {
+                                            "type": "string"
+                                          },
+                                          "position": {
+                                            "oneOf": [
+                                              {
+                                                "type": "number"
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "includes"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "startsWith": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "startsWith"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "endsWith": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "endsWith"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "validation",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "minimum": {
+                                    "type": "number"
+                                  },
+                                  "inclusive": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  },
+                                  "exact": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "string",
+                                      "number",
+                                      "bigint",
+                                      "date",
+                                      "array",
+                                      "set"
+                                    ]
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "minimum",
+                                  "inclusive",
+                                  "type",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "maximum": {
+                                    "type": "number"
+                                  },
+                                  "inclusive": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  },
+                                  "exact": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "string",
+                                      "number",
+                                      "bigint",
+                                      "date",
+                                      "array",
+                                      "set"
+                                    ]
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "maximum",
+                                  "inclusive",
+                                  "type",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "multipleOf": {
+                                    "type": "number"
+                                  },
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "multipleOf",
+                                  "path",
+                                  "message"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "code": {},
+                                  "path": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "fatal": {
+                                    "oneOf": [
+                                      {},
+                                      {}
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "path",
+                                  "message"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {}
+                            ]
+                          }
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "isEmpty": {
+                          "oneOf": [
+                            {},
+                            {}
+                          ]
+                        },
+                        "addIssue": {},
+                        "addIssues": {},
+                        "formErrors": {
+                          "type": "object",
+                          "properties": {
+                            "formErrors": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "fieldErrors": {}
+                          },
+                          "required": [
+                            "formErrors",
+                            "fieldErrors"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "stack": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "cause": {}
+                      },
+                      "required": [
+                        "issues",
+                        "errors",
+                        "message",
+                        "isEmpty",
+                        "addIssue",
+                        "addIssues",
+                        "formErrors",
+                        "name"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Status 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appointmentStats": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number"
+                        },
+                        "scheduled": {
+                          "type": "number"
+                        },
+                        "completed": {
+                          "type": "number"
+                        },
+                        "cancelled": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "scheduled",
+                        "completed",
+                        "cancelled"
+                      ]
+                    },
+                    "operationalMetrics": {
+                      "type": "object",
+                      "properties": {
+                        "averageAppointmentsPerDay": {
+                          "type": "string"
+                        },
+                        "completionRate": {
+                          "type": "string"
+                        },
+                        "cancellationRate": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "averageAppointmentsPerDay",
+                        "completionRate",
+                        "cancellationRate"
+                      ]
+                    },
+                    "trends": {
+                      "type": "object",
+                      "properties": {
+                        "topVisitReasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "reason": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "reason",
+                              "count"
+                            ]
+                          }
+                        },
+                        "busiestHours": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "hour": {
+                                "type": "number"
+                              },
+                              "count": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "hour",
+                              "count"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "topVisitReasons",
+                        "busiestHours"
+                      ]
+                    },
+                    "dateRange": {
+                      "type": "object",
+                      "properties": {
+                        "start": {
+                          "type": "string"
+                        },
+                        "end": {
+                          "type": "string"
+                        },
+                        "numberOfDays": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "start",
+                        "end",
+                        "numberOfDays"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "appointmentStats",
+                    "operationalMetrics",
+                    "trends",
+                    "dateRange"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/o/{orgName}/business-profile": {
+      "post": {
+        "summary": "Auto-generated POST /o/{orgName}/business-profile",
+        "parameters": [
+          {
+            "name": "orgName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "healthcare",
+                      "government"
+                    ]
+                  },
+                  "address": {
+                    "type": "object",
+                    "properties": {
+                      "street1": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "street2": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "city": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "state": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "postalCode": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "country": {
+                        "type": "string",
+                        "enum": [
+                          "IN"
+                        ],
+                        "nullable": true
+                      }
+                    }
+                  },
+                  "legalInfo": {
+                    "type": "object",
+                    "properties": {
+                      "pan": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "gst": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "category",
+                  "address",
+                  "legalInfo"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Status 201",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "doctorWebName": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "doctorWebName",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from 400 | 404 | 401 | 402 | 403 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 421 | 422 | 423 | 424 | 425 | 426 | 428 | 429 | 431 | 451 | 500 | 501 | 502 | 503 | 504 | 505 | 506 | 507 | 508 | 510 | 511 | -1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

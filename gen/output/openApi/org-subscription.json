@@ -1,0 +1,66 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auto-generated API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/{webName}": {
+      "get": {
+        "summary": "Auto-generated GET /{webName}",
+        "parameters": [
+          {
+            "name": "webName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Status 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "serviceStartDate": {
+                      "type": "string"
+                    },
+                    "serviceEndDate": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "serviceStartDate",
+                    "serviceEndDate"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

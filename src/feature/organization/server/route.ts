@@ -409,4 +409,6 @@ const organizationRoutes = new Hono()
     }
   });
 
+export type AppType = typeof organizationRoutes;
+
 export default organizationRoutes;

@@ -33,3 +33,6 @@ export const userRoutes = new Hono().get("/history", async (c) => {
     appointments: userAppointments,
   });
 });
+
+
+  export type AppType = typeof userRoutes

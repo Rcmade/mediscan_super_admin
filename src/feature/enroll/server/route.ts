@@ -217,3 +217,6 @@ export const enrollmentRoute = new Hono()
       }
     },
   );
+
+
+export type AppType = typeof enrollmentRoute

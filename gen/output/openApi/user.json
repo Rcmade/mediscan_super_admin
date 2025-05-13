@@ -1,0 +1,99 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auto-generated API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/history": {
+      "get": {
+        "summary": "Auto-generated GET /history",
+        "responses": {
+          "403": {
+            "description": "Status 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "appointments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "type": "string"
+                          },
+                          "patientName": {
+                            "type": "string"
+                          },
+                          "reasonForVisit": {
+                            "type": "string"
+                          },
+                          "tokenNumber": {
+                            "type": "string"
+                          },
+                          "image": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "revisitTime": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "createdAt",
+                          "updatedAt",
+                          "patientName",
+                          "reasonForVisit",
+                          "tokenNumber",
+                          "image",
+                          "revisitTime"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "appointments"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

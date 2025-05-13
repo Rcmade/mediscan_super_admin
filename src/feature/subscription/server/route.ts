@@ -18,3 +18,5 @@ export const subscriptionRoute = new Hono().get("/:webName", async (c) => {
   }
   return c.json(org);
 });
+
+export type AppType = typeof subscriptionRoute;

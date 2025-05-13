@@ -1,0 +1,394 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auto-generated API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/{webName}": {
+      "post": {
+        "summary": "Auto-generated POST /{webName}",
+        "parameters": [
+          {
+            "name": "webName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "type": "string"
+                  },
+                  "patients": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "patientName": {
+                          "type": "string"
+                        },
+                        "reasonForVisitTypeId": {
+                          "type": "string"
+                        },
+                        "userId": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "patientName",
+                        "reasonForVisitTypeId"
+                      ]
+                    }
+                  },
+                  "from": {
+                    "type": "string",
+                    "enum": [
+                      "USER",
+                      "RECEPTIONIST",
+                      "ADMIN",
+                      "SUPER_ADMIN"
+                    ],
+                    "nullable": true
+                  }
+                },
+                "required": [
+                  "phone",
+                  "patients"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Status 201",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "phone": {
+                          "type": "string"
+                        },
+                        "appointments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ]
+                          }
+                        },
+                        "PS2": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "phone",
+                        "appointments",
+                        "PS2"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Status 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Status 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Status 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{webName}/payment-overview": {
+      "post": {
+        "summary": "Auto-generated POST /{webName}/payment-overview",
+        "parameters": [
+          {
+            "name": "webName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "PS2": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "PS2"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Status 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    },
+                    "appointmentWithCost": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "appointment": {
+                            "type": "object",
+                            "properties": {
+                              "reasonForVisit": {
+                                "type": "string"
+                              },
+                              "price": {
+                                "type": "number"
+                              },
+                              "patientName": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "reasonForVisitTypeId": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "userId": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "appointmentStatus": {
+                                "type": "string",
+                                "enum": [
+                                  "Pending",
+                                  "Scheduled",
+                                  "Completed",
+                                  "Cancelled"
+                                ],
+                                "nullable": true
+                              },
+                              "id": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "createdAt": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "updatedAt": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "organizationId": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "tokenNumber": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "image": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "revisitTime": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "isPaid": {
+                                "oneOf": [
+                                  {},
+                                  {}
+                                ]
+                              }
+                            },
+                            "required": [
+                              "reasonForVisit",
+                              "price"
+                            ]
+                          },
+                          "cost": {
+                            "type": "object",
+                            "properties": {
+                              "price": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "price"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "appointment",
+                          "cost"
+                        ]
+                      }
+                    },
+                    "totalCost": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "ids",
+                    "appointmentWithCost",
+                    "totalCost"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

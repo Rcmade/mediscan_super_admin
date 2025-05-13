@@ -1,0 +1,677 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auto-generated API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "post": {
+        "summary": "Auto-generated POST /",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "doctorName": {
+                    "type": "string"
+                  },
+                  "orgEmail": {
+                    "type": "string"
+                  },
+                  "doctorWebName": {
+                    "type": "string"
+                  },
+                  "serviceStartDate": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "serviceEndDate": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "userLimit": {
+                    "type": "number"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "businessType": {
+                    "type": "string",
+                    "enum": [
+                      "llp",
+                      "ngo",
+                      "individual",
+                      "partnership",
+                      "proprietorship",
+                      "public_limited",
+                      "private_limited",
+                      "trust",
+                      "society",
+                      "not_yet_registered",
+                      "educational_institutes",
+                      "other"
+                    ]
+                  },
+                  "enabled": {
+                    "oneOf": [
+                      {},
+                      {}
+                    ]
+                  }
+                },
+                "required": [
+                  "doctorName",
+                  "orgEmail",
+                  "doctorWebName",
+                  "serviceStartDate",
+                  "serviceEndDate",
+                  "userLimit",
+                  "phone",
+                  "businessType"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Status 201",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "doctorWebName": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "doctorWebName"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Status 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "errors"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 421 | 422 | 423 | 424 | 425 | 426 | 428 | 429 | 431 | 451 | 500 | 501 | 502 | 503 | 504 | 505 | 506 | 507 | 508 | 510 | 511 | -1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Auto-generated GET /",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "appointmentStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "startTime",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "endOfDay",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Status 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "type": "object",
+                      "properties": {
+                        "limit": {
+                          "type": "number"
+                        },
+                        "page": {
+                          "type": "number"
+                        },
+                        "search": {
+                          "type": "string"
+                        },
+                        "startTime": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "endOfDay": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "isGlobalSearch": {
+                          "oneOf": [
+                            {},
+                            {}
+                          ]
+                        },
+                        "appointmentStatus": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "limit",
+                        "page",
+                        "search",
+                        "startTime",
+                        "endOfDay",
+                        "isGlobalSearch"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "doctorWebName": {
+                            "type": "string"
+                          },
+                          "serviceStartDate": {
+                            "type": "string"
+                          },
+                          "serviceEndDate": {
+                            "type": "string"
+                          },
+                          "userLimit": {
+                            "type": "number"
+                          },
+                          "total": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "doctorWebName",
+                          "serviceStartDate",
+                          "serviceEndDate",
+                          "userLimit",
+                          "total"
+                        ]
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number"
+                        },
+                        "page": {
+                          "type": "number"
+                        },
+                        "limit": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "page",
+                        "limit"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "query",
+                    "data",
+                    "pagination"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/o/{orgName}": {
+      "put": {
+        "summary": "Auto-generated PUT /o/{orgName}",
+        "parameters": [
+          {
+            "name": "orgName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "doctorName": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "orgEmail": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "doctorWebName": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "serviceStartDate": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    ]
+                  },
+                  "serviceEndDate": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    ]
+                  },
+                  "userLimit": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "phone": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "enabled": {
+                    "oneOf": [
+                      {},
+                      {}
+                    ]
+                  },
+                  "businessType": {
+                    "type": "string",
+                    "enum": [
+                      "llp",
+                      "ngo",
+                      "individual",
+                      "partnership",
+                      "proprietorship",
+                      "public_limited",
+                      "private_limited",
+                      "trust",
+                      "society",
+                      "not_yet_registered",
+                      "educational_institutes",
+                      "other"
+                    ],
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "doctorWebName": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "doctorWebName"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Generic status from 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 421 | 422 | 423 | 424 | 425 | 426 | 428 | 429 | 431 | 451 | 500 | 501 | 502 | 503 | 504 | 505 | 506 | 507 | 508 | 510 | 511 | -1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Auto-generated GET /o/{orgName}",
+        "parameters": [
+          {
+            "name": "orgName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "doctorWebName": {
+                          "type": "string"
+                        },
+                        "serviceStartDate": {
+                          "type": "string"
+                        },
+                        "serviceEndDate": {
+                          "type": "string"
+                        },
+                        "userLimit": {
+                          "type": "number"
+                        },
+                        "name": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "phone": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "orgEmail": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "businessType": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "doctorWebName",
+                        "serviceStartDate",
+                        "serviceEndDate",
+                        "userLimit",
+                        "name",
+                        "phone",
+                        "orgEmail",
+                        "businessType"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Auto-generated DELETE /o/{orgName}",
+        "parameters": [
+          {
+            "name": "orgName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Generic status from import(\"/home/developer/Music/softlab/projects/mediscan_super_admin/node_modules/.pnpm/hono@4.7.4/node_modules/hono/dist/types/utils/http-status\").ContentfulStatusCode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

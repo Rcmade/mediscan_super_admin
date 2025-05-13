@@ -33,3 +33,6 @@ export const uploads = new Hono().post(
     return c.json({ signature });
   },
 );
+
+export type AppType = typeof uploads
+

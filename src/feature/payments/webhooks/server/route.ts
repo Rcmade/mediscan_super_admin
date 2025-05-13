@@ -98,3 +98,6 @@ export const paymentWebhook = new Hono().post(
     return c.json({ status: "ignored" });
   },
 );
+
+
+  export type AppType = typeof paymentWebhook

@@ -189,3 +189,6 @@ export const authRoute = new Hono()
       );
     }
   });
+
+
+export type AppType = typeof authRoute
