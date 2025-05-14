@@ -44,6 +44,7 @@ import useTable from "@/hooks/useTable";
 import useViewAdminTransactionColumns from "@/feature/transaction/hooks/useViewAdminTransactionColumns";
 import ResponsiveTable from "@/components/table/ResponsiveTable";
 import PaginationButtons from "@/components/buttons/PaginationButtons";
+import Title from "@/feature/organization/components/sections/Title";
 
 interface OrgPaymentClientComponent {
   doctorWebName?: string;
@@ -101,6 +102,8 @@ export default function OrgPaymentClientComponent({
 
   return (
     <div className="">
+      <Title />
+
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Transactions</h1>
         {children}

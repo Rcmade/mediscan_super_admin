@@ -70,7 +70,7 @@ const QrCodeDisplay = ({
   };
 
   return (
-    <Card className="qr-card mx-auto w-full max-w-md overflow-hidden shadow-lg">
+    <Card className="qr-card  max-w-md overflow-hidden shadow-lg">
       <CardHeader className="bg-primary/5">
         <CardTitle className="text-center text-primary">{title}</CardTitle>
       </CardHeader>

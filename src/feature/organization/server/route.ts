@@ -333,6 +333,7 @@ const organizationRoutes = new Hono()
         .select({
           doctorWebName: organizations.doctorWebName,
           serviceStartDate: organizations.serviceStartDate,
+          description:organizations.description,
           serviceEndDate: organizations.serviceEndDate,
           userLimit: organizations.userLimit,
           name: users.name,

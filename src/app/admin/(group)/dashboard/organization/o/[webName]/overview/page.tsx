@@ -1,4 +1,6 @@
 import SubscriptionPopupAlert from "@/components/alerts/SubscriptionPopupAlert";
+import Title from "@/feature/organization/components/sections/Title";
+import OrgOverviewDetails from "@/feature/organization/overview/components/section/OrgOverviewDetails";
 import QrCodeDisplay from "@/feature/organization/overview/components/section/QrCodeDisplay";
 import { PagePropsPromise } from "@/types";
 import React from "react";
@@ -8,13 +10,17 @@ const page = async ({ params }: PagePropsPromise) => {
   const enrollPath = `${process.env.NEXT_PUBLIC_URL}/o/${webName}/enroll`;
 
   return (
-    <div className="size-96">
+    <div className="">
+      <Title />
       <SubscriptionPopupAlert />
-      <QrCodeDisplay
-        value={enrollPath}
-        title="Scan to Enroll"
-        webName={webName}
-      />
+      <OrgOverviewDetails />
+      <div className="flex my-4 justify-start">
+        <QrCodeDisplay
+          value={enrollPath}
+          title="Scan to Enroll"
+          webName={webName}
+        />
+      </div>
     </div>
   );
 };

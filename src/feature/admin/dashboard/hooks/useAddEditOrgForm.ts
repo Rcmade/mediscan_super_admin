@@ -39,6 +39,7 @@ const useAddEditOrgForm = () => {
       return {
         doctorName: orgInfo.orgInfo.name || "",
         doctorWebName: orgInfo.orgInfo.doctorWebName || "",
+        description: orgInfo?.orgInfo?.description || "",
         phone: orgInfo.orgInfo.phone || "+91",
         userLimit: orgInfo.orgInfo.userLimit || 1,
         serviceStartDate: orgInfo.orgInfo.serviceStartDate
@@ -50,6 +51,7 @@ const useAddEditOrgForm = () => {
         orgEmail: orgInfo.orgInfo.orgEmail || "",
         businessType: (orgInfo.orgInfo.businessType ||
           "individual") as (typeof businessTypeArr)[number],
+
         // transaction: {
         //   // total: orgInfo.orgInfo.transaction.total,
         //   // paid: orgInfo.orgInfo.transaction.paid,
@@ -66,6 +68,7 @@ const useAddEditOrgForm = () => {
       doctorWebName: "",
       phone: "+91",
       userLimit: 1,
+      description: "",
       // transaction: {
       //   total: 0,
       //   paid: 0,

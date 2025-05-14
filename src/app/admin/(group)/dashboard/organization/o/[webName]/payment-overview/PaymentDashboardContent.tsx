@@ -16,6 +16,7 @@ import { VisitReasonChart } from "@/feature/payments/appointmentPayments/compone
 import { formatCurrency } from "@/lib/utils";
 import usePaymentOverview from "@/feature/payments/appointmentPayments/hooks/usePaymentOverview";
 import { TrueFalseStr } from "@/types";
+import Title from "@/feature/organization/components/sections/Title";
 
 interface PaymentDashboardContentProps {
   isOverviewOnly: TrueFalseStr;
@@ -48,6 +49,8 @@ export default function PaymentDashboardContent({
   return (
     <div className="space-y-6">
       {/* Overview Cards */}
+      <Title />
+
       <PaymentOverview stats={stats.overview} />
 
       {isOverviewOnly === "false" && (

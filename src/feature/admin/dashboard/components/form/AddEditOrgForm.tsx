@@ -111,9 +111,27 @@ export default function AddEditOrgForm() {
               </FormControl>
               <FormDescription>
                 {orgInfo?.type === "edit"
-                  ? "You can't change this field"
-                  : "This will be used in the URL"}
+                  ? "This field cannot be changed."
+                  : "This will be used as the primary name and cannot be changed later."}
               </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel isRequiredField>Description</FormLabel>
+              <FormControl>
+                <Input
+                  disabled={isLoading}
+                  placeholder="Eye Specialist"
+                  {...field}
+                />
+              </FormControl>
 
               <FormMessage />
             </FormItem>

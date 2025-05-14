@@ -4,6 +4,7 @@ import StartEndButton from "@/components/buttons/StartEndButton";
 // import { PagePropsPromise, SearchParams } from "@/types";
 import React, { Suspense } from "react";
 import DashboardContent from "./PaymentDashboardContent";
+import Title from "@/feature/organization/components/sections/Title";
 
 // const getStats = async ({
 //   searchParams,
@@ -60,6 +61,8 @@ const page = async () => {
 
   return (
     <div>
+      <Title />
+
       {/* <pre>{JSON.stringify(stats, null, 2)}</pre> */}
       <StartEndButton />
       <Suspense>

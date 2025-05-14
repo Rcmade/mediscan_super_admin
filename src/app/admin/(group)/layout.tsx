@@ -4,12 +4,15 @@ import {
   // SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/feature/admin/dashboard/components/sidebar/DashboardSidebar";
+import Title from "@/feature/organization/components/sections/Title";
 import { Children } from "@/types";
 import React from "react";
 
 const Layout = ({ children }: Children) => {
   return (
     <SidebarProvider className="relative">
+      <Title />
+
       <DashboardSidebar />
       <SidebarInset>
         {/* <div className="flex justify-end px-4 my-2 mr-3" >

@@ -58,6 +58,7 @@ const userId = text("userId")
 export const organizations = pgTable("organization", {
   orgEmail: text("email"),
   doctorWebName: text("web_name").notNull().unique(),
+  description: text("description"),
   serviceStartDate: timestamp("service_start_date").notNull(),
   serviceEndDate: timestamp("service_end_date").notNull(),
   userLimit: integer("user_limit").notNull(),

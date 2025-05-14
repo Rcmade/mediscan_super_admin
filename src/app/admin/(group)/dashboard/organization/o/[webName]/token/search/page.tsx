@@ -1,5 +1,6 @@
 import { currentUser } from "@/action/currentUser";
 import SubscriptionPopupAlert from "@/components/alerts/SubscriptionPopupAlert";
+import Title from "@/feature/organization/components/sections/Title";
 import SearchAndCards from "@/feature/token/components/search/SearchAndCards";
 import React, { Suspense } from "react";
 
@@ -15,8 +16,9 @@ const page = async () => {
   }
   return (
     <Suspense>
-      <SubscriptionPopupAlert />
 
+      <Title />
+      <SubscriptionPopupAlert />
       <SearchAndCards />
     </Suspense>
   );

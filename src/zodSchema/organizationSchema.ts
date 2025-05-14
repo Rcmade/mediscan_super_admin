@@ -14,6 +14,7 @@ export const createOrgSchema = z.object({
   orgEmail: z.string().email().nonempty(),
   // Work as business legal name
   doctorWebName: z.string().nonempty().min(4).max(200),
+  description: z.string().max(20),
   serviceStartDate: z.coerce.date(),
   serviceEndDate: z.coerce.date(),
   userLimit: z.coerce.number().min(1).int(),

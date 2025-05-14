@@ -20,6 +20,7 @@ import SuperAdminOnlyOption from "./_SuperAdminOnlyOption";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 import SubscriptionPopupAlert from "@/components/alerts/SubscriptionPopupAlert";
 import PaymentDashboardContent from "./payment-overview/PaymentDashboardContent";
+import Title from "@/feature/organization/components/sections/Title";
 
 export const revalidate = 600;
 
@@ -103,6 +104,8 @@ const page = async ({ searchParams, params }: PagePropsPromise) => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Title />
+
       <SubscriptionPopupAlert />
 
       <div className="container mx-auto px-4">
@@ -181,7 +184,7 @@ const page = async ({ searchParams, params }: PagePropsPromise) => {
           />
         </div>
 
-        <h1 className="text-3xl font-bold my-4 px-4 text-foreground">
+        <h1 className="my-4 px-4 text-3xl font-bold text-foreground">
           Appointment Payment Overview
         </h1>
         <Suspense>

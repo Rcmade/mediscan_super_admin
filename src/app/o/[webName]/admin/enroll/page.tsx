@@ -9,6 +9,7 @@ const page = async () => {
 
   return (
     <div className="flex justify-center py-8">
+
       <Card className="w-[500px] max-w-full">
         <CardHeader>
           <CardTitle>Enter patient information.</CardTitle>
