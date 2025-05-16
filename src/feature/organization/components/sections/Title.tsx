@@ -4,7 +4,8 @@ import React from "react";
 
 const Title = () => {
   const { webName } = useWebName();
-  return <title>{decodeURIComponent(webName)?.toLocaleUpperCase()}</title>;
+  const name = webName ? decodeURIComponent(webName)?.toLocaleUpperCase() : "";
+  return name ? <title>{name}</title> : null;
 };
 
 export default Title;

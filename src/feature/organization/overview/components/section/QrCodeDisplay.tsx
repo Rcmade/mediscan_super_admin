@@ -70,13 +70,14 @@ const QrCodeDisplay = ({
   };
 
   return (
-    <Card className="qr-card  max-w-md overflow-hidden shadow-lg">
-      <CardHeader className="bg-primary/5">
-        <CardTitle className="text-center text-primary">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex justify-center p-6">
-        <div ref={qrRef} className="rounded-lg bg-white p-4 shadow-inner">
-          {/* <QRCodeCanvas
+    <Card className="qr-card max-w-md overflow-hidden shadow-lg">
+      <div className="qr-card bg-white rounded-lg">
+        <CardHeader className="bg-primary/5">
+          <CardTitle className="text-center text-primary">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex justify-center p-6">
+          <div ref={qrRef} className="rounded-lg p-4 shadow-inner">
+            {/* <QRCodeCanvas
             value={value}
             size={size}
             bgColor={"#ffffff"}
@@ -96,17 +97,18 @@ const QrCodeDisplay = ({
             }
             {...rest}
           /> */}
-          <QrCodeView
-            value={value}
-            size={1024}
-            className="object-contain"
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-          />
-        </div>
-      </CardContent>
+            <QrCodeView
+              value={value}
+              size={1024}
+              className="object-contain"
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+            />
+          </div>
+        </CardContent>
+      </div>
       <CardFooter className="flex flex-col justify-center gap-4 pb-6">
         <Link
           href={value}
