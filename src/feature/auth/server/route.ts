@@ -121,7 +121,12 @@ export const authRoute = new Hono()
           return c.json({
             message: message,
             stage: LoginVerificationStage.OTPSent,
-            data: { redirect: redirectUrl, hash },
+            data: {
+              redirect: redirectUrl,
+              hash,
+              otp:
+                process.env.OTP_SERVICE_AVAILABLE !== "true" ? generateOtp : "",
+            },
           });
 
         case LoginVerificationStage.OTPVerify:
@@ -169,7 +174,7 @@ export const authRoute = new Hono()
           return c.json({
             message: "OTP verified",
             stage: LoginVerificationStage.OTPVerified,
-            data: { redirect: redirect, hash: null },
+            data: { redirect: redirect, hash: null, otp: "" },
           });
 
         default:
@@ -190,5 +195,4 @@ export const authRoute = new Hono()
     }
   });
 
-
-export type AppType = typeof authRoute
+export type AppType = typeof authRoute;

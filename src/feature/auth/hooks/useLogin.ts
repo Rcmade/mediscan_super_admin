@@ -43,6 +43,9 @@ const useLogin = () => {
       }
       const data = await res.json();
       if (data.stage === LoginVerificationStage.OTPSent) {
+        if ("otp" in data?.data) {
+          form.setValue("otp", data.data.otp);
+        }
         form.setValue("stage", LoginVerificationStage.OTPVerify);
         form.setValue("hash", data.data.hash || "");
       }
@@ -56,7 +59,14 @@ const useLogin = () => {
       if (data.stage === LoginVerificationStage.OTPVerified) {
         session.update();
       }
-      replace(data.data.redirect);
+      if (data.stage === LoginVerificationStage.OTPVerified) {
+        setTimeout(() => {
+          // window.location.reload();
+          window.location.href = data.data.redirect;
+        }, 100);
+      } else {
+        replace(data.data.redirect);
+      }
     },
     onError: (error) => {
       toast.error(error.message || "Failed to login", {

@@ -88,7 +88,7 @@ const organizationRoutes = new Hono()
         .values({
           ...rest,
           orgEmail: rest.orgEmail,
-          doctorWebName: rest.doctorWebName.toLowerCase(),
+          doctorWebName: rest.doctorWebName.toLowerCase()?.trim(),
           serviceEndDate,
           serviceStartDate,
         })
@@ -333,7 +333,7 @@ const organizationRoutes = new Hono()
         .select({
           doctorWebName: organizations.doctorWebName,
           serviceStartDate: organizations.serviceStartDate,
-          description:organizations.description,
+          description: organizations.description,
           serviceEndDate: organizations.serviceEndDate,
           userLimit: organizations.userLimit,
           name: users.name,

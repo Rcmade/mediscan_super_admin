@@ -13,7 +13,7 @@ export const createOrgSchema = z.object({
   doctorName: z.string().nonempty(),
   orgEmail: z.string().email().nonempty(),
   // Work as business legal name
-  doctorWebName: z.string().nonempty().min(4).max(200),
+  doctorWebName: z.string().trim().nonempty().min(4).max(200),
   description: z.string().max(20),
   serviceStartDate: z.coerce.date(),
   serviceEndDate: z.coerce.date(),

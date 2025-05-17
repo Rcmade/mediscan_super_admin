@@ -14,7 +14,7 @@ const page = async ({ params }: PagePropsPromise) => {
       <Title />
       <SubscriptionPopupAlert />
       <OrgOverviewDetails />
-      <div className="flex my-4 justify-start">
+      <div className="my-4 flex justify-start">
         <QrCodeDisplay
           value={enrollPath}
           title="Scan to Enroll"
