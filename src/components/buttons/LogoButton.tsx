@@ -6,6 +6,7 @@ import Link from "next/link";
 import React from "react";
 import { Skeleton } from "../ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { usePathname } from "next/navigation";
 
 const LogoButton = ({
   className,
@@ -18,6 +19,7 @@ const LogoButton = ({
   const { data, isLoading } = useGetOrgDetailsByWebName();
   const webName = data?.doctorWebName;
   const user = useCurrentUser();
+  const pathName = usePathname();
 
   if (isLoading) return <Skeleton className="h-8 w-24 max-w-full p-2" />;
 
@@ -34,11 +36,12 @@ const LogoButton = ({
         ? `${decodeURIComponent(webName)}`
         : `${process.env.NEXT_PUBLIC_WEB_NAME}` || "MediScan"}
       <Description />
-      {(user?.role === "ADMIN" ||
-        user?.role === "RECEPTIONIST" ||
-        user?.role === "SUPER_ADMIN") && (
-        <span className="text-sm text-primary">({user?.role})</span>
-      )}
+      {pathName?.includes("admin") &&
+        (user?.role === "ADMIN" ||
+          user?.role === "RECEPTIONIST" ||
+          user?.role === "SUPER_ADMIN") && (
+          <span className="text-sm text-primary">({user?.role})</span>
+        )}
     </Link>
   );
 };
