@@ -1,6 +1,7 @@
 import React from "react";
 import QrCodeView from "./QrCodeView";
 import { CardContent, CardHeader, CardTitle } from "../ui/card";
+import { useGetOrgDetailsByWebName } from "@/feature/organization/hooks/useGetOrgByWebName";
 
 interface QrVariantsProps {
   qrRef: React.RefObject<HTMLDivElement | null>;
@@ -16,6 +17,20 @@ const QrVariants = ({
   variant,
   title,
 }: QrVariantsProps) => {
+  const { data: orgDetails } = useGetOrgDetailsByWebName();
+  const webNameLength = orgDetails?.doctorWebName?.length || 24;
+
+  const fontSize =
+    webNameLength < 25
+      ? "2xl"
+      : webNameLength <= 30
+        ? "xl"
+        : webNameLength <= 35
+          ? "lg"
+          : webNameLength <= 40
+            ? "base"
+            : "xs";
+
   switch (variant) {
     case "scannable":
       return (
@@ -40,20 +55,25 @@ const QrVariants = ({
       );
     case "queue":
       return (
-        <div className="qr-card relative flex aspect-square w-[40rem] max-w-full items-center justify-center overflow-hidden rounded-xl bg-[url(/qr-bg.png)] bg-contain bg-no-repeat px-0 shadow-lg">
+        <div
+          className={`qr-card relative flex aspect-square w-[40rem] max-w-full flex-col items-center overflow-hidden rounded-xl bg-contain bg-no-repeat px-0 pt-16 shadow-lg ${orgDetails?.orgType === "HOSPITAL" ? "bg-[url(/qr-bg.png)]" : "bg-[url(/other-qr-bg.jpg)]"} `}
+        >
           <div
             ref={qrRef}
-            className="absolute left-24 top-[4.2rem] text-xl font-semibold text-blue-900"
+            className="mb-5 w-full max-w-md text-start text-xl font-semibold text-blue-900"
           >
             <p>Book Your appointment </p>
             <p>
               with
-              <span className="mx-1 text-2xl font-bold uppercase">
+              <span className={`mx-1 font-bold uppercase ${fontSize}`}>
                 {decodeURIComponent(webName)}
               </span>
             </p>
           </div>
-          <div className="max-w-full">
+          <p className="text-lg text-primary">
+            No waiting no stress just scan and relax.
+          </p>
+          <div className="my-4 mr-4 max-w-full">
             <QrCodeView
               value={value}
               size={225}
@@ -64,10 +84,13 @@ const QrVariants = ({
               }}
             />
           </div>
+          <p className="bottom-28 max-w-64 text-center text-xl font-bold text-primary">
+            Save your energy for healing,not standing.
+          </p>
         </div>
       );
     default:
-      return null;
+      return null;  
   }
 };
 
