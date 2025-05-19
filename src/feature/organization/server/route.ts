@@ -167,9 +167,19 @@ const organizationRoutes = new Hono()
 
         // Fetch the organization
         const [org] = await db
-          .select({ id: organizations.id })
+          .select({
+            orgId: organizations.id,
+            userId: users.id,
+            userName: users.name, // Add more fields as needed
+            userPhone: users.phone,
+          })
           .from(organizations)
-          .where(eq(organizations.doctorWebName, orgName));
+          .where(eq(organizations.doctorWebName, orgName))
+          .leftJoin(
+            organizationUsers,
+            eq(organizationUsers.organizationId, organizations.id),
+          )
+          .leftJoin(users, eq(organizationUsers.userId, users.id));
 
         if (!org) {
           return c.json({ error: "Organization not found" }, 404);
@@ -198,33 +208,41 @@ const organizationRoutes = new Hono()
         const [updatedOrg] = await db
           .update(organizations)
           .set(filteredBody)
-          .where(eq(organizations.id, org.id))
+          .where(eq(organizations.id, org.orgId))
           .returning({ doctorWebName: organizations.doctorWebName });
 
-        // let transactionMessage = "";
-        // // if transaction id exists which mean user want to update the transaction if now user want to create new transaction
-        // if (body.transaction?.transactionId) {
-        //   transactionMessage = "Transaction updated";
-        //   await db
-        //     .update(orgTransaction)
-        //     .set({
-        //       ...body.transaction,
-        //       total: body.transaction.total.toString(),
-        //       paid: body.transaction.paid.toString(),
-        //       due: body.transaction.due.toString(),
-        //     })
-        //     .where(eq(orgTransaction.id, body.transaction.transactionId));
-        // } else if (body.transaction) {
-        //   transactionMessage = "Transaction created";
-        //   await db.insert(orgTransaction).values({
-        //     ...body.transaction,
-        //     organizationId: org.id,
-        //     total: body.transaction.total.toString(),
-        //     paid: body.transaction.paid.toString(),
-        //     due: body.transaction.due.toString(),
-        //   });
-        // }
+        if (body?.doctorName !== org.userName && org?.userId) {
+          await db
+            .update(users)
+            .set({
+              name: body?.doctorName,
+            })
+            .where(eq(users.id, org?.userId));
+        }
         if (!updatedOrg) {
+          // let transactionMessage = "";
+          // // if transaction id exists which mean user want to update the transaction if now user want to create new transaction
+          // if (body.transaction?.transactionId) {
+          //   transactionMessage = "Transaction updated";
+          //   await db
+          //     .update(orgTransaction)
+          //     .set({
+          //       ...body.transaction,
+          //       total: body.transaction.total.toString(),
+          //       paid: body.transaction.paid.toString(),
+          //       due: body.transaction.due.toString(),
+          //     })
+          //     .where(eq(orgTransaction.id, body.transaction.transactionId));
+          // } else if (body.transaction) {
+          //   transactionMessage = "Transaction created";
+          //   await db.insert(orgTransaction).values({
+          //     ...body.transaction,
+          //     organizationId: org.id,
+          //     total: body.transaction.total.toString(),
+          //     paid: body.transaction.paid.toString(),
+          //     due: body.transaction.due.toString(),
+          //   });
+          // }
           return c.json({ error: "Failed to update organization" }, 500);
         }
 
@@ -242,14 +260,14 @@ const organizationRoutes = new Hono()
               .from(users)
               .where(eq(users.phone, normalizedPhone));
 
-            if (existingPhoneUser.name !== doctorName) {
+            if (existingPhoneUser.name !== doctorName && org.userId) {
               await db
                 .update(users)
                 .set({
                   ...(doctorName ? { name: doctorName } : {}),
                   // ...(normalizedPhone ? { phone: normalizedPhone } : {}),
                 })
-                .where(eq(users.id, user.id));
+                .where(eq(users.id, org.userId));
             }
           }
         }
@@ -409,7 +427,7 @@ const organizationRoutes = new Hono()
       const err = formatError(error);
       return c.json({ error: err.message }, err.statusCode);
     }
-  })
+  });
 
 export type AppType = typeof organizationRoutes;
 
