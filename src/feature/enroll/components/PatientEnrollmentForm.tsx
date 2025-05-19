@@ -25,6 +25,7 @@ import { PlusCircle, X } from "lucide-react";
 import { UserRole } from "@/lib/db/schema";
 import { Separator } from "@/components/ui/separator";
 import useViewAppointmentReasonType from "@/feature/appointmentReasonType/hooks/useViewAppointmentReasonType";
+import useUserType from "@/feature/organization/hooks/useUserType";
 
 interface PatientEnrollmentFormProps {
   defaultValue?: EnrollmentSchemaT;
@@ -42,6 +43,9 @@ export function PatientEnrollmentForm({
     control: form.control,
     name: "patients",
   });
+
+
+  const userType = useUserType()
 
   return (
     <>
@@ -73,7 +77,9 @@ export function PatientEnrollmentForm({
             <div key={field.id} className="space-y-4">
               <div className="flex items-center justify-between">
                 {index > 0 && (
-                  <h3 className="text-lg font-semibold">Patient {index + 1}</h3>
+                  <h3 className="text-lg font-semibold">
+                    {userType} {index + 1}
+                  </h3>
                 )}
                 {index > 0 && (
                   <Button
@@ -84,7 +90,7 @@ export function PatientEnrollmentForm({
                     disabled={isLoading}
                   >
                     <X className="h-4 w-4" />
-                    <span className="sr-only">Remove patient</span>
+                    <span className="sr-only">Remove {userType}</span>
                   </Button>
                 )}
               </div>
@@ -93,7 +99,7 @@ export function PatientEnrollmentForm({
                 name={`patients.${index}.patientName`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Patient Name</FormLabel>
+                    <FormLabel>{userType} Name</FormLabel>
                     <FormControl>
                       <Input
                         disabled={isLoading}
@@ -103,7 +109,7 @@ export function PatientEnrollmentForm({
                       />
                     </FormControl>
                     <FormDescription>
-                      Enter the full name of the patient.
+                      Enter the full name of the {userType}.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -140,7 +146,7 @@ export function PatientEnrollmentForm({
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Choose the primary reason for the patient&apos;s visit.
+                      Choose the primary reason for the {userType}&apos;s visit.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -164,7 +170,7 @@ export function PatientEnrollmentForm({
             disabled={isLoading}
           >
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Another Patient
+            Add Another {userType}
           </Button>
 
           <Button disabled={isLoading} spinner type="submit">

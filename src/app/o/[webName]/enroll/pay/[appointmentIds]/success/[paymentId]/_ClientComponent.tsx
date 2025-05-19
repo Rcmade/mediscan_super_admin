@@ -16,10 +16,19 @@ const ClientComponent = ({
   //   paymentId,
 }: Children & { paymentId: string }) => {
   //   const [isDownloading, setIsDownloading] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   const receiptRef = useRef<HTMLDivElement>(null);
+
+  const handlePrintReceipt = () => {
+    setIsPrinting(true);
+    // Simulate print delay
+    setTimeout(() => {
+      setIsPrinting(false);
+      window.print();
+    }, 1000);
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -102,15 +111,6 @@ const ClientComponent = ({
   //       setIsDownloading(false);
   //     }
   //   };
-
-  const handlePrintReceipt = () => {
-    setIsPrinting(true);
-    // Simulate print delay
-    setTimeout(() => {
-      setIsPrinting(false);
-      window.print();
-    }, 1000);
-  };
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-10" ref={receiptRef}>

@@ -12,6 +12,7 @@ import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { businessTypeArr } from "@/constant";
+import { revalidatePaths } from "@/action/revalidatePaths";
 
 const createApi = client.api.main.org.$post;
 const editApi = client.api.main.org["o"][":orgName"]["$put"];
@@ -40,6 +41,7 @@ const useAddEditOrgForm = () => {
         doctorName: orgInfo.orgInfo.name || "",
         doctorWebName: orgInfo.orgInfo.doctorWebName || "",
         description: orgInfo?.orgInfo?.description || "",
+        orgType: orgInfo?.orgInfo?.orgType || "HOSPITAL",
         phone: orgInfo.orgInfo.phone || "+91",
         userLimit: orgInfo.orgInfo.userLimit || 1,
         serviceStartDate: orgInfo.orgInfo.serviceStartDate
@@ -69,6 +71,7 @@ const useAddEditOrgForm = () => {
       phone: "+91",
       userLimit: 1,
       description: "",
+      orgType: "HOSPITAL",
       // transaction: {
       //   total: 0,
       //   paid: 0,
@@ -131,14 +134,17 @@ const useAddEditOrgForm = () => {
       const error = getReadableErrorMessage(err);
       toast.error(error);
     },
-    onSuccess: ({ data }) => {
+    onSuccess: async ({ data }) => {
       // toast.success(data.data.message);
       if ("message" in data) {
         toast.success(data.message);
       }
 
       queryClient.invalidateQueries({ queryKey: ["organizations"] });
-
+      await revalidatePaths([
+        `/o/${data.doctorWebName}`,
+        `/o/${encodeURIComponent(data.doctorWebName)}`,
+      ]);
       if ("doctorWebName" in data) {
         // push(
         //   `/admin/dashboard/organization/o/${data.doctorWebName}/business-profile`,

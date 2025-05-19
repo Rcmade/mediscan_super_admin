@@ -10,8 +10,12 @@ const AddOrgButton = () => {
     // <Button onClick={() => onOpen({ type: "create" })} variant="outline">
     //   Add org
     // </Button>
-    <Button asChild>
-      <Link href="/admin/dashboard/organization/add">Add org</Link>
+    <Button className="relative">
+      <Link
+        href="/admin/dashboard/organization/add"
+        className="absolute inset-0"
+      />
+      Add org
     </Button>
   );
 };

@@ -14,7 +14,7 @@ export const enrollmentSchema = z.object({
   patients: z.array(
     z.object({
       patientName: z.string().min(2, {
-        message: "Patient name must be at least 2 characters.",
+        message: "User name must be at least 2 characters.",
       }),
       reasonForVisitTypeId: z.string().min(2, {
         message: "Reason for visit must be at least 2 characters.",

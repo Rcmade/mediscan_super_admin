@@ -44,6 +44,7 @@ import {
   appointmentPaymentSortByArr,
   appointmentPaymentSortOrderArr,
 } from "@/content/appointmentPaymentContent";
+import useUserType from "@/feature/organization/hooks/useUserType";
 
 interface AppointmentPaymentClientComponentProps {
   children?: React.ReactNode;
@@ -59,6 +60,7 @@ export default function AppointmentPaymentClientComponent({
   const { updateSearchParams } = useUpdateSearchParams(true);
   const { data } = useViewAppointmentPayment();
 
+  const userType = useUserType();
   const [filters, setFilters] = useState<
     AppointmentPaymentRequestType["query"]
   >({
@@ -120,7 +122,7 @@ export default function AppointmentPaymentClientComponent({
             className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4`}
           >
             <div className="space-y-2">
-              <Label htmlFor="search">Search by patient name</Label>
+              <Label htmlFor="search">Search by {userType} name</Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input

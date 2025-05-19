@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { PaymentOverviewResponseT } from "../../../types";
+import UserType from "@/feature/organization/components/sections/UserType";
 
 interface RecentAppointmentsProps {
   stats: PaymentOverviewResponseT["recentAppointments"];
@@ -27,13 +28,17 @@ export function RecentAppointments({ stats }: RecentAppointmentsProps) {
     <Card>
       <CardHeader>
         <CardTitle>Recent Appointments</CardTitle>
-        <CardDescription>Latest patient appointments</CardDescription>
+        <CardDescription>
+          Latest <UserType /> appointments
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Patient</TableHead>
+              <TableHead>
+                <UserType />
+              </TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Reason</TableHead>
               <TableHead>Status</TableHead>

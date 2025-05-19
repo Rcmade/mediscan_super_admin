@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 import React from "react";
 import ClientComponent from "./_ClientComponent";
+import UserType from "@/feature/organization/components/sections/UserType";
+// import UserType from "@/feature/organization/components/sections/UserType";
 
 //  InferResponseType<
 //     typeof client.api.main.payments.appointment.view["a"][":appointmentId"]["$get"]
@@ -150,7 +152,11 @@ const CompletePaymentOverviewSection = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Patient Name</TableHead>
+                <TableHead>
+                  <span>
+                    <UserType /> Name
+                  </span>
+                </TableHead>
                 <TableHead>Reason</TableHead>
                 <TableHead>Token</TableHead>
                 <TableHead>Status</TableHead>

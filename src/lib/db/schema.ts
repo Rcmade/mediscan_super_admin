@@ -15,6 +15,7 @@ import { nId } from "@/lib/utils/dbUtils";
 import {
   appointmentsReasons,
   appointmentStatusArr,
+  orgTypeArr,
   paymentMethodsArr,
   paymentStatusArr,
   userRoleArr,
@@ -30,6 +31,8 @@ export const visitReasons = pgEnum("VisitReasons", appointmentsReasons);
 export const paymentMethodsEnum = pgEnum("PaymentMethods", paymentMethodsArr);
 
 export const paymentStatus = pgEnum("PaymentStatus", paymentStatusArr);
+
+export const orgType = pgEnum("OrgType", orgTypeArr);
 
 const phone = varchar("phone", { length: 20 }).unique().notNull();
 
@@ -63,6 +66,7 @@ export const organizations = pgTable("organization", {
   serviceEndDate: timestamp("service_end_date").notNull(),
   userLimit: integer("user_limit").notNull(),
   enabled: boolean("enabled").notNull().default(true),
+  orgType: orgType("org_type").default("HOSPITAL"),
   businessType: text("business_type").notNull().default("individual"),
   ...commonFields,
 });

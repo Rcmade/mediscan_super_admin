@@ -5,6 +5,7 @@ import {
   countryArr,
   gstRegex,
   orgBusinessCategoryArr,
+  orgTypeArr,
   panRegex,
 } from "@/constant";
 // import { orgTransactionSchema } from "./transactionSchema";
@@ -15,6 +16,7 @@ export const createOrgSchema = z.object({
   // Work as business legal name
   doctorWebName: z.string().trim().nonempty().min(4).max(200),
   description: z.string().max(20),
+  orgType: z.enum(orgTypeArr).default("HOSPITAL"),
   serviceStartDate: z.coerce.date(),
   serviceEndDate: z.coerce.date(),
   userLimit: z.coerce.number().min(1).int(),

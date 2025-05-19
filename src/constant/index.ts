@@ -1,4 +1,7 @@
 export const appointmentsReasons = ["Check_UP", "Revisit", "To_Meet"] as const;
+
+export const orgTypeArr = ["HOSPITAL", "OTHER"] as const;
+
 export const OTP_EXPIRES_TIME = 3_600_000; // 1 HOURS
 
 export const webName = process.env.NEXT_PUBLIC_WEB_NAME || "Mediscan";

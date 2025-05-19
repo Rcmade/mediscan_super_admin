@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { businessTypeObj } from "@/constant";
+import { businessTypeObj, orgTypeArr } from "@/constant";
 // import { formatDate } from "@/lib/utils/dateUtils";
 
 export default function AddEditOrgForm() {
@@ -124,7 +124,7 @@ export default function AddEditOrgForm() {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel isRequiredField>Description</FormLabel>
+              <FormLabel>Description</FormLabel>
               <FormControl>
                 <Input
                   disabled={isLoading}
@@ -133,6 +133,31 @@ export default function AddEditOrgForm() {
                 />
               </FormControl>
 
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="orgType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Org Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger disabled={isLoading}>
+                    <SelectValue placeholder="Select a business type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {orgTypeArr.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type.replace(/_/g, " ")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

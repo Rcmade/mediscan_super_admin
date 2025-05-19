@@ -32,6 +32,7 @@ import { calendarDateFormat } from "@/lib/utils/dateUtils";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import useViewAppointmentReasonType from "@/feature/appointmentReasonType/hooks/useViewAppointmentReasonType";
+import useUserType from "@/feature/organization/hooks/useUserType";
 
 interface Props {
   data: UseGetAppointmentResponseT & { tokenNumber: string };
@@ -56,6 +57,7 @@ const EditAppointmentForm = ({
   });
 
   const { data } = useViewAppointmentReasonType();
+  const userType = useUserType()
 
   const { onSubmit, isLoading, form } = useEditAppointment({
     patientName: patientName || "",
@@ -85,7 +87,7 @@ const EditAppointmentForm = ({
           name="patientName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Patient Name</FormLabel>
+              <FormLabel>{userType} Name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -189,14 +191,17 @@ const EditAppointmentForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Reason for Visit</FormLabel>
-              <Select disabled onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                disabled
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
                 <FormControl>
                   <SelectTrigger className="capitalize">
                     <SelectValue placeholder="Select Option" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-               
                   {(data?.appointmentReasons || []).map((reason) => (
                     <SelectItem
                       value={reason.reasonId}
@@ -242,7 +247,7 @@ const EditAppointmentForm = ({
           name="revisitTime"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Patient Revisit</FormLabel>
+              <FormLabel>{userType} Revisit</FormLabel>
               <Popover
                 onOpenChange={(o) =>
                   setOpenPopovers((pre) => ({ ...pre, revisit: o }))

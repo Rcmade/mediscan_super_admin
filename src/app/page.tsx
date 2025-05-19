@@ -8,6 +8,7 @@ import {
   Shield,
   Smartphone,
 } from "lucide-react";
+import UserType from "@/feature/organization/components/sections/UserType";
 
 export default function Home() {
   return (
@@ -21,7 +22,7 @@ export default function Home() {
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Skip the Queue, Book Your Medical Scan Online
                   </h1>
-                  <p className="max-w-[600px]  md:text-xl">
+                  <p className="max-w-[600px] md:text-xl">
                     MediScan lets you book appointments for medical scans
                     directly from your mobile device. No more waiting in long
                     queues - get your token and arrive just in time.
@@ -256,7 +257,9 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Sarah Johnson</p>
-                    <p className="text-xs text-muted-foreground">Patient</p>
+                    <p className="text-xs text-muted-foreground">
+                      <UserType />
+                    </p>
                   </div>
                 </div>
               </div>

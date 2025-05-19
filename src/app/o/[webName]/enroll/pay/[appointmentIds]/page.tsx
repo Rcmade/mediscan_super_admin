@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { APPOINTMENT_ID_HASH_NAME } from "@/constant";
+import UserType from "@/feature/organization/components/sections/UserType";
 import PaymentTabsSection from "@/feature/payments/appointmentPayments/components/sections/PaymentTabsSection";
 import { client } from "@/lib/rpc";
 import { getReadableErrorMessage } from "@/lib/utils/stringUtils";
@@ -111,7 +112,9 @@ const page = async ({ params }: PagePropsPromise) => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Patient Name</TableHead>
+                        <TableHead>
+                          <UserType />
+                        </TableHead>
                         <TableHead>Service</TableHead>
                         <TableHead>Token</TableHead>
                         <TableHead className="text-right">Price</TableHead>

@@ -5,25 +5,28 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils/dateUtils";
 //import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AppointmentPaymentResponseType } from "./useViewAppointmentPayment";
+import useUserType from "@/feature/organization/hooks/useUserType";
 
 const useViewAppointmentPaymentColumns = () => {
   // const onOpen = useAddEditTransactionDialog((s) => s.onOpen);
-  // const user = useCurrentUser();
+  // const user = useCurrentUser()
   // const onEditEmployee = useEditEmployeeDialog((s) => s.onOpen);
+  const userType = useUserType();
 
   const columns: ColumnDef<AppointmentPaymentResponseType["data"][number]>[] = [
-
     {
       accessorKey: "payment.id",
       header: "Payment ID",
       cell: ({ row }) => (
-        <div className="font-medium">{row.original.payment.id?.substring(0,8) || "N/A"}...</div>
+        <div className="font-medium">
+          {row.original.payment.id?.substring(0, 8) || "N/A"}...
+        </div>
       ),
     },
 
     {
       accessorKey: "appointment.patientName",
-      header: "Patient Name",
+      header: `${userType} Name`,
       cell: ({ row }) => (
         <div className="font-medium">
           {row.original.appointment.patientName || "N/A"}

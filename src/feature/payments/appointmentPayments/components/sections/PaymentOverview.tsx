@@ -11,11 +11,17 @@ import {
 import React from "react";
 import { PaymentOverviewResponseT } from "../../types";
 import { formatCurrency } from "@/lib/utils";
+import { useGetOrgDetailsByWebName } from "@/feature/organization/hooks/useGetOrgByWebName";
 
 interface PaymentOverviewProps {
   stats: PaymentOverviewResponseT["overview"];
 }
 const PaymentOverview = ({ stats }: PaymentOverviewProps) => {
+  const { data: orgDetails } = useGetOrgDetailsByWebName();
+
+  const userTypeField =
+    orgDetails?.orgType === "HOSPITAL" ? "Patients" : "Customers";
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <Card>
@@ -74,20 +80,24 @@ const PaymentOverview = ({ stats }: PaymentOverviewProps) => {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Unique Patients</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            Unique {userTypeField}
+          </CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.uniquePatients}</div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Total patients seen
+            Total {userTypeField} seen
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">New Patients</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            New {userTypeField}
+          </CardTitle>
           <UserPlus className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>

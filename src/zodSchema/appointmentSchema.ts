@@ -14,7 +14,7 @@ export const appointmentSchema = z.object({
     required_error: "Please select a status for the appointment.",
   }),
   patientName: z.string().min(2, {
-    message: "Patient name must be at least 2 characters.",
+    message: "User name must be at least 2 characters.",
   }),
   // reasonForVisit: z.enum(appointmentsReasons, {
   //   required_error: "Please select a reason for visit.",

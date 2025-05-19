@@ -334,6 +334,7 @@ const organizationRoutes = new Hono()
           doctorWebName: organizations.doctorWebName,
           serviceStartDate: organizations.serviceStartDate,
           description: organizations.description,
+          orgType: organizations.orgType,
           serviceEndDate: organizations.serviceEndDate,
           userLimit: organizations.userLimit,
           name: users.name,
@@ -408,7 +409,7 @@ const organizationRoutes = new Hono()
       const err = formatError(error);
       return c.json({ error: err.message }, err.statusCode);
     }
-  });
+  })
 
 export type AppType = typeof organizationRoutes;
 
