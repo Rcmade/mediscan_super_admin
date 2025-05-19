@@ -52,7 +52,8 @@ const QrCodeDisplay = ({
       });
 
       const link = document.createElement("a");
-      link.download = `${webName}-${suffix}-qr.png`;
+      const l = `${decodeURIComponent(webName).replaceAll(" ", "-")}-qr.png`;
+      link.download = l;
       link.href = canvas.toDataURL("image/png");
       document.body.appendChild(link);
       link.click();
