@@ -89,6 +89,7 @@ RUN echo "Runner stage: Current directory: $(pwd)"
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+
 # Create a system user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 --ingroup nodejs nextjs
