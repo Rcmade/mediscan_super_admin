@@ -101,14 +101,13 @@ phases:
 
       - echo "🔹 Exporting NEXT_PUBLIC_* vars"
       - |
-        for VAR in NEXT_PUBLIC_URL NEXT_PUBLIC_APP_VERSION NEXT_PUBLIC_WEB_NAME \
+        for VAR in NEXT_PUBLIC_URL NEXT_PUBLIC_WEB_NAME \
                    NEXT_PUBLIC_WEB_MODE NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME \
                    NEXT_PUBLIC_CLOUDINARY_API_KEY NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET \
                    NEXT_PUBLIC_RAZORPAY_ID; do
           # Get the value from the .env file and export it
           VAR_VALUE=$(grep -E "^$VAR=" app.env | cut -d'=' -f2-)
           eval export $VAR="$VAR_VALUE"
-          echo "  • $VAR=$VAR_VALUE"
         done
 
   build:

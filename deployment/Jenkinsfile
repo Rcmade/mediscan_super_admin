@@ -31,8 +31,8 @@ pipeline {
         JENKINS_EC2_APP_SERVER_TWO = 'jenkins-ssh-key'
 
         S3_ENV_BUCKET = 'secure-env-files-itsoftlab'
-        MEDISCAN_PRODUCTION_ENV_S3_NAME = 'mediscan-production-env'
-        MEDISCAN_STAGING_ENV_S3_NAME = 'mediscan-staging-env'
+        MEDISCAN_PRODUCTION_ENV_S3_KEY = 'mediscan-production-env'
+        MEDISCAN_STAGING_ENV_S3_KEY = 'mediscan-staging-env'
     }
 
     stages {
