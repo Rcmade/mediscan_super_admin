@@ -1,9 +1,79 @@
+# version: 0.2
+
+# env:
+#   variables:
+#     AWS_DEFAULT_REGION: "ap-south-1"
+#     MEDISCAN_ECR_REPO: "615299768302.dkr.ecr.ap-south-1.amazonaws.com/mediscan-app"
+#     S3_ENV_BUCKET: "secure-env-files-itsoftlab"
+#     PRODUCTION_ENV_KEY: "mediscan-production-env.env"
+#     STAGING_ENV_KEY: "mediscan-staging-env.env"
+
+# phases:
+#   pre_build:
+#     commands:
+#       - set -e # Stop execution on failure
+
+#       - echo "🔹 Checking Docker status..."
+#       - docker info
+
+#       - echo "🔹 Logging into AWS ECR..."
+#       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $MEDISCAN_ECR_REPO
+
+#       - echo "🔹 Determining Secrets ARN based on environment..."
+#       - |
+#         if [ "$ENVIRONMENT" = "production" ]; then
+#           SECRET_ARN="arn:aws:secretsmanager:ap-south-1:615299768302:secret:mediscan-app-env-ewBB1v"
+#         else
+#           SECRET_ARN="arn:aws:secretsmanager:ap-south-1:615299768302:secret:mediscan-app-env-ewBB1v"
+#         fi
+#         echo "Using Secrets ARN: $SECRET_ARN"
+
+#       - |
+#         for VAR in NEXT_PUBLIC_URL NEXT_PUBLIC_APP_VERSION NEXT_PUBLIC_WEB_NAME NEXT_PUBLIC_WEB_MODE  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME NEXT_PUBLIC_CLOUDINARY_API_KEY NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET NEXT_PUBLIC_RAZORPAY_ID; do
+#         SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id $SECRET_ARN --query SecretString --output text)
+#           export $VAR=$(echo $SECRET_JSON | jq -r .$VAR)
+#         done
+
+#   build:
+#     commands:
+#       - set -e # Stop execution on failure
+
+#       - echo "🔹 Building Order easy Docker image..."
+#       - |
+#         docker build \
+#           --build-arg NEXT_PUBLIC_URL="$NEXT_PUBLIC_URL" \
+#           --build-arg NEXT_PUBLIC_APP_VERSION="$TAG_NAME" \
+#           --build-arg NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME" \
+#           --build-arg NODE_ENV="$ENVIRONMENT" \
+#           --build-arg NEXT_PUBLIC_WEB_NAME="$NEXT_PUBLIC_WEB_NAME" \
+#           --build-arg NEXT_PUBLIC_WEB_MODE="$NEXT_PUBLIC_WEB_MODE" \
+#           --build-arg NEXT_PUBLIC_CLOUDINARY_API_KEY="$NEXT_PUBLIC_CLOUDINARY_API_KEY" \
+#           --build-arg NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="$NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET" \
+#           --build-arg NEXT_PUBLIC_RAZORPAY_ID="$NEXT_PUBLIC_RAZORPAY_ID" \
+#           -t $APP_TAG -f ./Dockerfile .
+
+#   post_build:
+#     commands:
+#       - set -e # Stop execution on failure
+
+#       - echo "🔹 Tagging and pushing app image..."
+#       - docker tag $APP_TAG $MEDISCAN_ECR_REPO:$APP_TAG
+#       - docker push $MEDISCAN_ECR_REPO:$APP_TAG
+
+# artifacts:
+#   files:
+#     - imagedefinitions.json
+
 version: 0.2
 
 env:
   variables:
     AWS_DEFAULT_REGION: "ap-south-1"
     MEDISCAN_ECR_REPO: "615299768302.dkr.ecr.ap-south-1.amazonaws.com/mediscan-app"
+    # S3 bucket & keys for your .env files:
+    S3_ENV_BUCKET: "secure-env-files-itsoftlab"
+    PRODUCTION_ENV_KEY: "mediscan-production-env.env"
+    STAGING_ENV_KEY:    "mediscan-staging-env.env"
 
 phases:
   pre_build:
@@ -16,48 +86,57 @@ phases:
       - echo "🔹 Logging into AWS ECR..."
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $MEDISCAN_ECR_REPO
 
-      - echo "🔹 Determining Secrets ARN based on environment..."
+      - echo "🔹 Determining which .env file to fetch from S3..."
       - |
         if [ "$ENVIRONMENT" = "production" ]; then
-          SECRET_ARN="arn:aws:secretsmanager:ap-south-1:615299768302:secret:mediscan-app-env-ewBB1v"
+          ENV_KEY="$PRODUCTION_ENV_KEY"
         else
-          SECRET_ARN="arn:aws:secretsmanager:ap-south-1:615299768302:secret:mediscan-app-env-ewBB1v"
+          ENV_KEY="$STAGING_ENV_KEY"
         fi
-        echo "Using Secrets ARN: $SECRET_ARN"
+        echo "→ Will fetch s3://$S3_ENV_BUCKET/$ENV_KEY"
 
+      - echo "🔹 Downloading .env from S3..."
+      - aws s3 cp "s3://$S3_ENV_BUCKET/$ENV_KEY" ./app.env --region $AWS_DEFAULT_REGION
+      - chmod 600 ./app.env
+
+      - echo "🔹 Exporting NEXT_PUBLIC_* vars"
       - |
-        for VAR in NEXT_PUBLIC_URL NEXT_PUBLIC_APP_VERSION NEXT_PUBLIC_WEB_NAME NEXT_PUBLIC_WEB_MODE  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME NEXT_PUBLIC_CLOUDINARY_API_KEY NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET NEXT_PUBLIC_RAZORPAY_ID; do
-        SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id $SECRET_ARN --query SecretString --output text)
-          export $VAR=$(echo $SECRET_JSON | jq -r .$VAR)
+        for VAR in NEXT_PUBLIC_URL NEXT_PUBLIC_APP_VERSION NEXT_PUBLIC_WEB_NAME \
+                   NEXT_PUBLIC_WEB_MODE NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME \
+                   NEXT_PUBLIC_CLOUDINARY_API_KEY NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET \
+                   NEXT_PUBLIC_RAZORPAY_ID; do
+          # shellcheck disable=SC2046
+          export $VAR=$(grep -E "^$VAR=" app.env | cut -d'=' -f2-)
+          echo "  • $VAR=${!VAR}"
         done
 
   build:
     commands:
-      - set -e # Stop execution on failure
+      - set -e
 
-      - echo "🔹 Building Order easy Docker image..."
+      - echo "🔹 Building Docker image with NEXT_PUBLIC_* args..."
       - |
         docker build \
           --build-arg NEXT_PUBLIC_URL="$NEXT_PUBLIC_URL" \
-          --build-arg NEXT_PUBLIC_APP_VERSION="$TAG_NAME" \
-          --build-arg NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME" \
-          --build-arg NODE_ENV="$ENVIRONMENT" \
+          --build-arg NEXT_PUBLIC_APP_VERSION="$NEXT_PUBLIC_APP_VERSION" \
           --build-arg NEXT_PUBLIC_WEB_NAME="$NEXT_PUBLIC_WEB_NAME" \
           --build-arg NEXT_PUBLIC_WEB_MODE="$NEXT_PUBLIC_WEB_MODE" \
+          --build-arg NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME" \
           --build-arg NEXT_PUBLIC_CLOUDINARY_API_KEY="$NEXT_PUBLIC_CLOUDINARY_API_KEY" \
           --build-arg NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="$NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET" \
           --build-arg NEXT_PUBLIC_RAZORPAY_ID="$NEXT_PUBLIC_RAZORPAY_ID" \
-          -t $APP_TAG -f ./Dockerfile .
+          --build-arg TAG_NAME="$TAG_NAME" \
+          --build-arg NODE_ENV="$ENVIRONMENT" \
+          -t "$APP_TAG" -f ./Dockerfile .
 
   post_build:
     commands:
-      - set -e # Stop execution on failure
+      - set -e
 
-      - echo "🔹 Tagging and pushing app image..."
-      - docker tag $APP_TAG $MEDISCAN_ECR_REPO:$APP_TAG
-      - docker push $MEDISCAN_ECR_REPO:$APP_TAG
+      - echo "🔹 Tagging and pushing Docker image..."
+      - docker tag "$APP_TAG" "$MEDISCAN_ECR_REPO:$APP_TAG"
+      - docker push "$MEDISCAN_ECR_REPO:$APP_TAG"
 
 artifacts:
   files:
     - imagedefinitions.json
-

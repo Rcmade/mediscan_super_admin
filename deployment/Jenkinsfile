@@ -29,6 +29,10 @@ pipeline {
         NGINX_PRODUCTION_CONF = 'mediscan.qrblack.com.conf'
         APP_NAME = 'mediscan'
         JENKINS_EC2_APP_SERVER_TWO = 'jenkins-ssh-key'
+
+        S3_ENV_BUCKET = 'secure-env-files-itsoftlab'
+        MEDISCAN_PRODUCTION_ENV_S3_NAME = 'mediscan-production-env'
+        MEDISCAN_STAGING_ENV_S3_NAME = 'mediscan-staging-env'
     }
 
     stages {
@@ -185,24 +189,10 @@ pipeline {
                             TEMP_DIR=\$(mktemp -d)
                             git clone --branch "\$TAG" --depth 1 "\$REPO_URL" "\$TEMP_DIR" || { echo "❌ Error: Failed to clone tag \$TAG"; exit 1; }
 
-                            if [ "\$ENV" = "staging" ]; then
-                                APP_SECRET_NAME="mediscan-app-env"
-                            else
-                                APP_SECRET_NAME="mediscan-app-env"
-                            fi
-
                             echo "Logging into ECR"
                             AWS_ACCOUNT_ID=\$(aws sts get-caller-identity --query Account --output text)
                             ECR_URL="\${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}"
                             aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin \${ECR_URL}
-
-                            echo "🔑 Fetching secrets from AWS Secrets Manager..."
-                            APP_ENV_JSON=\$(aws secretsmanager get-secret-value --secret-id "\$APP_SECRET_NAME" --query SecretString --output text)
-
-                            if [ -z "\$APP_ENV_JSON" ]; then
-                                echo "❌ Error: Failed to retrieve secrets from AWS Secrets Manager"
-                                exit 1
-                            fi
 
                             ##############################################################################
                             # Toggle logic: Check running container to determine the new color
@@ -240,8 +230,26 @@ pipeline {
                             echo "🚦 New deployment color: \$NEW_COLOR"
                             echo "🚦 Host App Port: \$HOST_APP_PORT"
                             echo "🚦 Target Directory: \$TARGET_DIR"
-                            echo "✅ Converting JSON secrets to .env format"
-                            echo "\$APP_ENV_JSON" | jq -r "to_entries | map(\\\"\\(.key)=\\(.value | @text)\\\") | .[]" > "\$TARGET_DIR/app/.env"
+
+                            echo "🔑 Fetching .env from S3 bucket ${S3_ENV_BUCKET}..."
+                            # pick the right key based on environment
+                            if [ "\$ENV" = "production" ]; then
+                            S3_KEY="${MEDISCAN_PRODUCTION_ENV_S3_KEY}.env"
+                            else
+                            S3_KEY="${MEDISCAN_STAGING_ENV_S3_KEY}.env"
+                            fi
+
+                            aws s3 cp "s3://${S3_ENV_BUCKET}/\$S3_KEY" "\$TARGET_DIR/app/.env" --region ${AWS_REGION}
+                            if [ \$? -ne 0 ]; then
+                            echo "❌ Error: Failed to download \$S3_KEY from S3"
+                            exit 1
+                            fi
+
+                            chmod 600 "\$TARGET_DIR/app/.env"
+                            chown ubuntu:ubuntu "\$TARGET_DIR/app/.env"
+                            echo "✅ .env fetched and placed at \$TARGET_DIR/app/.env"
+
+                            APP_SECRET_NAME=\$S3_KEY
 
                             # Create the .env file with the required variables
                             printf "AWS_ACCOUNT_ID=%s\\nAWS_REGION=%s\\nECR_REPOSITORY=%s\\nAPP_TAG=%s\\nHOST_APP_PORT=%s\\nCOLOR=%s\\nENVIRONMENT=%s\\nAPP_SECRET_NAME=%s\\n" \\
