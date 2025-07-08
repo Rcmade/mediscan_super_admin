@@ -190,6 +190,7 @@ export const tokenRoute = new Hono()
             appointmentStatus: appointments.appointmentStatus,
             isPaid: appointments.isPaid,
             phone: users.phone,
+            isConfirmed: appointments.isConfirmed,
           })
           .from(appointments)
           .leftJoin(users, eq(appointments.userId, users.id))
@@ -204,6 +205,7 @@ export const tokenRoute = new Hono()
               eq(organizations.doctorWebName, webName),
               baseConditions,
               todayConditions,
+              eq(appointments.isConfirmed, true),
             ),
           )
           .orderBy(desc(appointments.createdAt), desc(appointments.tokenNumber))
@@ -223,6 +225,7 @@ export const tokenRoute = new Hono()
               eq(organizations.doctorWebName, webName),
               baseConditions,
               todayConditions,
+              eq(appointments.isConfirmed, true),
             ),
           ),
         // .where(and(baseConditions, todayConditions)), // Count total records
@@ -355,5 +358,4 @@ export const tokenRoute = new Hono()
     },
   );
 
-
-export type AppType =  typeof tokenRoute
+export type AppType = typeof tokenRoute;

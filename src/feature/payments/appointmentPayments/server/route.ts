@@ -125,7 +125,27 @@ const appointmentPaymentRoutes = new Hono()
             })),
           );
 
-          return { paymentId: paymentRecord.id };
+          //3. Update payment confirmation
+          const confirmedAppointments = await tx
+            .update(appointments)
+            .set({
+              isConfirmed: true,
+            })
+            .where(
+              or(
+                ...appointmentWithCost.map(({ ...rest }) =>
+                  rest.appointment.id
+                    ? eq(appointments.id, rest.appointment.id)
+                    : undefined,
+                ),
+              ),
+            )
+            .returning({
+              appointmentId: appointments.id,
+            });
+
+          console.log({ confirmedAppointments });
+          return { paymentId: paymentRecord.id, confirmedAppointments };
         });
 
         const [userInfo] = await db

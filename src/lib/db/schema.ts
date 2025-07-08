@@ -133,6 +133,7 @@ export const appointments = pgTable("appointments", {
   image: text("image"),
   revisitTime: timestamp("revisit_time"),
   isPaid: boolean("is_paid").notNull().default(false),
+  isConfirmed: boolean("is_confirmed").notNull().default(false),
   ...commonFields,
 });
 

@@ -18,12 +18,16 @@ const EditableAppointmentCard = ({
   <Card className="shadow-md transition-shadow duration-300 hover:shadow-lg">
     <CardContent className="flex justify-between gap-2 p-2 sm:p-4">
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-2 md:flex-row">
           <h1 className="text-2xl font-semibold text-primary">
             Token: <span className="text-3xl">{appointment.tokenNumber}</span>
           </h1>
           <Badge variant={appointment.isPaid ? "default" : "destructive"}>
-            {appointment.isPaid ? "Paid" : "Not Paid"}
+            {appointment.isPaid
+              ? "Paid"
+              : appointment.isConfirmed
+                ? "Confirmed"
+                : "Not Confirmed, It can only confirm by user."}
           </Badge>
 
           {/* {appointment.isPaid} */}
