@@ -12,7 +12,7 @@ pipeline {
         GITHUB_PAT = credentials('hrms-git-token')
         AWS_REGION = 'ap-south-1'
         CODEBUILD_PROJECT_NAME = 'mediscan-Build'
-        GIT_REPO = "https://${GITHUB_PAT}@github.com/rahul-chourasiya0204/mediscan_super_admin.git"
+        GIT_REPO = "https://${GITHUB_PAT}@github.com/rahulahirwal-itsoftlab/RM-mediscan_super_admin.git"
 
         // Production ports
         APP_PORT = '3600'
