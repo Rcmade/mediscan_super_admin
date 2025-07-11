@@ -14,6 +14,7 @@ pipeline {
         CODEBUILD_PROJECT_NAME = 'mediscan-Build'
         GIT_REPO = "https://${GITHUB_PAT}@github.com/rahulahirwal-itsoftlab/RM-mediscan_super_admin.git"
 
+
         // Production ports
         APP_PORT = '3600'
         APP_SECONDARY_PORT = '3601'
