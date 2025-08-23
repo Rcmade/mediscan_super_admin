@@ -20,7 +20,7 @@
   "dependencies": {
     "@auth/core": "^0.37.2",
     "@auth/drizzle-adapter": "^1.7.4",
-    "@hono/zod-validator": "^0.4.2",
+    "@hono/zod-validator": "^0.5.0",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-avatar": "^1.1.2",
