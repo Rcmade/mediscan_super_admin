@@ -16,7 +16,7 @@ importers:
         version: 1.9.1
       '@hono/zod-validator':
         specifier: ^0.4.2
-        version: 0.4.3(hono@4.7.10)(zod@3.25.36)
+        version: 0.4.3(hono@4.11.4)(zod@3.25.36)
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.56.4(react@19.1.0))
@@ -61,7 +61,7 @@ importers:
         version: 1.2.7(@types/react-dom@19.1.5(@types/react@19.1.6))(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@scalar/hono-api-reference':
         specifier: ^0.8.8
-        version: 0.8.10(hono@4.7.10)
+        version: 0.8.10(hono@4.11.4)
       '@tanstack/react-query':
         specifier: ^5.62.8
         version: 5.77.2(react@19.1.0)
@@ -93,8 +93,8 @@ importers:
         specifier: ^0.38.2
         version: 0.38.4(@types/react@19.1.6)(postgres@3.3.5)(react@19.1.0)
       hono:
-        specifier: ^4.6.14
-        version: 4.7.10
+        specifier: ^4.11.4
+        version: 4.11.4
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
@@ -2383,8 +2383,8 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  hono@4.7.10:
-    resolution: {integrity: sha512-QkACju9MiN59CKSY5JsGZCYmPZkA6sIW6OFCUp7qDjZu6S6KHtJHhAc9Uy9mV9F8PJ1/HQ3ybZF2yjCa/73fvQ==}
+  hono@4.11.4:
+    resolution: {integrity: sha512-U7tt8JsyrxSRKspfhtLET79pU8K+tInj5QZXs1jSugO1Vq5dFj3kmZsRldo29mTBfcjDRVRXrEZ6LS63Cog9ZA==}
     engines: {node: '>=16.9.0'}
 
   html2canvas@1.4.1:
@@ -3837,9 +3837,9 @@ snapshots:
 
   '@floating-ui/utils@0.2.9': {}
 
-  '@hono/zod-validator@0.4.3(hono@4.7.10)(zod@3.25.36)':
+  '@hono/zod-validator@0.4.3(hono@4.11.4)(zod@3.25.36)':
     dependencies:
-      hono: 4.7.10
+      hono: 4.11.4
       zod: 3.25.36
 
   '@hookform/resolvers@3.10.0(react-hook-form@7.56.4(react@19.1.0))':
@@ -4479,10 +4479,10 @@ snapshots:
     dependencies:
       '@scalar/types': 0.1.16
 
-  '@scalar/hono-api-reference@0.8.10(hono@4.7.10)':
+  '@scalar/hono-api-reference@0.8.10(hono@4.11.4)':
     dependencies:
       '@scalar/core': 0.2.16
-      hono: 4.7.10
+      hono: 4.11.4
 
   '@scalar/openapi-types@0.2.3':
     dependencies:
@@ -5695,7 +5695,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hono@4.7.10: {}
+  hono@4.11.4: {}
 
   html2canvas@1.4.1:
     dependencies:
